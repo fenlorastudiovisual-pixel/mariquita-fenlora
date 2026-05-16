@@ -437,9 +437,24 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Instru
         <!-- Formulario agregar foto -->
         <div class="add-photo-form" id="add-photo-form">
           <div style="font-size:11.5px;color:var(--text3);margin-bottom:8px;font-weight:500">Agregar nueva foto</div>
+
+          <!-- Opción 1: URL -->
+          <div style="font-size:10px;color:var(--text3);margin-bottom:4px;text-transform:uppercase;letter-spacing:.4px">Opción 1 — Por URL</div>
           <input type="text" id="new-photo-url" placeholder="URL de la imagen (https://...)" oninput="previewNewPhoto(this.value)">
           <img id="photo-preview-mini" class="photo-preview-mini" alt="Vista previa">
-          <input type="text" id="new-photo-cap" placeholder="Caption / descripción de la foto (opcional)">
+
+          <!-- Opción 2: Archivo local -->
+          <div style="font-size:10px;color:var(--text3);margin:10px 0 4px;text-transform:uppercase;letter-spacing:.4px">Opción 2 — Subir desde tu dispositivo</div>
+          <label style="display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--bg4);border:1.5px dashed var(--border2);border-radius:9px;cursor:pointer;transition:border-color .2s" id="foto-file-label">
+            <span style="font-size:20px">📷</span>
+            <div>
+              <div style="font-size:12px;font-weight:500;color:var(--text)">Seleccionar imagen</div>
+              <div style="font-size:11px;color:var(--text3)" id="foto-file-name">JPG, PNG, WebP — máx. 5MB</div>
+            </div>
+            <input type="file" accept="image/jpeg,image/png,image/webp,image/gif" style="display:none" id="foto-file-input" onchange="loadFotoFile(this)">
+          </label>
+
+          <input type="text" id="new-photo-cap" placeholder="Caption / descripción de la foto (opcional)" style="margin-top:8px">
           <div class="add-photo-actions">
             <button class="btn primary" onclick="addPhoto()">➕ Agregar foto</button>
             <button class="btn" onclick="closeAddPhoto()">Cancelar</button>
@@ -954,6 +969,35 @@ function previewNewPhoto(url) {
   } else {
     prev.style.display = 'none';
   }
+}
+
+function loadFotoFile(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const maxMB = 5;
+  if (file.size > maxMB * 1024 * 1024) {
+    showToast('⚠ La imagen supera ' + maxMB + 'MB. Comprime la imagen primero.', 'error');
+    input.value = '';
+    return;
+  }
+  document.getElementById('foto-file-name').textContent = 'Cargando...';
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    const base64 = e.target.result;
+    // Poner la base64 como URL de la foto
+    document.getElementById('new-photo-url').value = base64;
+    document.getElementById('foto-file-name').textContent = file.name;
+    // Mostrar preview
+    const prev = document.getElementById('photo-preview-mini');
+    prev.src = base64;
+    prev.style.display = 'block';
+    showToast('✅ Imagen lista — haz clic en Agregar foto', 'success');
+  };
+  reader.onerror = function() {
+    showToast('Error al leer la imagen', 'error');
+    document.getElementById('foto-file-name').textContent = 'JPG, PNG, WebP — máx. 5MB';
+  };
+  reader.readAsDataURL(file);
 }
 
 function addPhoto() {

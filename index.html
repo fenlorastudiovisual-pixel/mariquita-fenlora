@@ -726,10 +726,7 @@ function suscribirCambiosEnVivo() {
   } catch(e) {}
 }
 
-// Inicializar Supabase 1.5 seg después del mapa (para no bloquear la carga inicial)
-setTimeout(function() {
-  cargarPuntosDesdeSupabase().then(suscribirCambiosEnVivo);
-}, 1500);
+// setTimeout movido después de la definición de markers (línea ~801)
 
 // ═══════════════════════════════════════════════
 // RUTAS TEMÁTICAS
@@ -818,6 +815,11 @@ PUNTOS.forEach(p=>{
   markers.push({mk,cat:p.cat,id:p.id,coords:p.coords});
 });
 updateCount();
+
+// Inicializar Supabase después de que markers esté definido
+setTimeout(function() {
+  cargarPuntosDesdeSupabase().then(suscribirCambiosEnVivo);
+}, 1500);
 
 function updateCount(){
   let v=0;

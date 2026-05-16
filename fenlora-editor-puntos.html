@@ -266,7 +266,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Instru
   </div>
   <div class="s-btn active" data-tip="Editor de puntos (esta pantalla)">📍</div>
   <div class="s-btn" data-tip="Abrir panel admin" onclick="window.open('fenlora-admin.html','_blank')">📊</div>
-  <div class="s-btn" data-tip="Ver mapa público v5" onclick="window.open('ruta-mangostino-v5.html','_blank')">🗺️</div>
+  <div class="s-btn" data-tip="Ver mapa público v5" onclick="window.open('index.html','_blank')">🗺️</div>
   <div class="s-div"></div>
   <div class="s-btn" data-tip="Exportar JSON" onclick="showTab('export')">📤</div>
   <div class="s-btn" data-tip="Agregar negocio" onclick="addNew()">➕</div>
@@ -567,8 +567,8 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Instru
       <div class="export-area">
         <div class="export-title">📤 Exportar datos del mapa</div>
         <div class="export-desc">
-          Exporta el array completo de puntos como JSON. <strong>Los cambios que guardas aquí se sincronizan automáticamente con el mapa</strong> (ruta-mangostino-v5.html) en el mismo navegador — no necesitas copiar y pegar. El mapa v5 lee <code style="background:var(--bg4);padding:1px 5px;border-radius:4px;font-family:'DM Mono',monospace;font-size:11px">fenlora_points</code> del localStorage automáticamente.<br><br>
-          Si quieres llevar los cambios a otro dispositivo o hacer un backup, usa "Copiar JSON" y reemplaza el array <code style="background:var(--bg4);padding:1px 5px;border-radius:4px;font-family:'DM Mono',monospace;font-size:11px">PUNTOS</code> en <code style="background:var(--bg4);padding:1px 5px;border-radius:4px;font-family:'DM Mono',monospace;font-size:11px">ruta-mangostino-v5.html</code>. Cuando conectes Supabase, esto será automático para todos los dispositivos.
+          Exporta el array completo de puntos como JSON. <strong>Los cambios que guardas aquí se sincronizan automáticamente con el mapa</strong> (index.html) en el mismo navegador — no necesitas copiar y pegar. El mapa v5 lee <code style="background:var(--bg4);padding:1px 5px;border-radius:4px;font-family:'DM Mono',monospace;font-size:11px">fenlora_points</code> del localStorage automáticamente.<br><br>
+          Si quieres llevar los cambios a otro dispositivo o hacer un backup, usa "Copiar JSON" y reemplaza el array <code style="background:var(--bg4);padding:1px 5px;border-radius:4px;font-family:'DM Mono',monospace;font-size:11px">PUNTOS</code> en <code style="background:var(--bg4);padding:1px 5px;border-radius:4px;font-family:'DM Mono',monospace;font-size:11px">index.html</code>. Cuando conectes Supabase, esto será automático para todos los dispositivos.
         </div>
         <div class="json-preview" id="json-preview">Cargando datos...</div>
         <div class="export-btns">

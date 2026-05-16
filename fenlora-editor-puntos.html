@@ -429,32 +429,26 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Instru
     <div id="tab-fotos" style="display:none">
       <div class="form-section">
         <div class="form-section-title">Galería de imágenes</div>
-        <div style="font-size:12px;color:var(--text3);margin-bottom:12px;line-height:1.6">
-          La primera foto es la portada (aparece en el pin del mapa y como imagen principal del panel). Máximo 6 fotos. Usa URLs de imágenes reales de internet, Google Drive o Unsplash.
+
+        <!-- Instrucciones imgBB -->
+        <div style="background:rgba(200,134,10,.08);border:1px solid rgba(200,134,10,.2);border-radius:10px;padding:12px 14px;margin-bottom:14px">
+          <div style="font-size:12px;font-weight:600;color:var(--gold);margin-bottom:6px">📸 ¿Cómo agregar fotos?</div>
+          <div style="font-size:11.5px;color:var(--text2);line-height:1.7">
+            1. Ve a <a href="https://imgbb.com" target="_blank" style="color:var(--gold);font-weight:600">imgBB.com</a> — es gratis<br>
+            2. Sube tu foto desde el computador o celular<br>
+            3. Copia el link que dice <strong>"Direct link"</strong><br>
+            4. Pégalo aquí abajo y haz clic en Agregar foto
+          </div>
         </div>
+
         <div class="photos-grid" id="photos-grid"></div>
 
         <!-- Formulario agregar foto -->
         <div class="add-photo-form" id="add-photo-form">
-          <div style="font-size:11.5px;color:var(--text3);margin-bottom:8px;font-weight:500">Agregar nueva foto</div>
-
-          <!-- Opción 1: URL -->
-          <div style="font-size:10px;color:var(--text3);margin-bottom:4px;text-transform:uppercase;letter-spacing:.4px">Opción 1 — Por URL</div>
-          <input type="text" id="new-photo-url" placeholder="URL de la imagen (https://...)" oninput="previewNewPhoto(this.value)">
+          <div style="font-size:11.5px;color:var(--text3);margin-bottom:8px;font-weight:500">Pega el link de imgBB o cualquier URL de imagen</div>
+          <input type="text" id="new-photo-url" placeholder="https://i.ibb.co/... o cualquier URL de imagen" oninput="previewNewPhoto(this.value)">
           <img id="photo-preview-mini" class="photo-preview-mini" alt="Vista previa">
-
-          <!-- Opción 2: Archivo local -->
-          <div style="font-size:10px;color:var(--text3);margin:10px 0 4px;text-transform:uppercase;letter-spacing:.4px">Opción 2 — Subir desde tu dispositivo</div>
-          <label style="display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--bg4);border:1.5px dashed var(--border2);border-radius:9px;cursor:pointer;transition:border-color .2s" id="foto-file-label">
-            <span style="font-size:20px">📷</span>
-            <div>
-              <div style="font-size:12px;font-weight:500;color:var(--text)">Seleccionar imagen</div>
-              <div style="font-size:11px;color:var(--text3)" id="foto-file-name">JPG, PNG, WebP — máx. 5MB</div>
-            </div>
-            <input type="file" accept="image/jpeg,image/png,image/webp,image/gif" style="display:none" id="foto-file-input" onchange="loadFotoFile(this)">
-          </label>
-
-          <input type="text" id="new-photo-cap" placeholder="Caption / descripción de la foto (opcional)" style="margin-top:8px">
+          <input type="text" id="new-photo-cap" placeholder="Descripción de la foto (opcional)" style="margin-top:8px">
           <div class="add-photo-actions">
             <button class="btn primary" onclick="addPhoto()">➕ Agregar foto</button>
             <button class="btn" onclick="closeAddPhoto()">Cancelar</button>
@@ -464,16 +458,9 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Instru
         <button class="btn" id="open-add-photo-btn" onclick="openAddPhoto()" style="width:100%;justify-content:center;margin-top:4px">
           ➕ Agregar foto por URL
         </button>
-      </div>
 
-      <div class="form-section">
-        <div class="form-section-title">Sugerencias para mejores fotos</div>
-        <div style="display:flex;flex-direction:column;gap:6px">
-          <div style="font-size:12px;color:var(--text2);display:flex;gap:8px;align-items:flex-start"><span>📸</span><span>Foto 1 (portada): exterior del negocio o plato/producto principal — lo que más llama la atención</span></div>
-          <div style="font-size:12px;color:var(--text2);display:flex;gap:8px;align-items:flex-start"><span>📸</span><span>Foto 2: interior, ambiente o equipo del negocio</span></div>
-          <div style="font-size:12px;color:var(--text2);display:flex;gap:8px;align-items:flex-start"><span>📸</span><span>Foto 3: detalle del producto estrella, habitación o servicio</span></div>
-          <div style="font-size:12px;color:var(--text2);display:flex;gap:8px;align-items:flex-start"><span>💡</span><span>Resolución recomendada: mínimo 800×500px. Formato horizontal (paisaje) funciona mejor en la galería.</span></div>
-          <div style="font-size:12px;color:var(--text2);display:flex;gap:8px;align-items:flex-start"><span>🌐</span><span>Fuentes gratuitas: Unsplash (unsplash.com), Google Fotos (link público), o fotos propias subidas a imgBB (imgbb.com)</span></div>
+        <div style="font-size:11px;color:var(--text3);margin-top:10px;line-height:1.6">
+          💡 Máximo 6 fotos. La primera foto es la portada — aparece en el pin del mapa.
         </div>
       </div>
     </div>
@@ -517,60 +504,45 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Instru
     <div id="tab-video" style="display:none">
       <div class="form-section">
         <div class="form-section-title">Video del negocio</div>
-        <div style="font-size:12px;color:var(--text2);margin-bottom:14px;line-height:1.6">
-          El video aparece en el panel del negocio debajo de la galería. Puedes cargarlo de dos formas: pegando el link de YouTube, o subiendo un archivo de video desde tu computador.
-        </div>
 
-        <!-- OPCIÓN 1: YouTube URL -->
-        <div style="background:var(--bg3);border-radius:10px;padding:14px;margin-bottom:10px">
-          <div style="font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.4px;margin-bottom:10px">Opción 1 — Link de YouTube</div>
-          <div class="field">
-            <label>URL del video de YouTube</label>
-            <div class="video-url-wrap">
-              <input type="text" id="f-video-url" placeholder="https://www.youtube.com/watch?v=... o https://youtu.be/...">
-              <button class="extract-btn" onclick="extractVideo()">Cargar ▶</button>
-            </div>
-            <div class="field-hint">Pega el link y da clic en "Cargar" para ver la vista previa.</div>
+        <!-- Instrucciones YouTube -->
+        <div style="background:rgba(255,0,0,.06);border:1px solid rgba(255,0,0,.15);border-radius:10px;padding:12px 14px;margin-bottom:14px">
+          <div style="font-size:12px;font-weight:600;color:#c00;margin-bottom:6px">🎬 ¿Cómo agregar el video?</div>
+          <div style="font-size:11.5px;color:var(--text2);line-height:1.7">
+            1. Sube el video a <a href="https://youtube.com" target="_blank" style="color:#c00;font-weight:600">YouTube.com</a> — es gratis<br>
+            2. Puede ser <strong>No listado</strong> (nadie lo encuentra sin el link)<br>
+            3. Copia el link del video (ej: <code style="font-size:10px;background:var(--bg4);padding:1px 4px;border-radius:3px">youtube.com/watch?v=...</code>)<br>
+            4. Pégalo aquí y haz clic en <strong>Cargar ▶</strong>
           </div>
         </div>
 
-        <!-- OPCIÓN 2: Archivo local -->
-        <div style="background:var(--bg3);border-radius:10px;padding:14px;margin-bottom:12px">
-          <div style="font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.4px;margin-bottom:10px">Opción 2 — Archivo desde tu computador</div>
-          <div style="font-size:12px;color:var(--text2);margin-bottom:10px;line-height:1.55">
-            Sube un video directamente. Se convierte para reproducirse en el mapa.
-            <strong style="color:var(--gold)">Tamaño recomendado: máx. 50MB</strong> · Formatos: MP4, WebM, MOV.
+        <div style="font-size:11px;color:var(--text3);margin-bottom:10px">
+          💡 El video aparece <strong>primero</strong> al abrir el punto en el mapa, antes de las fotos.
+        </div>
+
+        <div class="field">
+          <label>Link de YouTube</label>
+          <div class="video-url-wrap">
+            <input type="text" id="f-video-url" placeholder="https://www.youtube.com/watch?v=... o https://youtu.be/...">
+            <button class="extract-btn" onclick="extractVideo()">Cargar ▶</button>
           </div>
-          <label style="display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--bg4);border:1.5px dashed var(--border2);border-radius:9px;cursor:pointer;transition:border-color .2s" id="video-file-label">
-            <span style="font-size:20px">🎬</span>
-            <div>
-              <div style="font-size:12px;font-weight:500;color:var(--text)">Seleccionar archivo de video</div>
-              <div style="font-size:11px;color:var(--text3)" id="video-file-name">MP4, WebM, MOV — máx. 50MB</div>
-            </div>
-            <input type="file" accept="video/mp4,video/webm,video/quicktime,.mp4,.webm,.mov" style="display:none" id="video-file-input" onchange="loadVideoFile(this)">
-          </label>
-          <div id="video-file-progress" style="display:none;margin-top:8px">
-            <div style="font-size:11px;color:var(--text3);margin-bottom:4px" id="video-file-status">Procesando...</div>
-            <div style="height:4px;background:var(--bg4);border-radius:2px;overflow:hidden">
-              <div id="video-file-bar" style="height:100%;background:var(--gold);border-radius:2px;width:0%;transition:width .3s"></div>
-            </div>
-          </div>
+          <div class="field-hint">Después de cargar, presiona <strong>Guardar cambios</strong> arriba para guardar en Supabase.</div>
         </div>
 
         <!-- PREVIEW -->
         <div class="video-preview" id="video-preview">
-          <span>Sin video — usa una de las opciones arriba</span>
+          <span>Sin video — pega el link de YouTube arriba</span>
         </div>
         <button class="btn danger" style="margin-top:8px" onclick="removeVideo()">🗑️ Quitar video</button>
       </div>
 
       <div class="form-section">
-        <div class="form-section-title">Sugerencias por tipo de negocio</div>
+        <div class="form-section-title">Ideas por tipo de punto</div>
         <div style="display:flex;flex-direction:column;gap:8px">
-          <div style="font-size:12px;color:var(--text2);display:flex;gap:8px"><span>🏛️</span><span><strong style="color:var(--text)">Puntos históricos:</strong> mini-documental de 2–5 min sobre la historia del lugar. Fenlora puede producirlo.</span></div>
-          <div style="font-size:12px;color:var(--text2);display:flex;gap:8px"><span>🏨</span><span><strong style="color:var(--text)">Hoteles:</strong> recorrido virtual de las instalaciones, habitaciones, zonas comunes y servicios.</span></div>
-          <div style="font-size:12px;color:var(--text2);display:flex;gap:8px"><span>🍽️</span><span><strong style="color:var(--text)">Restaurantes:</strong> el dueño presentando los platos estrella y el ambiente. Máximo 60 segundos.</span></div>
-          <div style="font-size:12px;color:var(--text2);display:flex;gap:8px"><span>🌿</span><span><strong style="color:var(--text)">Fincas:</strong> recorrido por los cultivos de mangostino, proceso de cosecha, experiencia del visitante.</span></div>
+          <div style="font-size:12px;color:var(--text2);display:flex;gap:8px"><span>🏛️</span><span><strong style="color:var(--text)">Puntos históricos:</strong> mini-documental de 2–5 min sobre la historia del lugar.</span></div>
+          <div style="font-size:12px;color:var(--text2);display:flex;gap:8px"><span>🏨</span><span><strong style="color:var(--text)">Hoteles:</strong> recorrido virtual de instalaciones y habitaciones.</span></div>
+          <div style="font-size:12px;color:var(--text2);display:flex;gap:8px"><span>🍽️</span><span><strong style="color:var(--text)">Restaurantes:</strong> el dueño presentando los platos estrella. Máximo 60 segundos.</span></div>
+          <div style="font-size:12px;color:var(--text2);display:flex;gap:8px"><span>🌿</span><span><strong style="color:var(--text)">Fincas:</strong> recorrido por los cultivos de mangostino y proceso de cosecha.</span></div>
           <div style="font-size:12px;color:var(--text2);display:flex;gap:8px"><span>💡</span><span>¿No tienen video aún? Fenlora ofrece producción de video comercial completo por $350.000 COP.</span></div>
         </div>
       </div>

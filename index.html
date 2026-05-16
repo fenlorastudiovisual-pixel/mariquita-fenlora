@@ -409,6 +409,7 @@ html,body{width:100%;height:100%;overflow:hidden;font-family:DM Sans,sans-serif;
 <!-- PANEL LATERAL DERECHO -->
 <div id="panel">
   <button id="pcls" onclick="closePanel()">✕</button>
+  <div id="pvideo"><iframe id="pvframe" allowfullscreen></iframe></div>
   <div id="pgal"></div>
   <div id="pdots"></div>
   <div id="pbody">
@@ -420,7 +421,6 @@ html,body{width:100%;height:100%;overflow:hidden;font-family:DM Sans,sans-serif;
     <div id="pbadge"><div class="d"></div><span id="pbtext"></span></div>
     <div id="pname"></div>
     <div id="pdesc"></div>
-    <div id="pvideo"><iframe id="pvframe" allowfullscreen></iframe></div>
     <div id="pinfo"></div>
     <div id="pacts"></div>
     <div id="prev-section"></div>
@@ -994,7 +994,12 @@ function openPanel(p){
     document.getElementById('prating-num').textContent=avg;
     document.getElementById('prating-count').textContent=`(${revs.length} reseña${revs.length!==1?'s':''})`;
   } else { ratingEl.style.display='none'; }
-  // Galería
+  // Video — aparece PRIMERO antes de la galería
+  const vw=document.getElementById('pvideo');
+  const vf=document.getElementById('pvframe');
+  if(p.video){vf.src=p.video;vw.style.display='block';}
+  else{vf.src='';vw.style.display='none';}
+  // Galería de fotos — aparece después del video
   const gal=document.getElementById('pgal');
   const dots=document.getElementById('pdots');
   gal.innerHTML='';dots.innerHTML='';
@@ -1011,11 +1016,6 @@ function openPanel(p){
     const i=Math.round(gal.scrollLeft/gal.offsetWidth);
     document.querySelectorAll('.pdot').forEach((d,j)=>d.classList.toggle('a',j===i));
   };
-  // Video
-  const vw=document.getElementById('pvideo');
-  const vf=document.getElementById('pvframe');
-  if(p.video){vf.src=p.video;vw.style.display='block';}
-  else{vf.src='';vw.style.display='none';}
   // Info
   const pi=document.getElementById('pinfo');
   const subShow = (currentLang==='en' && p.sub_en) ? p.sub_en : p.sub;

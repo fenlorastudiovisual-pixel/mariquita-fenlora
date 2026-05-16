@@ -750,7 +750,7 @@ function renderList() {
     : filtered.map(p => {
         const c = CAT_META[p.cat];
         const thumb = p.fotos?.[0]?.url;
-        return `<div class="punto-row${selected?.id===p.id?' selected':''}" onclick="selectPoint(${p.id})">
+        return `<div class="punto-row${selected?.id===p.id?' selected':''}" onclick="selectPoint('${p.id}')">
           ${thumb
             ? `<img class="punto-thumb" src="${thumb}" alt="" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">`
             : ''}
@@ -789,7 +789,7 @@ function toggleFilter(el) {
 // SELECCIÓN Y EDITOR
 // ═══════════════════════════════════════════════
 function selectPoint(id) {
-  selected = points.find(p => p.id === id);
+  selected = points.find(p => String(p.id) === String(id));
   if (!selected) return;
   renderList();
   loadEditor(selected);
@@ -1163,7 +1163,7 @@ async function savePoint() {
       selected.sbId = data.id;
       selected.id = data.id;
     }
-    const idx = points.findIndex(p => p.id === selected.id);
+    const idx = points.findIndex(p => String(p.id) === String(selected.id));
     if (idx >= 0) points[idx] = selected;
     renderList();
     document.getElementById('editor-title').textContent = selected.nombre;

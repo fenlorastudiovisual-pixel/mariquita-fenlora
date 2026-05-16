@@ -7,6 +7,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@400;500&family=Instrument+Sans:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
@@ -624,21 +625,63 @@ const CAT_META = {
   serv:    {color:'#2E86AB',label:'Servicio turístico',emoji:'🧭',rgb:'46,134,171'},
 };
 
-const DEFAULT_POINTS = [
-  {id:1,cat:'hotel',nombre:'Terrakota Heritage House',sub:'Hotel boutique · Calle 11 # 5-68 · La Concordia',desc:'Joya colonial boutique en Mariquita. Habitaciones restauradas con arquitectura republicana, patio interior tropical y desayuno típico tolimense. Reconocida como uno de los mejores alojamientos boutique del norte del Tolima.',fotos:[{url:'https://images.unsplash.com/photo-1566073771259-6a8506099945?w=700&q=80',cap:'Patio interior · Terrakota'},{url:'https://images.unsplash.com/photo-1540541338287-41700207dee6?w=700&q=80',cap:'Habitación colonial'},{url:'https://images.unsplash.com/photo-1582719508461-905c673771fd?w=700&q=80',cap:'Suite premium'}],tel:'+57 313 287 2686',wsp:'573132872686',email:'contact@terrakota.house',horario:'Recepción 24 horas',coords:[5.2008,-74.9035],gmaps:'https://maps.google.com/?q=5.2008,-74.9035',video:'https://www.youtube.com/embed/dQw4w9WgXcQ',plan:'premium',activo:true,notas:'Cliente premium desde mayo 2026. Paga puntual. Interesado en spot tótem.'},
-  {id:2,cat:'hotel',nombre:'Hotel Los Mangostinos',sub:'Hotel · Calle 7 # 5-26 · Centro',desc:'Hotel familiar en el corazón del centro histórico, nombrado en honor al fruto emblema. Habitaciones con AC, WiFi y parqueadero. Perfecto punto de partida para la Ruta del Mangostino.',fotos:[{url:'https://images.unsplash.com/photo-1455587734955-081b22074882?w=700&q=80',cap:'Fachada hotel'},{url:'https://images.unsplash.com/photo-1611892440504-42a792e24d32?w=700&q=80',cap:'Habitación'}],tel:'+57 313 453 5496',wsp:'573134535496',email:'paola.rojas1201@yahoo.com',horario:'Abierto todos los días',coords:[5.2015,-74.9020],gmaps:'https://maps.google.com/?q=5.2015,-74.9020',video:null,plan:'basic',activo:true,notas:''},
-  {id:3,cat:'finca',nombre:'Finca Ecoturística Brabante',sub:'Agroturismo · Vereda El Caucho, km 4.1',desc:'800 árboles de mangostino, cacao y cítricos tropicales. Recorridos guiados, cosecha participativa y degustación. Una experiencia auténtica del campo tolimense.',fotos:[{url:'https://images.unsplash.com/photo-1500076656116-558758c991c1?w=700&q=80',cap:'Cultivo tropical'},{url:'https://images.unsplash.com/photo-1416879595882-3373a0480b5b?w=700&q=80',cap:'Jardín de frutas'}],tel:'+57 601 533 3800',wsp:'576015333800',email:'vanuden.consultorio@gmail.com',horario:'Sáb–Dom · 7am–4pm · Cita previa',coords:[5.2100,-74.8920],gmaps:'https://maps.google.com/?q=5.2100,-74.8920',video:null,plan:'basic',activo:true,notas:''},
-  {id:4,cat:'rest',nombre:'El Gran Ranchón',sub:'Restaurante · Vereda Pantano Grande',desc:'Gastronomía tolimense auténtica: viudo de bocachico, lechona y mazamorra. El mangostino protagonista en postres y jugos. Amplio para grupos y eventos familiares.',fotos:[{url:'https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=700&q=80',cap:'El Gran Ranchón'},{url:'https://images.unsplash.com/photo-1540189549336-e6e99c3679fe?w=700&q=80',cap:'Platos típicos'}],tel:'+57 320 953 0772',wsp:'573209530772',email:'milefertovar3@gmail.com',horario:'Lun–Dom · 7am–8pm',coords:[5.1855,-74.9005],gmaps:'https://maps.google.com/?q=5.1855,-74.9005',video:null,plan:'pro',activo:true,notas:''},
-  {id:5,cat:'bar',nombre:'Santa Lucía Gastro Bar',sub:'Bar · Carrera 3 # 3-12 P2',desc:'Gastrobar en segundo piso con terraza y vista al parque. Cócteles de autor, tablas gourmet y ambiente sofisticado. El lugar preferido de los jóvenes profesionales de Mariquita.',fotos:[{url:'https://images.unsplash.com/photo-1536935338788-846bb9981813?w=700&q=80',cap:'Santa Lucía Gastro Bar'}],tel:'+57 314 642 4011',wsp:'573146424011',email:'kreyesguarin@gmail.com',horario:'Mié–Dom · 4pm–1am',coords:[5.2008,-74.9035],gmaps:'https://maps.google.com/?q=5.2008,-74.9035',video:null,plan:'pro',activo:true,notas:''},
-  {id:6,cat:'hist',nombre:'Casa de la Expedición Botánica · Mutis',sub:'Patrimonio histórico · Centro de Mariquita',desc:'Mariquita fue sede de la Real Expedición Botánica de José Celestino Mutis (1783–1816). En esta casa se clasificaron miles de especies, incluyendo el mangostino. Uno de los hitos científicos más importantes de la historia de Colombia.',fotos:[{url:'https://images.unsplash.com/photo-1580121441575-41bcb5c6b47c?w=700&q=80',cap:'Casa Mutis · Mariquita'},{url:'https://images.unsplash.com/photo-1600093463592-8e36ae95ef56?w=700&q=80',cap:'Patio colonial histórico'}],tel:'+57 251 1234',wsp:'573208000000',email:'cultura@mariquita.gov.co',horario:'Mar–Dom · 9am–5pm · Entrada libre',coords:[5.2010,-74.9038],gmaps:'https://maps.google.com/?q=5.2010,-74.9038',video:'https://www.youtube.com/embed/dQw4w9WgXcQ',plan:'free',activo:true,notas:'Punto histórico gratuito. Contenido producido por Fenlora.'},
-  {id:7,cat:'pub',nombre:'Alcaldía Municipal de Mariquita',sub:'Entidad pública · Parque Central',desc:'Sede de la administración municipal de San Sebastián de Mariquita. Secretaría de Cultura y Turismo, ente que avala la Ruta del Mangostino. Atención al ciudadano y trámites administrativos.',fotos:[{url:'https://images.unsplash.com/photo-1555636222-cae831e670b3?w=700&q=80',cap:'Alcaldía de Mariquita'}],tel:'+57 258 5000',wsp:'576015258500',email:'alcaldia@mariquita.gov.co',horario:'Lun–Vie · 8am–12m y 2pm–6pm',coords:[5.2014,-74.9032],gmaps:'https://maps.google.com/?q=5.2014,-74.9032',video:null,plan:'free',activo:true,notas:'Punto institucional gratuito.'},
-  {id:8,cat:'agencia',nombre:'Selvatik Rutas y Experiencias',sub:'Agencia · Carrera 4 # 4-25',desc:'Agencia especializada en ecoturismo y aventura. Organiza rutas por el Gualí, senderismo nocturno, rappel en cascadas y tour del mangostino. La más innovadora de la región.',fotos:[{url:'https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1?w=700&q=80',cap:'Selvatik Rutas'}],tel:'+57 252 5529',wsp:'576015252529',email:'aleja.mm23@gmail.com',horario:'Lun–Sáb · 8am–6pm',coords:[5.2005,-74.9032],gmaps:'https://maps.google.com/?q=5.2005,-74.9032',video:null,plan:'pro',activo:true,notas:''},
-];
+// ═══════════════════════════════════════════════
+// SUPABASE
+// ═══════════════════════════════════════════════
+const SUPABASE_URL = 'https://ikcutinvnkktfasgnanv.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_G_MCq1M-a_CM77AKPocYvA_KOgmiw7h';
+const _sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+// Convierte fila de Supabase → objeto interno del editor
+function sbRowToPoint(row) {
+  return {
+    id: row.id,
+    sbId: row.id,
+    cat: row.category || 'serv',
+    nombre: row.name || '',
+    sub: row.sub || row.address || '',
+    desc: row.description || '',
+    fotos: Array.isArray(row.fotos) ? row.fotos : [],
+    tel: row.phone || '',
+    email: row.email || '',
+    horario: row.horario || '',
+    coords: (row.latitude && row.longitude) ? [parseFloat(row.latitude), parseFloat(row.longitude)] : [5.2012, -74.9030],
+    gmaps: row.google_maps_url || '',
+    video: row.video || null,
+    plan: row.plan_fenlora || row.plan || 'basic',
+    activo: row.is_active !== false,
+    notas: row.notas_admin || '',
+    menu: row.menu || { cats: ['Platos', 'Bebidas'], items: [], promo: { big: '', sub: '' } },
+  };
+}
+
+// Convierte objeto interno → fila para Supabase
+function pointToSbRow(p) {
+  return {
+    name: p.nombre,
+    category: p.cat,
+    sub: p.sub,
+    description: p.desc,
+    phone: p.tel,
+    email: p.email,
+    horario: p.horario,
+    latitude: p.coords ? p.coords[0] : null,
+    longitude: p.coords ? p.coords[1] : null,
+    google_maps_url: p.gmaps,
+    fotos: p.fotos || [],
+    video: p.video || null,
+    plan_fenlora: p.plan || 'basic',
+    is_active: p.activo !== false,
+    notas_admin: p.notas || '',
+    menu: p.menu || {},
+    updated_at: new Date().toISOString(),
+  };
+}
 
 // ═══════════════════════════════════════════════
 // ESTADO
 // ═══════════════════════════════════════════════
-let points = JSON.parse(localStorage.getItem('fenlora_points')) || DEFAULT_POINTS;
+let points = [];
 let selected = null;
 let activeFilter = 'todos';
 let searchQuery = '';
@@ -648,10 +691,27 @@ let pickerMarker = null;
 // ═══════════════════════════════════════════════
 // INIT
 // ═══════════════════════════════════════════════
-function init() {
+async function init() {
   buildCatGrid();
-  buildPlanSelect('f-plan', 'basic'); // poblar select con precios desde CONFIG
+  buildPlanSelect('f-plan', 'basic');
+  showToast('Cargando puntos…', 'info');
+  await loadFromSupabase();
   renderList();
+}
+
+async function loadFromSupabase() {
+  try {
+    const { data, error } = await _sb
+      .from('businesses')
+      .select('*')
+      .order('created_at', { ascending: true });
+    if (error) throw error;
+    points = (data || []).map(sbRowToPoint);
+    showToast('✅ ' + points.length + ' punto(s) cargados', 'success');
+  } catch (e) {
+    showToast('⚠ Sin conexión a Supabase', 'error');
+    console.error('Supabase load:', e);
+  }
 }
 
 // ═══════════════════════════════════════════════
@@ -810,7 +870,7 @@ function toggleStatusUI() {
   document.getElementById('status-sub').textContent = isNowActive ? 'Los visitantes pueden encontrar este punto' : 'Este punto no aparecerá hasta que se reactive';
 }
 
-function toggleStatus() {
+async function toggleStatus() {
   if (!selected) return;
   selected.activo = !selected.activo;
   const isActive = selected.activo;
@@ -819,9 +879,15 @@ function toggleStatus() {
   document.getElementById('status-label').textContent = isActive ? 'Activo — visible en el mapa público' : 'Inactivo — oculto del mapa público';
   document.getElementById('status-sub').textContent = isActive ? 'Los visitantes pueden encontrar este punto' : 'Este punto no aparecerá hasta que se reactive';
   document.getElementById('btn-toggle-status').textContent = isActive ? '⏸ Desactivar' : '▶ Activar';
-  saveToStorage();
   renderList();
-  showToast(isActive ? '✅ Punto activado en el mapa' : '⏸ Punto desactivado del mapa', 'success');
+  try {
+    if (selected.sbId) {
+      await _sb.from('businesses').update({ is_active: isActive, updated_at: new Date().toISOString() }).eq('id', selected.sbId);
+    }
+    showToast(isActive ? '✅ Punto activado en el mapa' : '⏸ Punto desactivado del mapa', 'success');
+  } catch (e) {
+    showToast('⚠ Estado cambiado localmente — error Supabase', 'error');
+  }
 }
 
 // ═══════════════════════════════════════════════
@@ -1044,7 +1110,7 @@ function removeVideo() {
 // ═══════════════════════════════════════════════
 // SAVE
 // ═══════════════════════════════════════════════
-function savePoint() {
+async function savePoint() {
   if (!selected) return;
   selected.nombre = document.getElementById('f-nombre').value.trim();
   selected.sub = document.getElementById('f-sub').value.trim();
@@ -1062,35 +1128,61 @@ function savePoint() {
   const gmaps = document.getElementById('f-gmaps').value.trim();
   selected.gmaps = gmaps || `https://maps.google.com/?q=${selected.coords[0]},${selected.coords[1]}`;
   selected.activo = document.getElementById('status-toggle').classList.contains('on');
-  const idx = points.findIndex(p => p.id === selected.id);
-  if (idx >= 0) points[idx] = selected;
-  saveToStorage();
-  renderList();
-  document.getElementById('editor-title').textContent = selected.nombre;
-  showToast('✅ Cambios guardados correctamente','success');
+
+  showToast('Guardando…', 'info');
+  try {
+    const row = pointToSbRow(selected);
+    if (selected.sbId) {
+      // Actualizar registro existente
+      const { error } = await _sb.from('businesses').update(row).eq('id', selected.sbId);
+      if (error) throw error;
+    } else {
+      // Insertar nuevo registro
+      const { data, error } = await _sb.from('businesses').insert(row).select().single();
+      if (error) throw error;
+      selected.sbId = data.id;
+      selected.id = data.id;
+    }
+    const idx = points.findIndex(p => p.id === selected.id);
+    if (idx >= 0) points[idx] = selected;
+    renderList();
+    document.getElementById('editor-title').textContent = selected.nombre;
+    showToast('✅ Guardado en Supabase', 'success');
+  } catch (e) {
+    showToast('❌ Error al guardar: ' + (e.message || e), 'error');
+    console.error('Supabase save:', e);
+  }
 }
 
 function saveToStorage() {
-  localStorage.setItem('fenlora_points', JSON.stringify(points));
+  // Compatibilidad — no se usa, todo va a Supabase
 }
 
 // ═══════════════════════════════════════════════
 // ADD NEW
 // ═══════════════════════════════════════════════
-function addNew() {
-  const newId = Math.max(...points.map(p=>p.id), 0) + 1;
+async function addNew() {
   const newPoint = {
-    id: newId, cat: 'rest', nombre: 'Nuevo negocio #' + newId,
+    cat: 'hist', nombre: 'Nuevo punto',
     sub: '', desc: '', fotos: [], tel: '', email: '', horario: '',
     coords: [5.2012, -74.9030], gmaps: 'https://maps.google.com/?q=5.2012,-74.9030',
-    video: null, plan: 'basic', activo: true, notas: '',
-    menu: { cats: ['Platos', 'Bebidas'], items: [], promo: {big:'', sub:''} }
+    video: null, plan: 'basic', activo: false, notas: '',
+    menu: { cats: ['Platos', 'Bebidas'], items: [], promo: { big: '', sub: '' } }
   };
-  points.push(newPoint);
-  saveToStorage();
-  renderList();
-  selectPoint(newId);
-  showToast('✅ Nuevo punto creado — completa la información','success');
+  showToast('Creando punto…', 'info');
+  try {
+    const { data, error } = await _sb.from('businesses').insert(pointToSbRow(newPoint)).select().single();
+    if (error) throw error;
+    newPoint.id = data.id;
+    newPoint.sbId = data.id;
+    points.push(newPoint);
+    renderList();
+    selectPoint(newPoint.id);
+    showToast('✅ Nuevo punto creado — completa la información', 'success');
+  } catch (e) {
+    showToast('❌ Error al crear punto: ' + (e.message || e), 'error');
+    console.error('Supabase addNew:', e);
+  }
 }
 
 // ═══════════════════════════════════════════════
@@ -1104,20 +1196,33 @@ function confirmDelete() {
   document.getElementById('confirm-overlay').classList.add('open');
 }
 
-function doDelete() {
+async function doDelete() {
   if (!selected) return;
-  points = points.filter(p => p.id !== selected.id);
-  saveToStorage();
-  closeConfirm();
-  selected = null;
-  document.getElementById('editor-tabs').style.display = 'none';
-  document.getElementById('head-actions').style.display = 'none';
-  document.getElementById('editor-title').textContent = 'Selecciona un negocio';
-  document.getElementById('editor-sub').textContent = '← Elige un punto de la lista para editarlo';
-  document.getElementById('empty-state').style.display = 'flex';
-  Object.keys({info:1,fotos:1,ubicacion:1,video:1,menu:1,export:1}).forEach(t => document.getElementById('tab-'+t).style.display='none');
-  renderList();
-  showToast('Punto eliminado del mapa','info');
+  showToast('Eliminando…', 'info');
+  try {
+    if (selected.sbId) {
+      const { error } = await _sb.from('businesses').delete().eq('id', selected.sbId);
+      if (error) throw error;
+    }
+    points = points.filter(p => p.id !== selected.id);
+    closeConfirm();
+    selected = null;
+    document.getElementById('editor-tabs').style.display = 'none';
+    document.getElementById('head-actions').style.display = 'none';
+    document.getElementById('editor-title').textContent = 'Selecciona un negocio';
+    document.getElementById('editor-sub').textContent = '← Elige un punto de la lista para editarlo';
+    document.getElementById('empty-state').style.display = 'flex';
+    Object.keys({info:1,fotos:1,ubicacion:1,video:1,menu:1,export:1}).forEach(t => {
+      const el = document.getElementById('tab-'+t);
+      if (el) el.style.display = 'none';
+    });
+    renderList();
+    showToast('Punto eliminado', 'info');
+  } catch (e) {
+    closeConfirm();
+    showToast('❌ Error al eliminar: ' + (e.message || e), 'error');
+    console.error('Supabase delete:', e);
+  }
 }
 
 function closeConfirm() {

@@ -696,10 +696,20 @@ async function cargarPuntosDesdeSupabase() {
       .order('created_at', { ascending: true });
     if (error) { console.warn('Supabase error:', error.message); return; }
     if (!data || data.length === 0) { console.log('Supabase: sin puntos activos'); return; }
+    // Eliminar marcadores existentes del mapa
+    markers.forEach(function(m){ map.removeLayer(m.mk); });
+    markers.length = 0;
     PUNTOS.length = 0;
-    data.forEach(function(row){ PUNTOS.push(sbRowToPunto(row)); });
-    renderMarkers();
-    console.log('Supabase: ' + data.length + ' punto(s) cargados');
+    // Agregar nuevos puntos
+    data.forEach(function(row){
+      var p = sbRowToPunto(row);
+      PUNTOS.push(p);
+      var mk = L.marker(p.coords, {icon: makeIcon(p)}).addTo(map);
+      mk.on('click', function(){ openPanel(p); });
+      markers.push({mk: mk, cat: p.cat, id: p.id, coords: p.coords});
+    });
+    updateCount();
+    console.log('Supabase: ' + data.length + ' punto(s) cargados en el mapa');
   } catch(e) {
     console.warn('Supabase offline — usando datos locales', e);
   }

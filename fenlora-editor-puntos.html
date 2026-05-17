@@ -1119,8 +1119,11 @@ function previewConductorImg(url, imgId) {
     if (icon) icon.style.display = 'block';
   }
 }
+
+function previewNewPhoto(url) {
   const prev = document.getElementById('photo-preview-mini');
-  if (url.startsWith('http')) {
+  if (!prev) return;
+  if (url && url.startsWith('http')) {
     prev.src = url;
     prev.style.display = 'block';
     prev.onerror = () => { prev.style.display = 'none'; };

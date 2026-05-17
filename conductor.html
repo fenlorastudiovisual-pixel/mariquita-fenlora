@@ -26,7 +26,7 @@ html,body{height:100%;overflow-x:hidden;font-family:'DM Sans',sans-serif;backgro
 @keyframes pulse{0%,100%{opacity:.2;transform:scale(.8)}50%{opacity:1;transform:scale(1)}}
 
 /* ── ERROR ── */
-#error-screen{position:fixed;inset:0;background:var(--dark);display:none;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:32px;gap:16px}
+#error-screen{position:fixed;inset:0;background:var(--dark);display:none;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:32px;gap:16px;z-index:9998}
 .err-icon{font-size:48px}
 .err-title{font-family:'Syne',sans-serif;font-size:22px;font-weight:700;color:var(--cream)}
 .err-sub{font-size:13px;color:var(--text3);line-height:1.6}
@@ -673,6 +673,9 @@ function suscribirCambios() {
 
 function showError() {
   document.getElementById('loading').style.display = 'none';
+  document.getElementById('app').style.display = 'none';
+  const auth = document.getElementById('auth-screen');
+  if (auth) auth.style.display = 'none';
   document.getElementById('error-screen').style.display = 'flex';
 }
 

@@ -621,15 +621,50 @@ function buildPlanSelect(selectId, selectedVal){
 // DATOS INICIALES (se guardan en localStorage)
 // ═══════════════════════════════════════════════
 const CAT_META = {
-  hotel:   {color:'#1565C0',label:'Hotel / Alojamiento',emoji:'🏨',rgb:'21,101,192'},
-  finca:   {color:'#1A7A4A',label:'Finca / Agroturismo',emoji:'🌿',rgb:'26,122,74'},
-  rest:    {color:'#C0392B',label:'Restaurante / Café',emoji:'🍽️',rgb:'192,57,43'},
-  bar:     {color:'#6C3483',label:'Bar / Gastrobar',emoji:'🍺',rgb:'108,52,131'},
-  agencia: {color:'#D4580A',label:'Agencia de viajes',emoji:'✈️',rgb:'212,88,10'},
-  trans:   {color:'#0D7377',label:'Transporte',emoji:'🚌',rgb:'13,115,119'},
-  hist:    {color:'#C8860A',label:'Punto histórico',emoji:'🏛️',rgb:'200,134,10'},
-  pub:     {color:'#C62828',label:'Entidad pública',emoji:'🏢',rgb:'198,40,40'},
-  serv:    {color:'#2E86AB',label:'Servicio turístico',emoji:'🧭',rgb:'46,134,171'},
+  // Gastronomía
+  rest:     {color:'#C0392B',label:'Restaurante / Fonda',    emoji:'🍽️', grupo:'Gastronomía'},
+  fritanga: {color:'#E74C3C',label:'Fritanga / Asadero',     emoji:'🍖', grupo:'Gastronomía'},
+  tipico:   {color:'#D44B3A',label:'Comida típica',          emoji:'🥘', grupo:'Gastronomía'},
+  cafe:     {color:'#A04000',label:'Cafetería / Panadería',  emoji:'☕', grupo:'Gastronomía'},
+  helado:   {color:'#F4A460',label:'Heladería / Postres',    emoji:'🍦', grupo:'Gastronomía'},
+  jugo:     {color:'#E67E22',label:'Jugos / Cholados',       emoji:'🥤', grupo:'Gastronomía'},
+  // Alojamiento
+  hotel:    {color:'#1565C0',label:'Hotel / Hostal',         emoji:'🏨', grupo:'Alojamiento'},
+  finca:    {color:'#1A7A4A',label:'Finca ecoturística',     emoji:'🌿', grupo:'Alojamiento'},
+  airbnb:   {color:'#FF5A5F',label:'Casa / Apartamento',     emoji:'🏠', grupo:'Alojamiento'},
+  // Transporte
+  taxi:     {color:'#F1C40F',label:'Taxi local',             emoji:'🚕', grupo:'Transporte'},
+  moto:     {color:'#E5A800',label:'Mototransporte',         emoji:'🏍️', grupo:'Transporte'},
+  chiva:    {color:'#D4AC0D',label:'Chiva turística',        emoji:'🚌', grupo:'Transporte'},
+  alqmoto:  {color:'#B8860B',label:'Alquiler de motos',      emoji:'🛵', grupo:'Transporte'},
+  alqbici:  {color:'#A0820A',label:'Alquiler de bicicletas', emoji:'🚲', grupo:'Transporte'},
+  vereda:   {color:'#8B6914',label:'Transporte a veredas',   emoji:'🛻', grupo:'Transporte'},
+  fletero:  {color:'#7A5C10',label:'Fleteros',               emoji:'📦', grupo:'Transporte'},
+  // Comercio local
+  licorera: {color:'#8E44AD',label:'Licorera / Depósito',   emoji:'🍾', grupo:'Comercio'},
+  salsamen: {color:'#7D3C98',label:'Salsamentaría',          emoji:'🥩', grupo:'Comercio'},
+  tienda:   {color:'#6C3483',label:'Tienda / Mini-market',   emoji:'🛒', grupo:'Comercio'},
+  panaderia:{color:'#F39C12',label:'Panadería artesanal',    emoji:'🥖', grupo:'Comercio'},
+  fruteria: {color:'#27AE60',label:'Frutería / Granero',     emoji:'🍎', grupo:'Comercio'},
+  // Vida nocturna
+  bar:      {color:'#6C3483',label:'Bar / Gastrobar',        emoji:'🍺', grupo:'Nocturna'},
+  disco:    {color:'#9B59B6',label:'Discoteca / Eventos',    emoji:'🎶', grupo:'Nocturna'},
+  // Turismo activo
+  agencia:  {color:'#D4580A',label:'Agencia de viajes',      emoji:'✈️', grupo:'Turismo'},
+  guia:     {color:'#E67E22',label:'Guía turístico',         emoji:'🧭', grupo:'Turismo'},
+  aventura: {color:'#CA6F1E',label:'Aventura / Senderismo',  emoji:'🧗', grupo:'Turismo'},
+  pesca:    {color:'#1A5276',label:'Pesca deportiva',        emoji:'🎣', grupo:'Turismo'},
+  // Salud
+  farmacia: {color:'#E74C3C',label:'Droguería / Farmacia',   emoji:'💊', grupo:'Salud'},
+  medico:   {color:'#C0392B',label:'Médico / Clínica',       emoji:'🏥', grupo:'Salud'},
+  spa:      {color:'#76D7C4',label:'Spa / Masajes',          emoji:'💆', grupo:'Salud'},
+  barber:   {color:'#1ABC9C',label:'Peluquería / Barbería',  emoji:'✂️', grupo:'Salud'},
+  // Histórico
+  hist:     {color:'#C8860A',label:'Punto histórico',        emoji:'🏛️', grupo:'Histórico'},
+  iglesia:  {color:'#B7770D',label:'Iglesia / Capilla',      emoji:'⛪', grupo:'Histórico'},
+  pub:      {color:'#C62828',label:'Entidad pública',        emoji:'🏢', grupo:'Histórico'},
+  // Servicios
+  serv:     {color:'#2E86AB',label:'Servicio turístico',     emoji:'🔧', grupo:'Servicios'},
 };
 
 // ═══════════════════════════════════════════════
@@ -844,11 +879,21 @@ function loadEditor(p) {
 // ═══════════════════════════════════════════════
 function buildCatGrid() {
   const grid = document.getElementById('cat-grid');
-  grid.innerHTML = Object.entries(CAT_META).map(([key, c]) =>
-    `<div class="cat-opt" data-cat="${key}" onclick="selectCat('${key}',this)">
-      <div class="cat-dot-big" style="background:${c.color}"></div>
-      ${c.emoji} ${c.label.split(' /')[0]}
-    </div>`
+  // Agrupar por grupo
+  const grupos = {};
+  Object.entries(CAT_META).forEach(([key, c]) => {
+    const g = c.grupo || 'Otros';
+    if(!grupos[g]) grupos[g] = [];
+    grupos[g].push({key, ...c});
+  });
+  grid.innerHTML = Object.entries(grupos).map(([g, cats]) =>
+    `<div style="grid-column:1/-1;font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;margin:8px 0 2px">${g}</div>` +
+    cats.map(c =>
+      `<div class="cat-opt" data-cat="${c.key}" onclick="selectCat('${c.key}',this)">
+        <div class="cat-dot-big" style="background:${c.color}"></div>
+        ${c.emoji} ${c.label.split(' /')[0]}
+      </div>`
+    ).join('')
   ).join('');
 }
 
@@ -856,12 +901,10 @@ function selectCat(cat, el) {
   document.querySelectorAll('.cat-opt').forEach(o => {
     o.classList.remove('selected');
     o.style.removeProperty('--selected-color');
-    o.style.removeProperty('--selected-rgb');
   });
   el.classList.add('selected');
   const c = CAT_META[cat];
   el.style.setProperty('--selected-color', c.color);
-  el.style.setProperty('--selected-rgb', c.rgb);
   if (selected) selected.cat = cat;
 }
 

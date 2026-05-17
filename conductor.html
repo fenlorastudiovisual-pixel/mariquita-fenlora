@@ -301,35 +301,6 @@ html,body{height:100%;overflow-x:hidden;font-family:'DM Sans',sans-serif;backgro
     </div>
   </div>
 
-  <!-- EDICIÓN DE DATOS (oculto por defecto) -->
-  <div style="margin:12px 20px 0">
-    <button id="btn-edit-datos" onclick="toggleEditDatos()" style="width:100%;padding:10px;background:rgba(200,134,10,.08);border:1px solid var(--border);border-radius:10px;color:var(--gold);font-size:12px;font-weight:600;font-family:'DM Sans',sans-serif;cursor:pointer;transition:all .2s">✏️ Editar mis datos e imágenes</button>
-  </div>
-  <div id="edit-datos" style="display:none;flex-direction:column;gap:10px;margin:10px 20px 0;background:rgba(253,246,236,.04);border:1px solid var(--border);border-radius:14px;padding:16px">
-    <div style="font-size:10px;color:var(--gold);font-weight:700;text-transform:uppercase;letter-spacing:.08em;margin-bottom:2px">✏️ Editar información</div>
-    <div>
-      <label style="font-size:10px;color:var(--text3);display:block;margin-bottom:4px">Cédula</label>
-      <input id="f-cedula" type="text" placeholder="Número de cédula" style="width:100%;background:rgba(200,134,10,.06);border:1px solid var(--border);border-radius:8px;padding:8px 10px;color:var(--cream);font-size:13px;font-family:'DM Sans',sans-serif;outline:none">
-    </div>
-    <div>
-      <label style="font-size:10px;color:var(--text3);display:block;margin-bottom:4px">Placa del vehículo</label>
-      <input id="f-placa" type="text" placeholder="Ej: ABC123" style="width:100%;background:rgba(200,134,10,.06);border:1px solid var(--border);border-radius:8px;padding:8px 10px;color:var(--cream);font-size:13px;font-family:'DM Sans',sans-serif;outline:none;text-transform:uppercase">
-    </div>
-    <div>
-      <label style="font-size:10px;color:var(--text3);display:block;margin-bottom:4px">Color / Modelo del vehículo</label>
-      <input id="f-vehiculo-desc" type="text" placeholder="Ej: Chevrolet Spark rojo 2019" style="width:100%;background:rgba(200,134,10,.06);border:1px solid var(--border);border-radius:8px;padding:8px 10px;color:var(--cream);font-size:13px;font-family:'DM Sans',sans-serif;outline:none">
-    </div>
-    <div>
-      <label style="font-size:10px;color:var(--text3);display:block;margin-bottom:4px">Foto conductor (URL imgBB)</label>
-      <input id="f-foto-conductor" type="url" placeholder="https://i.ibb.co/..." style="width:100%;background:rgba(200,134,10,.06);border:1px solid var(--border);border-radius:8px;padding:8px 10px;color:var(--cream);font-size:12px;font-family:'DM Sans',sans-serif;outline:none">
-    </div>
-    <div>
-      <label style="font-size:10px;color:var(--text3);display:block;margin-bottom:4px">Foto vehículo (URL imgBB)</label>
-      <input id="f-foto-vehiculo" type="url" placeholder="https://i.ibb.co/..." style="width:100%;background:rgba(200,134,10,.06);border:1px solid var(--border);border-radius:8px;padding:8px 10px;color:var(--cream);font-size:12px;font-family:'DM Sans',sans-serif;outline:none">
-    </div>
-    <button onclick="saveDatos()" style="width:100%;padding:12px;background:linear-gradient(135deg,var(--gold),#9a6507);border:none;border-radius:10px;color:#fff;font-size:13px;font-weight:700;font-family:'DM Sans',sans-serif;cursor:pointer">Guardar cambios ✓</button>
-  </div>
-
   <!-- DISPONIBILIDAD -->
   <div class="avail-section">
     <div class="avail-label"><span class="ping" id="ping-dot" style="display:none"></span>Estado actual</div>
@@ -538,12 +509,6 @@ function renderPerfil(d) {
   document.getElementById('disp-tel').textContent = d.phone || '— — —';
   document.getElementById('disp-placa').textContent = placa || '— — —';
   document.getElementById('disp-vehiculo').textContent = vehiculoDesc || '— — —';
-  // Precargar campos de edición
-  document.getElementById('f-cedula').value = cedula;
-  document.getElementById('f-placa').value = placa;
-  document.getElementById('f-vehiculo-desc').value = vehiculoDesc;
-  document.getElementById('f-foto-conductor').value = fotoConductor;
-  document.getElementById('f-foto-vehiculo').value = fotoVehiculo;
   // Estado disponibilidad
   disponible = d.disponible === true;
   updateToggleUI();
@@ -565,61 +530,6 @@ function renderPerfil(d) {
     document.getElementById('stat-dias').textContent = dias;
   }
   document.getElementById('stat-estado').textContent = d.disponible ? '🟢 Activo' : '⚫ Inactivo';
-}
-
-function toggleEditDatos() {
-  const ed = document.getElementById('edit-datos');
-  const btn = document.getElementById('btn-edit-datos');
-  const showing = ed.style.display === 'flex';
-  ed.style.display = showing ? 'none' : 'flex';
-  btn.textContent = showing ? '✏️ Editar mis datos e imágenes' : '✕ Cancelar edición';
-}
-
-function editFoto(tipo) {
-  const field = tipo === 'conductor' ? 'f-foto-conductor' : 'f-foto-vehiculo';
-  document.getElementById('edit-datos').style.display = 'flex';
-  document.getElementById('btn-edit-datos').textContent = '✕ Cancelar edición';
-  document.getElementById(field).focus();
-  showToast('Pega el Direct Link de imgBB en el campo de ' + (tipo === 'conductor' ? 'foto conductor' : 'foto vehículo'));
-}
-
-async function saveDatos() {
-  const cedula = document.getElementById('f-cedula').value.trim();
-  const placa = document.getElementById('f-placa').value.trim().toUpperCase();
-  const vehiculoDesc = document.getElementById('f-vehiculo-desc').value.trim();
-  const fotoConductor = document.getElementById('f-foto-conductor').value.trim();
-  const fotoVehiculo = document.getElementById('f-foto-vehiculo').value.trim();
-
-  const addons = {
-    cedula, placa, vehiculo_desc: vehiculoDesc,
-    foto_conductor: fotoConductor, foto_vehiculo: fotoVehiculo
-  };
-
-  try {
-    await _sb.from('businesses').update({
-      addons: addons,
-      updated_at: new Date().toISOString()
-    }).eq('id', conductorId);
-
-    // Actualizar visualización
-    document.getElementById('disp-cedula').textContent = cedula ? '•••• ' + cedula.slice(-4) : '— — —';
-    document.getElementById('disp-placa').textContent = placa || '— — —';
-    document.getElementById('disp-vehiculo').textContent = vehiculoDesc || '— — —';
-    if (fotoConductor) {
-      document.getElementById('foto-conductor-img').src = fotoConductor;
-      document.getElementById('foto-conductor-img').style.display = 'block';
-      document.getElementById('foto-conductor-emoji').style.display = 'none';
-    }
-    if (fotoVehiculo) {
-      document.getElementById('foto-vehiculo-img').src = fotoVehiculo;
-      document.getElementById('foto-vehiculo-img').style.display = 'block';
-      document.getElementById('foto-vehiculo-emoji').style.display = 'none';
-    }
-    toggleEditDatos();
-    showToast('✅ Datos guardados correctamente');
-  } catch(e) {
-    showToast('❌ Error al guardar. Intenta de nuevo.');
-  }
 }
 
 function to24(t) {

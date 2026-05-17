@@ -179,9 +179,9 @@ html,body{width:100%;height:100%;overflow:hidden;font-family:DM Sans,sans-serif;
 .btn-review{display:flex;align-items:center;justify-content:center;gap:6px;width:100%;padding:9px;background:rgba(200,134,10,.08);border:1px solid rgba(200,134,10,.2);border-radius:9px;color:var(--gold);font-size:12px;font-weight:500;cursor:pointer;font-family:DM Sans,sans-serif;margin-top:8px;transition:all .2s}
 .btn-review:hover{background:rgba(200,134,10,.15)}
 
-#fen-strip{border-top:1px solid rgba(28,18,8,.08);padding:9px 16px;display:flex;align-items:center;gap:8px;background:rgba(200,134,10,.04);flex-shrink:0}
-#fen-strip .ft{font-size:9.5px;color:#7A5C2E;line-height:1.45}
-#fen-strip .fl{font-size:9.5px;font-weight:500;color:var(--gold);text-decoration:none}
+#fen-strip{border-top:1px solid rgba(28,18,8,.12);padding:10px 16px;display:flex;align-items:center;gap:10px;background:rgba(200,134,10,.06);flex-shrink:0}
+#fen-strip .ft{font-size:10.5px;color:#7A5C2E;line-height:1.55}
+#fen-strip .fl{font-size:10.5px;font-weight:700;color:var(--gold);text-decoration:none;display:inline-block;margin-top:2px}
 #fen-strip .fl:hover{text-decoration:underline}
 
 /* ── LEYENDA ── */
@@ -426,9 +426,9 @@ html,body{width:100%;height:100%;overflow:hidden;font-family:DM Sans,sans-serif;
     <div id="prev-section"></div>
   </div>
   <div id="fen-strip">
-    <div>🏢</div>
-    <div class="ft" data-i18n="fen-strip">¿Quieres estar aquí o mejorar tu presencia digital?<br>
-      <a class="fl" href="#" onclick="openFenlora(event)" data-i18n="fen-strip-link">Conoce los servicios de Fenlora →</a>
+    <div style="font-size:18px">🏢</div>
+    <div class="ft">¿Quieres estar aquí o mejorar tu presencia digital?<br>
+      <a class="fl" href="#" onclick="openFenlora(event)">Conoce los servicios de Fenlora →</a>
     </div>
   </div>
 </div>
@@ -1027,11 +1027,11 @@ function openPanel(p){
     (p.email ? '<div class="irow"><div class="ico2">✉️</div><div><a href="mailto:'+p.email+'">'+p.email+'</a></div></div>' : '');
   // Acciones
   const acts=document.getElementById('pacts');
-  const menuBtn=p.menu?`<button class="bmenu" onclick="openMenu()">${t('btn-menu')}</button>`:'';
+  const menuBtn=p.menu?`<button class="bmenu" onclick="openMenu()">📋 Ver menú digital</button>`:'';
   acts.innerHTML=`
-    <a class="bmaps" href="${p.gmaps}" target="_blank">${t('btn-gmaps')}</a>
-    ${p.wsp?`<a class="bwsp" href="https://wa.me/${p.wsp}?text=Hola! Vi su negocio en la Ruta del Mangostino y quiero información _(Desde la Ruta del Mangostino)_" target="_blank">${t('btn-wsp')}</a>`:''}
-    <button class="bshare" onclick="sharePoint()">${t('btn-share')}</button>
+    <a class="bmaps" href="${p.gmaps}" target="_blank">🗺️ Cómo llegar — Google Maps</a>
+    ${p.wsp?`<a class="bwsp" href="https://wa.me/${p.wsp}?text=Hola! Vi su negocio en la Ruta del Mangostino y quiero información _(Desde la Ruta del Mangostino)_" target="_blank">💬 Escribir por WhatsApp</a>`:''}
+    <button class="bshare" onclick="sharePoint()">📤 Compartir ubicación</button>
     ${menuBtn}
   `;
   // Reseñas

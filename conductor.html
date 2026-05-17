@@ -439,11 +439,13 @@ async function acceptAuth() {
 async function init() {
   if (!conductorId) { showError(); return; }
   try {
+    console.log('Buscando conductor ID:', conductorId);
     const { data, error } = await _sb
       .from('businesses')
       .select('*')
       .eq('id', conductorId)
       .single();
+    console.log('Data:', data, 'Error:', error);
     if (error || !data) { showError(); return; }
     punto = data;
     // Verificar autorización — Supabase o localStorage

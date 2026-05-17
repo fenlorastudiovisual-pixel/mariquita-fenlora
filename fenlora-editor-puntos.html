@@ -396,6 +396,39 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Instru
         </div>
       </div>
 
+      <!-- SECCIÓN CONDUCTOR — solo visible para categorías de transporte -->
+      <div class="form-section" id="section-conductor" style="display:none">
+        <div class="form-section-title">🚗 Datos del conductor y vehículo</div>
+        <div style="font-size:11.5px;color:var(--text3);margin-bottom:12px;line-height:1.6;background:var(--bg3);border-radius:8px;padding:10px 12px;border:1px solid var(--border)">
+          💡 Estos datos aparecen en el panel personal del conductor. Las fotos deben ser URLs de <strong style="color:var(--gold)">imgBB.com → Direct link</strong>.
+        </div>
+        <div class="field-row col2">
+          <div class="field">
+            <label>Número de cédula</label>
+            <input type="text" id="f-cedula" placeholder="123456789">
+          </div>
+          <div class="field">
+            <label>Placa del vehículo</label>
+            <input type="text" id="f-placa" placeholder="ABC123" oninput="this.value=this.value.toUpperCase()">
+          </div>
+        </div>
+        <div class="field">
+          <label>Color y modelo del vehículo</label>
+          <input type="text" id="f-vehiculo-desc" placeholder="ej. Roja · Honda CB125 2022">
+        </div>
+        <div class="field">
+          <label>URL foto del conductor (imgBB Direct link)</label>
+          <input type="text" id="f-foto-conductor-url" placeholder="https://i.ibb.co/...">
+        </div>
+        <div class="field">
+          <label>URL foto del vehículo (imgBB Direct link)</label>
+          <input type="text" id="f-foto-vehiculo-url" placeholder="https://i.ibb.co/...">
+        </div>
+        <div style="font-size:11px;color:var(--text3);margin-top:4px;line-height:1.6">
+          🔒 La cédula se muestra solo con los últimos 4 dígitos en el panel público del conductor.
+        </div>
+      </div>
+
       <div class="form-section">
         <div class="form-section-title">Suscripción Fenlora</div>
         <div style="font-size:11px;color:var(--text3);background:var(--bg3);border:1px solid var(--border);border-radius:7px;padding:8px 11px;margin-bottom:10px;line-height:1.5">
@@ -874,6 +907,18 @@ function loadEditor(p) {
   document.getElementById('status-sub').textContent = isActive ? 'Los visitantes pueden encontrar este punto' : 'Este punto no aparecerá hasta que se reactive';
   document.getElementById('btn-toggle-status').textContent = isActive ? '⏸ Desactivar' : '▶ Activar';
 
+  // Sección conductor — mostrar si es transporte
+  const transCats = ['taxi','moto','chiva','alqmoto','alqbici','vereda','fletero'];
+  const secCond = document.getElementById('section-conductor');
+  if (secCond) secCond.style.display = transCats.includes(p.cat) ? 'block' : 'none';
+  // Cargar datos conductor desde addons
+  const addons = p.addons || {};
+  if (document.getElementById('f-cedula')) document.getElementById('f-cedula').value = addons.cedula || '';
+  if (document.getElementById('f-placa')) document.getElementById('f-placa').value = addons.placa || '';
+  if (document.getElementById('f-vehiculo-desc')) document.getElementById('f-vehiculo-desc').value = addons.vehiculo_desc || '';
+  if (document.getElementById('f-foto-conductor-url')) document.getElementById('f-foto-conductor-url').value = addons.foto_conductor || '';
+  if (document.getElementById('f-foto-vehiculo-url')) document.getElementById('f-foto-vehiculo-url').value = addons.foto_vehiculo || '';
+
   // Menu toggle
   const menuTog = document.getElementById('menu-toggle');
   const tieneMenu = p.tiene_menu === true;
@@ -940,6 +985,10 @@ function selectCat(cat, el) {
   const c = CAT_META[cat];
   el.style.setProperty('--selected-color', c.color);
   if (selected) selected.cat = cat;
+  // Mostrar sección conductor si es transporte
+  const transCats = ['taxi','moto','chiva','alqmoto','alqbici','vereda','fletero'];
+  const sec = document.getElementById('section-conductor');
+  if (sec) sec.style.display = transCats.includes(cat) ? 'block' : 'none';
 }
 
 // ═══════════════════════════════════════════════
@@ -1246,6 +1295,17 @@ async function savePoint() {
   selected.notas = document.getElementById('f-notas').value.trim();
   selected.inicio = document.getElementById('f-inicio').value;
   selected.vence = document.getElementById('f-vence').value;
+  // Datos conductor
+  const transCats = ['taxi','moto','chiva','alqmoto','alqbici','vereda','fletero'];
+  if (transCats.includes(selected.cat)) {
+    selected.addons = {
+      cedula: document.getElementById('f-cedula')?.value.trim() || '',
+      placa: document.getElementById('f-placa')?.value.trim().toUpperCase() || '',
+      vehiculo_desc: document.getElementById('f-vehiculo-desc')?.value.trim() || '',
+      foto_conductor: document.getElementById('f-foto-conductor-url')?.value.trim() || '',
+      foto_vehiculo: document.getElementById('f-foto-vehiculo-url')?.value.trim() || '',
+    };
+  }
   const lat = parseFloat(document.getElementById('f-lat').value);
   const lng = parseFloat(document.getElementById('f-lng').value);
   if (!isNaN(lat) && !isNaN(lng)) selected.coords = [lat, lng];

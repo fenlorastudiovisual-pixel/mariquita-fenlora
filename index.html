@@ -284,7 +284,9 @@ html,body{width:100%;height:100%;overflow:hidden;font-family:DM Sans,sans-serif;
 #fen-cta:hover{background:#b5790a}
 #fen-close{position:absolute;top:12px;right:14px;background:none;border:none;font-size:19px;cursor:pointer;color:var(--dark)}
 /* PIN map normal */
-.mpin{width:32px;height:32px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);display:flex;align-items:center;justify-content:center;border:2px solid rgba(255,255,255,.88);box-shadow:0 3px 12px rgba(0,0,0,.4);cursor:pointer;overflow:hidden}
+.mpin{width:32px;height:32px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);display:flex;align-items:center;justify-content:center;border:2px solid rgba(255,255,255,.88);box-shadow:0 3px 12px rgba(0,0,0,.4);cursor:pointer;overflow:hidden;position:relative}
+.mpin-disponible{position:absolute;top:-2px;right:-2px;width:10px;height:10px;background:#25A864;border-radius:50%;border:2px solid #fff;transform:rotate(45deg);z-index:2;box-shadow:0 0 6px rgba(37,168,100,.8);animation:disponible-pulse 2s ease-in-out infinite}
+@keyframes disponible-pulse{0%,100%{box-shadow:0 0 4px rgba(37,168,100,.6)}50%{box-shadow:0 0 10px rgba(37,168,100,.9)}}
 .mpin img{width:100%;height:100%;object-fit:cover;transform:rotate(45deg) scale(1.5)}
 .mpin .ico{transform:rotate(45deg);font-size:13px}
 /* ── TOUCH IMPROVEMENTS ── */
@@ -788,7 +790,23 @@ async function cargarPuntosDesdeSupabase() {
 function suscribirCambiosEnVivo() {
   try {
     _sb.channel('businesses-realtime')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'businesses' }, function() {
+      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'businesses' }, function(payload) {
+        const updated = payload.new;
+        if (!updated) return;
+        // Actualizar el punto en memoria
+        const idx = PUNTOS.findIndex(function(p){ return String(p.id) === String(updated.id); });
+        if (idx >= 0) {
+          PUNTOS[idx].disponible = updated.disponible;
+          PUNTOS[idx].horario = updated.horario || PUNTOS[idx].horario;
+          // Refrescar el ícono del marcador en el mapa
+          const markerObj = markers.find(function(m){ return String(m.id) === String(updated.id); });
+          if (markerObj) markerObj.mk.setIcon(makeIcon(PUNTOS[idx]));
+        }
+      })
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'businesses' }, function() {
+        cargarPuntosDesdeSupabase();
+      })
+      .on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'businesses' }, function() {
         cargarPuntosDesdeSupabase();
       })
       .subscribe();
@@ -874,9 +892,11 @@ let activeTrans='todos';
 function makeIcon(p){
   const c=CAT[p.cat]||{color:'#888',emoji:'📍'};
   const img=p.fotos[0]?.url;
-  const html=img
-    ?`<div class="mpin" style="background:${c.color}"><img src="${img}" loading="lazy" alt=""/></div>`
-    :`<div class="mpin" style="background:${c.color}"><span class="ico">${c.emoji}</span></div>`;
+  const disponibleDot=p.disponible?'<div class="mpin-disponible"></div>':'';
+  const inner=img
+    ?`<img src="${img}" loading="lazy" alt="" style="width:100%;height:100%;object-fit:cover"/>`
+    :`<span class="ico">${c.emoji}</span>`;
+  const html=`<div class="mpin" style="background:${c.color}">${inner}${disponibleDot}</div>`;
   return L.divIcon({className:'',html,iconSize:[32,32],iconAnchor:[16,32],popupAnchor:[0,-36]});
 }
 

@@ -801,6 +801,11 @@ function suscribirCambiosEnVivo() {
           PUNTOS[idx].horario = updated.horario || PUNTOS[idx].horario;
           const markerObj = markers.find(function(m){ return String(m.id) === String(updated.id); });
           if (markerObj) markerObj.mk.setIcon(makeIcon(PUNTOS[idx]));
+          // Si el panel está abierto mostrando este punto, refrescarlo
+          if (currentPunto && String(currentPunto.id) === String(updated.id)) {
+            currentPunto.disponible = updated.disponible;
+            openPanel(currentPunto);
+          }
         }
       })
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'businesses' }, function() {
@@ -1172,9 +1177,23 @@ function openPanel(p){
   const pi=document.getElementById('pinfo');
   const subShow = (currentLang==='en' && p.sub_en) ? p.sub_en : p.sub;
   const horShow = (currentLang==='en' && p.horario_en) ? p.horario_en : p.horario;
+  // Etiqueta disponibilidad para transporte
+  const transCats = ['taxi','moto','chiva','alqmoto','alqbici','vereda','fletero'];
+  const dispBadge = transCats.includes(p.cat)
+    ? (p.disponible
+        ? `<div style="display:inline-flex;align-items:center;gap:6px;padding:6px 12px;background:rgba(26,122,74,.12);border:1.5px solid rgba(37,168,100,.4);border-radius:20px;margin-bottom:10px">
+            <span style="width:8px;height:8px;border-radius:50%;background:#25A864;display:inline-block;animation:disp-pulse 1.4s ease-in-out infinite;flex-shrink:0"></span>
+            <span style="font-size:12px;font-weight:600;color:#1A7A4A">Disponible ahora — toca para contactar</span>
+           </div>`
+        : `<div style="display:inline-flex;align-items:center;gap:6px;padding:6px 12px;background:rgba(80,80,80,.08);border:1.5px solid rgba(150,150,150,.2);border-radius:20px;margin-bottom:10px">
+            <span style="width:8px;height:8px;border-radius:50%;background:#888;display:inline-block;flex-shrink:0"></span>
+            <span style="font-size:12px;font-weight:500;color:#888">No disponible en este momento</span>
+           </div>`)
+    : '';
   pi.innerHTML =
-    '<div class="irow"><div class="ico2">📍</div><div>'+subShow+'</div></div>' +
-    '<div class="irow"><div class="ico2">🕐</div><div>'+horShow+'</div></div>' +
+    dispBadge +
+    (subShow ? '<div class="irow"><div class="ico2">📍</div><div>'+subShow+'</div></div>' : '') +
+    (horShow ? '<div class="irow"><div class="ico2">🕐</div><div>'+horShow+'</div></div>' : '') +
     (p.tel ? '<div class="irow"><div class="ico2">📞</div><div><a href="tel:'+p.tel+'">'+p.tel+'</a></div></div>' : '') +
     (p.email ? '<div class="irow"><div class="ico2">✉️</div><div><a href="mailto:'+p.email+'">'+p.email+'</a></div></div>' : '');
   // Acciones

@@ -240,19 +240,77 @@ html,body{height:100%;overflow-x:hidden;font-family:'DM Sans',sans-serif;backgro
     <div class="hdr-badge">Panel conductor</div>
   </div>
 
-  <!-- PERFIL -->
+  <!-- TARJETA DE IDENTIFICACIÓN -->
   <div class="profile-card">
-    <div class="profile-top">
-      <div class="avatar" id="avatar-wrap">
-        <span id="avatar-emoji">🚕</span>
+
+    <!-- BADGE FENLORA -->
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+      <div style="font-size:10px;color:var(--text3);font-weight:600;letter-spacing:.1em;text-transform:uppercase">Conductor verificado</div>
+      <div style="font-size:10px;color:var(--gold);background:rgba(200,134,10,.12);border:1px solid rgba(200,134,10,.2);border-radius:20px;padding:3px 10px;font-weight:600">✓ Fenlora</div>
+    </div>
+
+    <!-- FOTOS CONDUCTOR + VEHÍCULO -->
+    <div style="display:flex;gap:12px;margin-bottom:16px">
+      <!-- Foto conductor -->
+      <div style="flex:1;text-align:center">
+        <div id="foto-conductor-wrap" style="width:80px;height:80px;border-radius:50%;border:3px solid var(--gold);overflow:hidden;background:var(--dark2);display:flex;align-items:center;justify-content:center;margin:0 auto 6px;font-size:32px;cursor:pointer;position:relative" onclick="editFoto('conductor')">
+          <span id="foto-conductor-emoji">👤</span>
+          <img id="foto-conductor-img" src="" alt="" style="display:none;width:100%;height:100%;object-fit:cover;position:absolute;inset:0">
+          <div style="position:absolute;bottom:0;right:0;width:22px;height:22px;background:var(--gold);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;border:2px solid var(--dark)">📷</div>
+        </div>
+        <div style="font-size:10px;color:var(--text3)">Mi foto</div>
       </div>
-      <div class="profile-info">
+      <!-- Info central -->
+      <div style="flex:2;display:flex;flex-direction:column;justify-content:center;gap:4px">
         <div class="profile-name" id="profile-name">Cargando...</div>
         <div class="profile-cat" id="profile-cat"></div>
         <div class="profile-zona" id="profile-zona"></div>
       </div>
+      <!-- Foto vehículo -->
+      <div style="flex:1;text-align:center">
+        <div id="foto-vehiculo-wrap" style="width:80px;height:80px;border-radius:12px;border:2px solid rgba(200,134,10,.3);overflow:hidden;background:var(--dark2);display:flex;align-items:center;justify-content:center;margin:0 auto 6px;font-size:28px;cursor:pointer;position:relative" onclick="editFoto('vehiculo')">
+          <span id="foto-vehiculo-emoji">🚗</span>
+          <img id="foto-vehiculo-img" src="" alt="" style="display:none;width:100%;height:100%;object-fit:cover;position:absolute;inset:0">
+          <div style="position:absolute;bottom:0;right:0;width:22px;height:22px;background:var(--gold);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;border:2px solid var(--dark)">📷</div>
+        </div>
+        <div style="font-size:10px;color:var(--text3)">Mi vehículo</div>
+      </div>
     </div>
-    <div class="info-rows" id="info-rows"></div>
+
+    <!-- DATOS DEL CONDUCTOR -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px">
+      <div style="background:rgba(253,246,236,.04);border:1px solid var(--border);border-radius:10px;padding:10px 12px">
+        <div style="font-size:9px;color:var(--text3);font-weight:600;letter-spacing:.06em;text-transform:uppercase;margin-bottom:4px">Cédula</div>
+        <div style="font-size:13px;color:var(--cream);font-weight:500" id="disp-cedula">— — —</div>
+      </div>
+      <div style="background:rgba(253,246,236,.04);border:1px solid var(--border);border-radius:10px;padding:10px 12px">
+        <div style="font-size:9px;color:var(--text3);font-weight:600;letter-spacing:.06em;text-transform:uppercase;margin-bottom:4px">Teléfono</div>
+        <div style="font-size:13px;color:var(--cream);font-weight:500" id="disp-tel">— — —</div>
+      </div>
+      <div style="background:rgba(253,246,236,.04);border:1px solid var(--border);border-radius:10px;padding:10px 12px">
+        <div style="font-size:9px;color:var(--text3);font-weight:600;letter-spacing:.06em;text-transform:uppercase;margin-bottom:4px">Placa vehículo</div>
+        <div style="font-size:14px;color:var(--gold);font-weight:700;letter-spacing:.1em;font-family:'Syne',sans-serif" id="disp-placa">— — —</div>
+      </div>
+      <div style="background:rgba(253,246,236,.04);border:1px solid var(--border);border-radius:10px;padding:10px 12px">
+        <div style="font-size:9px;color:var(--text3);font-weight:600;letter-spacing:.06em;text-transform:uppercase;margin-bottom:4px">Color / Modelo</div>
+        <div style="font-size:12px;color:var(--cream);font-weight:500" id="disp-vehiculo">— — —</div>
+      </div>
+    </div>
+
+    <!-- EDITAR DATOS -->
+    <div id="edit-datos" style="display:none;flex-direction:column;gap:8px;margin-top:4px">
+      <div style="font-size:10px;color:var(--gold);font-weight:600;letter-spacing:.08em;text-transform:uppercase;margin-bottom:4px">✏️ Actualizar mis datos</div>
+      <input type="text" id="f-cedula" placeholder="Número de cédula" style="width:100%;background:rgba(200,134,10,.06);border:1px solid var(--border);border-radius:8px;padding:10px 12px;color:var(--cream);font-size:13px;font-family:'DM Sans',sans-serif;outline:none">
+      <input type="text" id="f-placa" placeholder="Placa del vehículo (ej: ABC123)" style="width:100%;background:rgba(200,134,10,.06);border:1px solid var(--border);border-radius:8px;padding:10px 12px;color:var(--cream);font-size:13px;font-family:'DM Sans',sans-serif;outline:none;text-transform:uppercase" oninput="this.value=this.value.toUpperCase()">
+      <input type="text" id="f-vehiculo-desc" placeholder="Color y modelo (ej: Roja · Honda CB125)" style="width:100%;background:rgba(200,134,10,.06);border:1px solid var(--border);border-radius:8px;padding:10px 12px;color:var(--cream);font-size:13px;font-family:'DM Sans',sans-serif;outline:none">
+      <input type="text" id="f-foto-conductor" placeholder="URL foto conductor (imgBB — Direct link)" style="width:100%;background:rgba(200,134,10,.06);border:1px solid var(--border);border-radius:8px;padding:10px 12px;color:var(--cream);font-size:12px;font-family:'DM Sans',sans-serif;outline:none">
+      <input type="text" id="f-foto-vehiculo" placeholder="URL foto vehículo (imgBB — Direct link)" style="width:100%;background:rgba(200,134,10,.06);border:1px solid var(--border);border-radius:8px;padding:10px 12px;color:var(--cream);font-size:12px;font-family:'DM Sans',sans-serif;outline:none">
+      <button onclick="saveDatos()" style="width:100%;padding:12px;background:linear-gradient(135deg,var(--gold),#9a6507);border:none;border-radius:10px;color:#fff;font-size:13px;font-weight:600;font-family:'DM Sans',sans-serif;cursor:pointer">Guardar datos ✓</button>
+    </div>
+
+    <button onclick="toggleEditDatos()" id="btn-edit-datos" style="width:100%;margin-top:8px;padding:9px;background:transparent;border:1px solid rgba(200,134,10,.25);border-radius:10px;color:var(--text3);font-size:12px;font-family:'DM Sans',sans-serif;cursor:pointer;transition:all .2s">
+      ✏️ Editar mis datos e imágenes
+    </button>
   </div>
 
   <!-- DISPONIBILIDAD -->
@@ -419,27 +477,54 @@ async function init() {
 
 function renderPerfil(d) {
   const cat = CAT_CONFIG[d.category] || {emoji:'🚗', label:'Transporte', color:'#C8860A'};
-  // Avatar
-  document.getElementById('avatar-emoji').textContent = cat.emoji;
-  // Info
+  // Nombre e info básica
   document.getElementById('profile-name').textContent = d.name || 'Sin nombre';
   document.getElementById('profile-cat').textContent = cat.label;
   document.getElementById('profile-zona').textContent = d.sub || d.address || '';
-  // Info rows
-  const rows = [];
-  if (d.phone) rows.push(`<div class="info-row"><span class="info-icon">📞</span><span>${d.phone}</span></div>`);
-  if (d.horario) rows.push(`<div class="info-row"><span class="info-icon">🕐</span><span>${d.horario}</span></div>`);
-  document.getElementById('info-rows').innerHTML = rows.join('');
+  // Foto conductor
+  const addons = d.addons || {};
+  const fotoConductor = addons.foto_conductor || '';
+  const fotoVehiculo = addons.foto_vehiculo || '';
+  if (fotoConductor) {
+    document.getElementById('foto-conductor-img').src = fotoConductor;
+    document.getElementById('foto-conductor-img').style.display = 'block';
+    document.getElementById('foto-conductor-emoji').style.display = 'none';
+  }
+  if (fotoVehiculo) {
+    const emojiCat = cat.emoji || '🚗';
+    document.getElementById('foto-vehiculo-img').src = fotoVehiculo;
+    document.getElementById('foto-vehiculo-img').style.display = 'block';
+    document.getElementById('foto-vehiculo-emoji').style.display = 'none';
+  } else {
+    document.getElementById('foto-vehiculo-emoji').textContent = cat.emoji || '🚗';
+  }
+  // Datos identificación
+  const cedula = addons.cedula || '';
+  const placa = addons.placa || '';
+  const vehiculoDesc = addons.vehiculo_desc || '';
+  // Cédula — mostrar solo últimos 4 dígitos
+  document.getElementById('disp-cedula').textContent = cedula
+    ? '•••• ' + cedula.slice(-4)
+    : '— — —';
+  document.getElementById('disp-tel').textContent = d.phone || '— — —';
+  document.getElementById('disp-placa').textContent = placa || '— — —';
+  document.getElementById('disp-vehiculo').textContent = vehiculoDesc || '— — —';
+  // Precargar campos de edición
+  document.getElementById('f-cedula').value = cedula;
+  document.getElementById('f-placa').value = placa;
+  document.getElementById('f-vehiculo-desc').value = vehiculoDesc;
+  document.getElementById('f-foto-conductor').value = fotoConductor;
+  document.getElementById('f-foto-vehiculo').value = fotoVehiculo;
   // Estado disponibilidad
   disponible = d.disponible === true;
   updateToggleUI();
   // Nota
-  const nota = (d.notas_admin || '').replace(/^\[NOTA_TURISTA\]/, '').trim();
+  const nota = d.notas_admin || '';
   document.getElementById('nota-input').value = nota;
   updateNotaChars();
-  // Horario en campos
+  // Horario
   if (d.horario) {
-    const match = d.horario.match(/(\d{1,2}:\d{2})\s*[–-]\s*(\d{1,2}:\d{2})/);
+    const match = d.horario.match(/(\d{1,2}:\d{2})\s*[–\-]\s*(\d{1,2}:\d{2})/);
     if (match) {
       document.getElementById('h-inicio-m').value = to24(match[1]);
       document.getElementById('h-fin-m').value = to24(match[2]);
@@ -447,10 +532,64 @@ function renderPerfil(d) {
   }
   // Stats
   document.getElementById('stat-vistas').textContent = d.vistas || 0;
-  // Días activo (desde created_at)
   if (d.created_at) {
     const dias = Math.floor((Date.now() - new Date(d.created_at)) / 86400000);
     document.getElementById('stat-dias').textContent = dias;
+  }
+}
+
+function toggleEditDatos() {
+  const ed = document.getElementById('edit-datos');
+  const btn = document.getElementById('btn-edit-datos');
+  const showing = ed.style.display === 'flex';
+  ed.style.display = showing ? 'none' : 'flex';
+  btn.textContent = showing ? '✏️ Editar mis datos e imágenes' : '✕ Cancelar edición';
+}
+
+function editFoto(tipo) {
+  const field = tipo === 'conductor' ? 'f-foto-conductor' : 'f-foto-vehiculo';
+  document.getElementById('edit-datos').style.display = 'flex';
+  document.getElementById('btn-edit-datos').textContent = '✕ Cancelar edición';
+  document.getElementById(field).focus();
+  showToast('Pega el Direct Link de imgBB en el campo de ' + (tipo === 'conductor' ? 'foto conductor' : 'foto vehículo'));
+}
+
+async function saveDatos() {
+  const cedula = document.getElementById('f-cedula').value.trim();
+  const placa = document.getElementById('f-placa').value.trim().toUpperCase();
+  const vehiculoDesc = document.getElementById('f-vehiculo-desc').value.trim();
+  const fotoConductor = document.getElementById('f-foto-conductor').value.trim();
+  const fotoVehiculo = document.getElementById('f-foto-vehiculo').value.trim();
+
+  const addons = {
+    cedula, placa, vehiculo_desc: vehiculoDesc,
+    foto_conductor: fotoConductor, foto_vehiculo: fotoVehiculo
+  };
+
+  try {
+    await _sb.from('businesses').update({
+      addons: addons,
+      updated_at: new Date().toISOString()
+    }).eq('id', conductorId);
+
+    // Actualizar visualización
+    document.getElementById('disp-cedula').textContent = cedula ? '•••• ' + cedula.slice(-4) : '— — —';
+    document.getElementById('disp-placa').textContent = placa || '— — —';
+    document.getElementById('disp-vehiculo').textContent = vehiculoDesc || '— — —';
+    if (fotoConductor) {
+      document.getElementById('foto-conductor-img').src = fotoConductor;
+      document.getElementById('foto-conductor-img').style.display = 'block';
+      document.getElementById('foto-conductor-emoji').style.display = 'none';
+    }
+    if (fotoVehiculo) {
+      document.getElementById('foto-vehiculo-img').src = fotoVehiculo;
+      document.getElementById('foto-vehiculo-img').style.display = 'block';
+      document.getElementById('foto-vehiculo-emoji').style.display = 'none';
+    }
+    toggleEditDatos();
+    showToast('✅ Datos guardados correctamente');
+  } catch(e) {
+    showToast('❌ Error al guardar. Intenta de nuevo.');
   }
 }
 

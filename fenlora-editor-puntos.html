@@ -282,15 +282,14 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Instru
     </div>
     <div class="filter-row" id="filter-row">
       <div class="filter-chip on" data-cat="todos" onclick="toggleFilter(this)">Todos</div>
-      <div class="filter-chip" data-cat="hotel" onclick="toggleFilter(this)">Hoteles</div>
-      <div class="filter-chip" data-cat="finca" onclick="toggleFilter(this)">Fincas</div>
-      <div class="filter-chip" data-cat="rest" onclick="toggleFilter(this)">Restaurantes</div>
-      <div class="filter-chip" data-cat="bar" onclick="toggleFilter(this)">Bares</div>
-      <div class="filter-chip" data-cat="agencia" onclick="toggleFilter(this)">Agencias</div>
-      <div class="filter-chip" data-cat="trans" onclick="toggleFilter(this)">Transporte</div>
-      <div class="filter-chip" data-cat="hist" onclick="toggleFilter(this)">Histórico</div>
-      <div class="filter-chip" data-cat="pub" onclick="toggleFilter(this)">Entidades</div>
-      <div class="filter-chip" data-cat="serv" onclick="toggleFilter(this)">Servicios</div>
+      <div class="filter-chip" data-cat="gastronomia" onclick="toggleFilter(this)">Gastronomía</div>
+      <div class="filter-chip" data-cat="alojamiento" onclick="toggleFilter(this)">Alojamiento</div>
+      <div class="filter-chip" data-cat="transporte" onclick="toggleFilter(this)">Transporte</div>
+      <div class="filter-chip" data-cat="comercio" onclick="toggleFilter(this)">Comercio</div>
+      <div class="filter-chip" data-cat="nocturna" onclick="toggleFilter(this)">Nocturna</div>
+      <div class="filter-chip" data-cat="turismo" onclick="toggleFilter(this)">Turismo</div>
+      <div class="filter-chip" data-cat="salud" onclick="toggleFilter(this)">Salud</div>
+      <div class="filter-chip" data-cat="historico" onclick="toggleFilter(this)">Histórico</div>
     </div>
   </div>
   <div class="list-stats">
@@ -762,7 +761,16 @@ async function loadFromSupabase() {
 function renderList() {
   const body = document.getElementById('list-body');
   let filtered = points.filter(p => {
-    const matchCat = activeFilter === 'todos' || p.cat === activeFilter;
+    const catData = CAT_META[p.cat];
+    const grupo = catData ? (catData.grupo || '').toLowerCase() : '';
+    // Mapear nombre de grupo a clave de filtro
+    const grupoKey = {
+      'gastronomía':'gastronomia','alojamiento':'alojamiento',
+      'transporte':'transporte','comercio':'comercio',
+      'nocturna':'nocturna','turismo':'turismo',
+      'salud':'salud','histórico':'historico','servicios':'servicio'
+    }[grupo] || grupo;
+    const matchCat = activeFilter === 'todos' || grupoKey === activeFilter;
     const matchQ = !searchQuery || p.nombre.toLowerCase().includes(searchQuery) || (p.sub||'').toLowerCase().includes(searchQuery);
     return matchCat && matchQ;
   });
@@ -803,7 +811,7 @@ function filterList(q) {
 function toggleFilter(el) {
   document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('on'));
   el.classList.add('on');
-  activeFilter = el.dataset.cat;
+  activeFilter = el.dataset.cat; // ahora es el grupo o 'todos'
   renderList();
 }
 

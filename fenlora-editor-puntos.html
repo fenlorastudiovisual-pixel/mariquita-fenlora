@@ -400,7 +400,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Instru
       <div class="form-section" id="section-conductor" style="display:none">
         <div class="form-section-title">🚗 Datos del conductor y vehículo</div>
         <div style="font-size:11.5px;color:var(--text3);margin-bottom:12px;line-height:1.6;background:var(--bg3);border-radius:8px;padding:10px 12px;border:1px solid var(--border)">
-          💡 Estos datos aparecen en el panel personal del conductor. Las fotos deben ser URLs de <strong style="color:var(--gold)">imgBB.com → Direct link</strong>.
+          💡 Estos datos aparecen en el panel personal del conductor y en el mapa para el turista. Las fotos deben ser URLs de <strong style="color:var(--gold)">imgBB.com → Direct link</strong>.
         </div>
         <div class="field-row col2">
           <div class="field">
@@ -416,16 +416,31 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Instru
           <label>Color y modelo del vehículo</label>
           <input type="text" id="f-vehiculo-desc" placeholder="ej. Roja · Honda CB125 2022">
         </div>
-        <div class="field">
-          <label>URL foto del conductor (imgBB Direct link)</label>
-          <input type="text" id="f-foto-conductor-url" placeholder="https://i.ibb.co/...">
+
+        <!-- Fotos con preview lado a lado -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:8px">
+          <div class="field">
+            <label>Foto del conductor</label>
+            <input type="text" id="f-foto-conductor-url" placeholder="https://i.ibb.co/..."
+              oninput="previewConductorImg(this.value,'prev-conductor')">
+            <div style="margin-top:8px;width:100%;aspect-ratio:1;border-radius:12px;border:2px dashed var(--border2);overflow:hidden;background:var(--bg3);display:flex;align-items:center;justify-content:center;font-size:28px" id="prev-conductor-wrap">
+              <img id="prev-conductor" src="" alt="" style="display:none;width:100%;height:100%;object-fit:cover">
+              <span id="prev-conductor-icon">👤</span>
+            </div>
+          </div>
+          <div class="field">
+            <label>Foto del vehículo</label>
+            <input type="text" id="f-foto-vehiculo-url" placeholder="https://i.ibb.co/..."
+              oninput="previewConductorImg(this.value,'prev-vehiculo')">
+            <div style="margin-top:8px;width:100%;aspect-ratio:1;border-radius:12px;border:2px dashed var(--border2);overflow:hidden;background:var(--bg3);display:flex;align-items:center;justify-content:center;font-size:28px" id="prev-vehiculo-wrap">
+              <img id="prev-vehiculo" src="" alt="" style="display:none;width:100%;height:100%;object-fit:cover">
+              <span id="prev-vehiculo-icon">🚗</span>
+            </div>
+          </div>
         </div>
-        <div class="field">
-          <label>URL foto del vehículo (imgBB Direct link)</label>
-          <input type="text" id="f-foto-vehiculo-url" placeholder="https://i.ibb.co/...">
-        </div>
-        <div style="font-size:11px;color:var(--text3);margin-top:4px;line-height:1.6">
-          🔒 La cédula se muestra solo con los últimos 4 dígitos en el panel público del conductor.
+
+        <div style="font-size:11px;color:var(--text3);margin-top:8px;line-height:1.6">
+          🔒 Estos datos solo pueden ser modificados por el admin de Fenlora. El conductor no puede editarlos desde su panel.
         </div>
       </div>
 
@@ -917,8 +932,16 @@ function loadEditor(p) {
   if (document.getElementById('f-cedula')) document.getElementById('f-cedula').value = addons.cedula || '';
   if (document.getElementById('f-placa')) document.getElementById('f-placa').value = addons.placa || '';
   if (document.getElementById('f-vehiculo-desc')) document.getElementById('f-vehiculo-desc').value = addons.vehiculo_desc || '';
-  if (document.getElementById('f-foto-conductor-url')) document.getElementById('f-foto-conductor-url').value = addons.foto_conductor || '';
-  if (document.getElementById('f-foto-vehiculo-url')) document.getElementById('f-foto-vehiculo-url').value = addons.foto_vehiculo || '';
+  if (document.getElementById('f-foto-conductor-url')) {
+    const fc = addons.foto_conductor || '';
+    document.getElementById('f-foto-conductor-url').value = fc;
+    previewConductorImg(fc, 'prev-conductor');
+  }
+  if (document.getElementById('f-foto-vehiculo-url')) {
+    const fv = addons.foto_vehiculo || '';
+    document.getElementById('f-foto-vehiculo-url').value = fv;
+    previewConductorImg(fv, 'prev-vehiculo');
+  }
 
   // Menu toggle
   const menuTog = document.getElementById('menu-toggle');
@@ -1070,7 +1093,20 @@ function closeAddPhoto() {
   prev.src = '';
 }
 
-function previewNewPhoto(url) {
+function previewConductorImg(url, imgId) {
+  const img = document.getElementById(imgId);
+  const icon = document.getElementById(imgId + '-icon');
+  if (!img) return;
+  if (url && url.startsWith('http')) {
+    img.src = url;
+    img.style.display = 'block';
+    if (icon) icon.style.display = 'none';
+    img.onerror = () => { img.style.display = 'none'; if (icon) icon.style.display = 'block'; };
+  } else {
+    img.style.display = 'none';
+    if (icon) icon.style.display = 'block';
+  }
+}
   const prev = document.getElementById('photo-preview-mini');
   if (url.startsWith('http')) {
     prev.src = url;

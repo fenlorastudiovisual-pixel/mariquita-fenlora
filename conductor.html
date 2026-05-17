@@ -301,6 +301,35 @@ html,body{height:100%;overflow-x:hidden;font-family:'DM Sans',sans-serif;backgro
     </div>
   </div>
 
+  <!-- EDICIÓN DE DATOS (oculto por defecto) -->
+  <div style="margin:12px 20px 0">
+    <button id="btn-edit-datos" onclick="toggleEditDatos()" style="width:100%;padding:10px;background:rgba(200,134,10,.08);border:1px solid var(--border);border-radius:10px;color:var(--gold);font-size:12px;font-weight:600;font-family:'DM Sans',sans-serif;cursor:pointer;transition:all .2s">✏️ Editar mis datos e imágenes</button>
+  </div>
+  <div id="edit-datos" style="display:none;flex-direction:column;gap:10px;margin:10px 20px 0;background:rgba(253,246,236,.04);border:1px solid var(--border);border-radius:14px;padding:16px">
+    <div style="font-size:10px;color:var(--gold);font-weight:700;text-transform:uppercase;letter-spacing:.08em;margin-bottom:2px">✏️ Editar información</div>
+    <div>
+      <label style="font-size:10px;color:var(--text3);display:block;margin-bottom:4px">Cédula</label>
+      <input id="f-cedula" type="text" placeholder="Número de cédula" style="width:100%;background:rgba(200,134,10,.06);border:1px solid var(--border);border-radius:8px;padding:8px 10px;color:var(--cream);font-size:13px;font-family:'DM Sans',sans-serif;outline:none">
+    </div>
+    <div>
+      <label style="font-size:10px;color:var(--text3);display:block;margin-bottom:4px">Placa del vehículo</label>
+      <input id="f-placa" type="text" placeholder="Ej: ABC123" style="width:100%;background:rgba(200,134,10,.06);border:1px solid var(--border);border-radius:8px;padding:8px 10px;color:var(--cream);font-size:13px;font-family:'DM Sans',sans-serif;outline:none;text-transform:uppercase">
+    </div>
+    <div>
+      <label style="font-size:10px;color:var(--text3);display:block;margin-bottom:4px">Color / Modelo del vehículo</label>
+      <input id="f-vehiculo-desc" type="text" placeholder="Ej: Chevrolet Spark rojo 2019" style="width:100%;background:rgba(200,134,10,.06);border:1px solid var(--border);border-radius:8px;padding:8px 10px;color:var(--cream);font-size:13px;font-family:'DM Sans',sans-serif;outline:none">
+    </div>
+    <div>
+      <label style="font-size:10px;color:var(--text3);display:block;margin-bottom:4px">Foto conductor (URL imgBB)</label>
+      <input id="f-foto-conductor" type="url" placeholder="https://i.ibb.co/..." style="width:100%;background:rgba(200,134,10,.06);border:1px solid var(--border);border-radius:8px;padding:8px 10px;color:var(--cream);font-size:12px;font-family:'DM Sans',sans-serif;outline:none">
+    </div>
+    <div>
+      <label style="font-size:10px;color:var(--text3);display:block;margin-bottom:4px">Foto vehículo (URL imgBB)</label>
+      <input id="f-foto-vehiculo" type="url" placeholder="https://i.ibb.co/..." style="width:100%;background:rgba(200,134,10,.06);border:1px solid var(--border);border-radius:8px;padding:8px 10px;color:var(--cream);font-size:12px;font-family:'DM Sans',sans-serif;outline:none">
+    </div>
+    <button onclick="saveDatos()" style="width:100%;padding:12px;background:linear-gradient(135deg,var(--gold),#9a6507);border:none;border-radius:10px;color:#fff;font-size:13px;font-weight:700;font-family:'DM Sans',sans-serif;cursor:pointer">Guardar cambios ✓</button>
+  </div>
+
   <!-- DISPONIBILIDAD -->
   <div class="avail-section">
     <div class="avail-label"><span class="ping" id="ping-dot" style="display:none"></span>Estado actual</div>

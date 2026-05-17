@@ -925,12 +925,9 @@ function loadEditor(p) {
 
   // Sección conductor — mostrar si es transporte
   const transCats = ['taxi','moto','chiva','alqmoto','alqbici','vereda','fletero'];
-  const isTransporte = transCats.includes(p.cat);
+  const transCats2 = ['taxi','moto','chiva','alqmoto','alqbici','vereda','fletero'];
   const secCond = document.getElementById('section-conductor');
-  if (secCond) secCond.style.display = isTransporte ? 'block' : 'none';
-  // Pestaña Fotos — oculta para transporte
-  const tabFotosBtn = document.querySelector('.etab[onclick="showTab(\'fotos\')"]');
-  if (tabFotosBtn) tabFotosBtn.style.display = isTransporte ? 'none' : '';
+  if (secCond) secCond.style.display = transCats2.includes(p.cat) ? 'block' : 'none';
   // Cargar datos conductor desde addons
   const addons = p.addons || {};
   if (document.getElementById('f-cedula')) document.getElementById('f-cedula').value = addons.cedula || '';
@@ -1015,17 +1012,9 @@ function selectCat(cat, el) {
   if (selected) selected.cat = cat;
   // Mostrar sección conductor si es transporte
   const transCats = ['taxi','moto','chiva','alqmoto','alqbici','vereda','fletero'];
-  const isTransporte = transCats.includes(cat);
+  const transCats = ['taxi','moto','chiva','alqmoto','alqbici','vereda','fletero'];
   const sec = document.getElementById('section-conductor');
-  if (sec) sec.style.display = isTransporte ? 'block' : 'none';
-  // Pestaña Fotos — oculta para transporte, visible para resto
-  const tabFotosBtn = document.querySelector('.etab[onclick="showTab(\'fotos\')"]');
-  if (tabFotosBtn) {
-    tabFotosBtn.style.display = isTransporte ? 'none' : '';
-    if (isTransporte && document.getElementById('tab-fotos') && document.getElementById('tab-fotos').style.display === 'block') {
-      showTab('info');
-    }
-  }
+  if (sec) sec.style.display = transCats.includes(cat) ? 'block' : 'none';
 }
 
 // ═══════════════════════════════════════════════

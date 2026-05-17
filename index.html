@@ -46,6 +46,10 @@ html,body{width:100%;height:100%;overflow:hidden;font-family:DM Sans,sans-serif;
 .fb[data-c="serv"].on{border-color:var(--serv);background:rgba(46,134,171,.2)}
 .fb[data-c="todos"].on{border-color:var(--gold);background:rgba(200,134,10,.15)}
 .fb:hover{background:rgba(255,255,255,.1)}
+/* Subcategorías transporte */
+.sb{display:inline-flex;align-items:center;padding:5px 11px;border-radius:16px;font-size:11px;font-weight:500;border:1.5px solid rgba(212,172,13,.25);background:rgba(255,255,255,.05);color:rgba(253,246,236,.55);cursor:pointer;white-space:nowrap;transition:all .2s}
+.sb.on{border-color:#D4AC0D;color:#D4AC0D;background:rgba(212,172,13,.15)}
+.sb:hover{background:rgba(212,172,13,.1);color:rgba(253,246,236,.85)}
 /* Botón rutas */
 #btn-rutas{margin-left:4px;flex-shrink:0;display:flex;align-items:center;gap:5px;padding:4px 10px;border-radius:20px;background:rgba(200,134,10,.12);border:1px solid rgba(200,134,10,.35);color:var(--gold);font-size:10px;font-weight:500;cursor:pointer;transition:background .2s;white-space:nowrap}
 #btn-rutas:hover{background:rgba(200,134,10,.25)}
@@ -356,16 +360,15 @@ html,body{width:100%;height:100%;overflow:hidden;font-family:DM Sans,sans-serif;
     <h1 data-i18n="brand">Ruta del Mangostino<span data-i18n="brand-sub">San Sebastián de Mariquita · Tolima</span></h1>
   </div>
   <div id="filters">
-    <button class="fb on" data-c="todos"><div class="d" style="background:var(--gold)"></div><span data-i18n="f-todos">Todos</span></button>
-    <button class="fb on" data-c="hotel"><div class="d" style="background:var(--hotel)"></div><span data-i18n="f-hotel">Hoteles</span></button>
-    <button class="fb on" data-c="finca"><div class="d" style="background:var(--finca)"></div><span data-i18n="f-finca">Fincas</span></button>
-    <button class="fb on" data-c="rest"><div class="d" style="background:var(--rest)"></div><span data-i18n="f-rest">Restaurantes</span></button>
-    <button class="fb on" data-c="bar"><div class="d" style="background:var(--bar)"></div><span data-i18n="f-bar">Bares</span></button>
-    <button class="fb on" data-c="agencia"><div class="d" style="background:var(--agencia)"></div><span data-i18n="f-agencia">Agencias</span></button>
-    <button class="fb on" data-c="trans"><div class="d" style="background:var(--trans)"></div><span data-i18n="f-trans">Transporte</span></button>
-    <button class="fb on" data-c="hist"><div class="d" style="background:var(--hist)"></div><span data-i18n="f-hist">Histórico</span></button>
-    <button class="fb on" data-c="pub"><div class="d" style="background:var(--pub)"></div><span data-i18n="f-pub">Entidades</span></button>
-    <button class="fb on" data-c="serv"><div class="d" style="background:var(--serv)"></div><span data-i18n="f-serv">Servicios</span></button>
+    <button class="fb on" data-g="todos"><div class="d" style="background:#888"></div><span>Todos</span></button>
+    <button class="fb on" data-g="gastronomia"><div class="d" style="background:#C0392B"></div><span>Gastronomía</span></button>
+    <button class="fb on" data-g="alojamiento"><div class="d" style="background:#1565C0"></div><span>Alojamiento</span></button>
+    <button class="fb on" data-g="transporte" id="fb-transporte"><div class="d" style="background:#D4AC0D"></div><span>Transporte ▾</span></button>
+    <button class="fb on" data-g="comercio"><div class="d" style="background:#8E44AD"></div><span>Comercio</span></button>
+    <button class="fb on" data-g="historico"><div class="d" style="background:#C8860A"></div><span>Histórico</span></button>
+    <button class="fb on" data-g="turismo"><div class="d" style="background:#D4580A"></div><span>Turismo</span></button>
+    <button class="fb on" data-g="nocturna"><div class="d" style="background:#6C3483"></div><span>Nocturna</span></button>
+    <button class="fb on" data-g="salud"><div class="d" style="background:#E74C3C"></div><span>Salud</span></button>
   </div>
   <button id="btn-rutas" onclick="toggleRoutes()">🧭 <span data-i18n="routes-btn">Rutas</span></button>
   <button id="btn-lang" onclick="toggleLang()">ES · EN</button>
@@ -381,6 +384,16 @@ html,body{width:100%;height:100%;overflow:hidden;font-family:DM Sans,sans-serif;
     <div class="pulse"></div><span>Fenlora</span>
   </a>
 </header>
+
+<!-- DROPDOWN TRANSPORTE (flotante bajo el botón) -->
+<div id="trans-dropdown" style="
+  display:none;position:fixed;top:58px;left:50%;transform:translateX(-50%);
+  z-index:999;background:#1a1206;border:1px solid rgba(212,172,13,.4);
+  border-radius:12px;padding:10px 12px;box-shadow:0 8px 24px rgba(0,0,0,.5);
+  max-width:340px;width:90%">
+  <div style="font-size:9px;color:rgba(212,172,13,.6);font-weight:600;letter-spacing:.5px;text-transform:uppercase;margin-bottom:8px">Subcategorías de transporte</div>
+  <div id="trans-subbar" style="display:flex;gap:6px;flex-wrap:wrap"></div>
+</div>
 
 <!-- MAPA -->
 <div id="map"></div>
@@ -609,19 +622,70 @@ function toggleLang(){
 }
 
 // ═══════════════════════════════════════════════
-// CATEGORÍAS
+// CATEGORÍAS EXPANDIDAS
 // ═══════════════════════════════════════════════
 const CAT={
-  hotel:{color:"#1565C0",label:"Hotel / Alojamiento",emoji:"🏨"},
-  finca:{color:"#1A7A4A",label:"Finca / Agroturismo",emoji:"🌿"},
-  rest: {color:"#C0392B",label:"Restaurante / Café",emoji:"🍽️"},
-  bar:  {color:"#6C3483",label:"Bar / Gastrobar",emoji:"🍺"},
-  agencia:{color:"#D4580A",label:"Agencia de viajes",emoji:"✈️"},
-  trans:{color:"#0D7377",label:"Transporte",emoji:"🚌"},
-  hist: {color:"#C8860A",label:"Punto histórico",emoji:"🏛️"},
-  pub:  {color:"#C62828",label:"Entidad pública",emoji:"🏢"},
-  serv: {color:"#2E86AB",label:"Servicio turístico",emoji:"🧭"},
+  // Gastronomía
+  rest:    {color:"#C0392B",label:"Restaurante / Fonda",    emoji:"🍽️", grupo:"gastronomia"},
+  fritanga:{color:"#E74C3C",label:"Fritanga / Asadero",     emoji:"🍖", grupo:"gastronomia"},
+  tipico:  {color:"#D44B3A",label:"Comida típica",          emoji:"🥘", grupo:"gastronomia"},
+  cafe:    {color:"#A04000",label:"Cafetería / Panadería",  emoji:"☕", grupo:"gastronomia"},
+  helado:  {color:"#F4A460",label:"Heladería / Postres",    emoji:"🍦", grupo:"gastronomia"},
+  jugo:    {color:"#E67E22",label:"Jugos / Cholados",       emoji:"🥤", grupo:"gastronomia"},
+  // Alojamiento
+  hotel:   {color:"#1565C0",label:"Hotel / Hostal",         emoji:"🏨", grupo:"alojamiento"},
+  finca:   {color:"#1A7A4A",label:"Finca ecoturística",     emoji:"🌿", grupo:"alojamiento"},
+  airbnb:  {color:"#FF5A5F",label:"Casa / Apartamento",     emoji:"🏠", grupo:"alojamiento"},
+  // Transporte (con subcategorías)
+  taxi:    {color:"#F1C40F",label:"Taxi local",             emoji:"🚕", grupo:"transporte"},
+  moto:    {color:"#E5A800",label:"Mototransporte",         emoji:"🏍️", grupo:"transporte"},
+  chiva:   {color:"#D4AC0D",label:"Chiva turística",        emoji:"🚌", grupo:"transporte"},
+  alqmoto: {color:"#B8860B",label:"Alquiler de motos",      emoji:"🛵", grupo:"transporte"},
+  alqbici: {color:"#A0820A",label:"Alquiler de bicicletas", emoji:"🚲", grupo:"transporte"},
+  vereda:  {color:"#8B6914",label:"Transporte a veredas",   emoji:"🛻", grupo:"transporte"},
+  fletero: {color:"#7A5C10",label:"Fleteros",               emoji:"📦", grupo:"transporte"},
+  // Comercio local
+  licorera:{color:"#8E44AD",label:"Licorera / Depósito",   emoji:"🍾", grupo:"comercio"},
+  salsamen:{color:"#7D3C98",label:"Salsamentaría",          emoji:"🥩", grupo:"comercio"},
+  tienda:  {color:"#6C3483",label:"Tienda / Mini-market",   emoji:"🛒", grupo:"comercio"},
+  panaderia:{color:"#F39C12",label:"Panadería artesanal",   emoji:"🥖", grupo:"comercio"},
+  fruteria:{color:"#27AE60",label:"Frutería / Granero",     emoji:"🍎", grupo:"comercio"},
+  // Vida nocturna
+  bar:     {color:"#6C3483",label:"Bar / Gastrobar",        emoji:"🍺", grupo:"nocturna"},
+  disco:   {color:"#9B59B6",label:"Discoteca / Eventos",    emoji:"🎶", grupo:"nocturna"},
+  // Turismo activo
+  agencia: {color:"#D4580A",label:"Agencia de viajes",      emoji:"✈️", grupo:"turismo"},
+  guia:    {color:"#E67E22",label:"Guía turístico",         emoji:"🧭", grupo:"turismo"},
+  aventura:{color:"#CA6F1E",label:"Aventura / Senderismo",  emoji:"🧗", grupo:"turismo"},
+  pesca:   {color:"#1A5276",label:"Pesca deportiva",        emoji:"🎣", grupo:"turismo"},
+  // Salud y bienestar
+  farmacia:{color:"#E74C3C",label:"Droguería / Farmacia",   emoji:"💊", grupo:"salud"},
+  medico:  {color:"#C0392B",label:"Médico / Clínica",       emoji:"🏥", grupo:"salud"},
+  spa:     {color:"#76D7C4",label:"Spa / Masajes",          emoji:"💆", grupo:"salud"},
+  barber:  {color:"#1ABC9C",label:"Peluquería / Barbería",  emoji:"✂️", grupo:"salud"},
+  // Histórico y cultural
+  hist:    {color:"#C8860A",label:"Punto histórico",        emoji:"🏛️", grupo:"historico"},
+  iglesia: {color:"#B7770D",label:"Iglesia / Capilla",      emoji:"⛪", grupo:"historico"},
+  pub:     {color:"#C62828",label:"Entidad pública",        emoji:"🏢", grupo:"historico"},
+  // Servicios
+  serv:    {color:"#2E86AB",label:"Servicio turístico",     emoji:"🔧", grupo:"servicio"},
 };
+
+// Grupos de categorías para la barra de filtros
+const GRUPOS={
+  todos:      {label:"Todos",           emoji:"🗺️",  color:"#888"},
+  gastronomia:{label:"Gastronomía",     emoji:"🍽️",  color:"#C0392B"},
+  alojamiento:{label:"Alojamiento",     emoji:"🏨",  color:"#1565C0"},
+  transporte: {label:"Transporte",      emoji:"🚗",  color:"#D4AC0D"},
+  comercio:   {label:"Comercio local",  emoji:"🛒",  color:"#8E44AD"},
+  nocturna:   {label:"Vida nocturna",   emoji:"🍾",  color:"#6C3483"},
+  turismo:    {label:"Turismo activo",  emoji:"🧭",  color:"#D4580A"},
+  salud:      {label:"Salud",           emoji:"💊",  color:"#E74C3C"},
+  historico:  {label:"Histórico",       emoji:"🏛️",  color:"#C8860A"},
+};
+
+// Subcategorías del grupo transporte
+const SUBCATS_TRANS=['todos','taxi','moto','chiva','alqmoto','alqbici','vereda','fletero'];
 
 // ═══════════════════════════════════════════════
 // MENÚS DIGITALES
@@ -802,9 +866,11 @@ const markers=[];
 let active=new Set(Object.keys(CAT));
 let routeLayer=null, routeLineLayer=null;
 let activeRoute=null, activeStopIdx=0;
+let activeGrupos=new Set(Object.keys(GRUPOS));
+let activeTrans='todos';
 
 function makeIcon(p){
-  const c=CAT[p.cat];
+  const c=CAT[p.cat]||{color:'#888',emoji:'📍'};
   const img=p.fotos[0]?.url;
   const html=img
     ?`<div class="mpin" style="background:${c.color}"><img src="${img}" loading="lazy" alt=""/></div>`
@@ -827,24 +893,64 @@ setTimeout(function() {
 function updateCount(){
   let v=0;
   markers.forEach(m=>{
-    if(active.has(m.cat)&&!activeRoute){m.mk.addTo(map);v++;}
+    const catData=CAT[m.cat];
+    const grupo=catData?catData.grupo:'servicio';
+    // Verificar si el grupo está activo
+    let show=activeGrupos.has(grupo)||activeGrupos.has('todos');
+    // Filtro adicional de subcategoría transporte
+    if(grupo==='transporte'&&activeTrans!=='todos') show=show&&(m.cat===activeTrans);
+    if(show&&!activeRoute){m.mk.addTo(map);v++;}
     else if(!activeRoute){map.removeLayer(m.mk);}
   });
   if(!activeRoute) document.getElementById('cnum').textContent=v;
 }
 
-document.querySelectorAll('.fb').forEach(btn=>{
+// Subcategorías transporte
+function buildTransSubbar(){
+  const bar=document.getElementById('trans-subbar');
+  if(!bar) return;
+  const labels={todos:'Todos',taxi:'Taxis',moto:'Mototransporte',
+    chiva:'Chivas',alqmoto:'Alquiler motos',alqbici:'Alquiler bicicletas',
+    vereda:'A veredas',fletero:'Fleteros'};
+  bar.innerHTML=Object.entries(labels).map(([k,l])=>
+    `<button class="sb${k===activeTrans?' on':''}" onclick="setTransSub('${k}')">${l}</button>`
+  ).join('');
+}
+function setTransSub(sub){
+  activeTrans=sub;
+  buildTransSubbar();
+  updateCount();
+}
+buildTransSubbar();
+
+// Cerrar dropdown transporte al hacer clic fuera
+document.addEventListener('click', function(e){
+  const dropdown=document.getElementById('trans-dropdown');
+  const btnTrans=document.getElementById('fb-transporte');
+  if(dropdown && dropdown.style.display!=='none'){
+    if(!dropdown.contains(e.target) && e.target!==btnTrans && !btnTrans.contains(e.target)){
+      dropdown.style.display='none';
+    }
+  }
+});
+
+document.querySelectorAll('.fb[data-g]').forEach(btn=>{
   btn.addEventListener('click',()=>{
-    const c=btn.dataset.c;
-    const allCats=Object.keys(CAT);
-    if(c==='todos'){
-      const allOn=active.size===allCats.length;
-      if(allOn){active.clear();document.querySelectorAll('.fb:not([data-c="todos"])').forEach(b=>b.classList.remove('on'));btn.classList.add('on');}
-      else{active=new Set(allCats);document.querySelectorAll('.fb').forEach(b=>b.classList.add('on'));}
+    const g=btn.dataset.g;
+    if(g==='todos'){
+      const allOn=[...document.querySelectorAll('.fb[data-g]')].every(b=>b.classList.contains('on'));
+      document.querySelectorAll('.fb[data-g]').forEach(b=>b.classList.toggle('on',!allOn));
+      activeGrupos=allOn?new Set():new Set(Object.keys(GRUPOS));
+    } else if(g==='transporte'){
+      // Toggle dropdown en lugar de filtrar
+      const dropdown=document.getElementById('trans-dropdown');
+      if(dropdown) dropdown.style.display=dropdown.style.display==='none'?'block':'none';
+      // También activar/desactivar el grupo
+      btn.classList.toggle('on');
+      if(btn.classList.contains('on')) activeGrupos.add(g); else { activeGrupos.delete(g); if(dropdown) dropdown.style.display='none'; }
     } else {
-      active.has(c)?active.delete(c):active.add(c);
-      btn.classList.toggle('on',active.has(c));
-      document.querySelector('.fb[data-c="todos"]').classList.toggle('on',active.size===allCats.length);
+      btn.classList.toggle('on');
+      if(btn.classList.contains('on')) activeGrupos.add(g); else activeGrupos.delete(g);
     }
     if(!activeRoute) updateCount();
   });
@@ -1243,6 +1349,54 @@ function getMenuKeywords(p){
   return p.menu.items.map(function(it){ return normStr(it.name); });
 }
 
+// Alias de búsqueda por categoría — palabras que el turista usa en la vida real
+const CAT_ALIASES = {
+  // Gastronomía
+  rest:     ['restaurante','comida','almuerzo','cena','plato','fonda','parador','tipico','tolimense'],
+  fritanga: ['fritanga','frito','chicharron','chorizo','morcilla','asado','brasa','parilla','asadero'],
+  tipico:   ['tipico','tolimense','viudo','bocachico','lechona','tamal','mazamorra','sancocho','ajiaco'],
+  cafe:     ['cafe','cafeteria','desayuno','pandebono','pan','bizcocho','achira','panaderia','tinto'],
+  helado:   ['helado','postre','dulce','heladeria','nieve','paleta','cremolada'],
+  jugo:     ['jugo','limonada','cholado','raspado','refrescante','agua'],
+  // Alojamiento
+  hotel:    ['hotel','hostal','habitacion','dormir','hospedaje','alojamiento','cuarto','cama','suite'],
+  finca:    ['finca','agroturismo','campo','mangostino','cultivo','rural','ecoturismo','camping','glamping'],
+  airbnb:   ['airbnb','casa','apartamento','alquiler','arriendo','cabana','cabaña','disponibilidad'],
+  // Transporte
+  taxi:     ['taxi','carro','vehiculo','traslado','llevarme','transporte','cotaxi','cab'],
+  moto:     ['moto','mototaxi','mototransporte','motocarrito','motocicleta','mototaxista'],
+  chiva:    ['chiva','bus','campero','tour','grupos','excursion','ruta','paseo'],
+  alqmoto:  ['alquiler moto','renta moto','moto','motocicleta','alquilar'],
+  alqbici:  ['alquiler bicicleta','bicicleta','bici','cicloturismo','ciclismo'],
+  vereda:   ['vereda','campo','finca','cascada','excursion','transporte rural','llevar'],
+  fletero:  ['flete','mudanza','camion','carga','transporte carga','mercancia'],
+  // Comercio
+  licorera: ['licorera','licor','cerveza','aguardiente','ron','alcohol','deposito','cigarreria','cigarreria'],
+  salsamen: ['salsamentaria','carniceria','carne','embutido','jamon','queso','salchicha'],
+  tienda:   ['tienda','mini market','supermercado','víveres','viveres','abarrotes','negocio'],
+  panaderia:['panaderia','pan','bizcocho','achira','pandebono','almojabana','masato'],
+  fruteria: ['fruta','fruteria','verdura','granero','mercado','plaza','mangostino'],
+  // Nocturna
+  bar:      ['bar','coctel','cocktail','trago','copa','gastrobar','cerveza','whiskey','rum'],
+  disco:    ['discoteca','rumba','bailar','fiesta','club','electronica','vallenato','champeta'],
+  // Turismo
+  agencia:  ['agencia','paquete','tour','excursion','viaje','turismo','paseo'],
+  guia:     ['guia','guia turistico','recorrido','historia','explicacion','visita'],
+  aventura: ['aventura','senderismo','rappel','escalada','cascada','rio','rafting','extremo'],
+  pesca:    ['pesca','pescar','rio','guali','anzuelo','deportiva'],
+  // Salud
+  farmacia: ['farmacia','drogueria','medicamento','pastilla','medicina','drogas','droguería'],
+  medico:   ['medico','doctor','clinica','urgencias','salud','consulta','hospital'],
+  spa:      ['spa','masaje','relajacion','terapia','bienestar','facial','corporal'],
+  barber:   ['peluqueria','barberia','corte','pelo','cabello','barba','estilista'],
+  // Histórico
+  hist:     ['historico','historia','monumento','museo','patrimonio','expedicion','botanica','mutis','colonial'],
+  iglesia:  ['iglesia','capilla','catedral','ermita','religion','misa','colonial'],
+  pub:      ['alcaldia','gobierno','entidad','publica','tramite','turismo','municipio'],
+  // Servicios
+  serv:     ['servicio','informacion','turistica','asistencia'],
+};
+
 function doSearch(q){
   var results = document.getElementById('search-results');
   var q2 = q.trim();
@@ -1259,14 +1413,17 @@ function doSearch(q){
     var catLbl  = normStr(CAT[p.cat] ? CAT[p.cat].label : '');
     var idxKeys = (SEARCH_INDEX[p.id] || []).join(' ');
     var menuKws = getMenuKeywords(p).join(' ');
+    // Alias de categoría
+    var catAliases = (CAT_ALIASES[p.cat] || []).join(' ');
 
     terms.forEach(function(t){
-      if(nombre.indexOf(t)  >= 0) score += 10;
-      if(catLbl.indexOf(t)  >= 0) score += 7;
-      if(idxKeys.indexOf(t) >= 0) score += 6;
-      if(menuKws.indexOf(t) >= 0) score += 5;
-      if(sub.indexOf(t)     >= 0) score += 4;
-      if(desc.indexOf(t)    >= 0) score += 2;
+      if(nombre.indexOf(t)      >= 0) score += 10;
+      if(catLbl.indexOf(t)      >= 0) score += 8;
+      if(catAliases.indexOf(t)  >= 0) score += 7;
+      if(idxKeys.indexOf(t)     >= 0) score += 6;
+      if(menuKws.indexOf(t)     >= 0) score += 5;
+      if(sub.indexOf(t)         >= 0) score += 4;
+      if(desc.indexOf(t)        >= 0) score += 2;
     });
     return {p:p, score:score};
   })
@@ -1275,7 +1432,7 @@ function doSearch(q){
   .slice(0,7);
 
   if(!scored.length){
-    results.innerHTML = '<div style="padding:16px 14px;font-size:12px;color:rgba(253,246,236,.4);text-align:center">Sin resultados para <strong style="color:rgba(253,246,236,.7)">' + q2 + '</strong><br><span style="font-size:10.5px;color:rgba(253,246,236,.3)">Intenta: lechona, piscina, tour, masaje, cascada...</span></div>';
+    results.innerHTML = '<div style="padding:16px 14px;font-size:12px;color:rgba(253,246,236,.4);text-align:center">Sin resultados para <strong style="color:rgba(253,246,236,.7)">' + q2 + '</strong><br><span style="font-size:10.5px;color:rgba(253,246,236,.3)">Intenta: taxi, lechona, masaje, tour, cascada...</span></div>';
     results.classList.add('show');
     return;
   }
@@ -1283,7 +1440,7 @@ function doSearch(q){
   var html2 = '';
   scored.forEach(function(item){
     var p = item.p;
-    var c = CAT[p.cat];
+    var c = CAT[p.cat] || {color:'#888',emoji:'📍',label:'Punto'};
     var idxKeys = SEARCH_INDEX[p.id] || [];
     var menuItems = getMenuKeywords(p);
     var kwn = normStr(q2);
@@ -1307,9 +1464,10 @@ function doSearch(q){
     }
     if(matchedMenu) hint = c.emoji + ' ' + matchedMenu.charAt(0).toUpperCase() + matchedMenu.slice(1);
     else if(matchedKw) hint = c.emoji + ' ' + matchedKw.charAt(0).toUpperCase() + matchedKw.slice(1);
+    else hint = c.emoji + ' ' + c.label;
 
     var thumb = (p.fotos && p.fotos[0]) ? p.fotos[0].url : '';
-    html2 += '<div class="sr-item" onclick="selectSearch(' + p.id + ')">';
+    html2 += '<div class="sr-item" onclick="selectSearch(\'' + p.id + '\')">';
     if(thumb) html2 += '<img class="sr-thumb" src="' + thumb + '" alt="" loading="lazy" style="width:34px;height:34px;border-radius:7px;object-fit:cover;flex-shrink:0">';
     html2 += '<div class="sr-info"><div class="sn">' + p.nombre + '</div>';
     html2 += '<div class="ss" style="color:' + c.color + '">' + hint + '</div></div></div>';
@@ -1320,7 +1478,7 @@ function doSearch(q){
 
 
 function selectSearch(id){
-  const p=PUNTOS.find(x=>x.id===id);
+  const p=PUNTOS.find(x=>String(x.id)===String(id));
   if(!p) return;
   map.setView(p.coords,16,{animate:true});
   openPanel(p);

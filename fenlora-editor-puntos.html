@@ -765,6 +765,7 @@ function pointToSbRow(p) {
     notas_admin: p.notas || '',
     menu: p.menu || {},
     tiene_menu: p.tiene_menu === true,
+    addons: p.addons || {},
     updated_at: new Date().toISOString(),
   };
 }

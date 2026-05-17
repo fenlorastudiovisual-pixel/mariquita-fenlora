@@ -243,42 +243,44 @@ html,body{height:100%;overflow-x:hidden;font-family:'DM Sans',sans-serif;backgro
   <!-- TARJETA DE IDENTIFICACIÓN -->
   <div class="profile-card">
 
-    <!-- BADGE FENLORA -->
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
-      <div style="font-size:10px;color:var(--text3);font-weight:600;letter-spacing:.1em;text-transform:uppercase">Conductor verificado</div>
-      <div style="font-size:10px;color:var(--gold);background:rgba(200,134,10,.12);border:1px solid rgba(200,134,10,.2);border-radius:20px;padding:3px 10px;font-weight:600">✓ Fenlora</div>
+    <!-- BADGE -->
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+      <div style="font-size:10px;color:var(--text3);font-weight:600;letter-spacing:.1em;text-transform:uppercase">🪪 Mi identificación Fenlora</div>
+      <div style="font-size:10px;color:var(--gold);background:rgba(200,134,10,.12);border:1px solid rgba(200,134,10,.2);border-radius:20px;padding:3px 10px;font-weight:600">✓ Verificado</div>
     </div>
 
-    <!-- FOTOS CONDUCTOR + VEHÍCULO -->
-    <div style="display:flex;gap:12px;margin-bottom:16px">
+    <!-- FOTOS GRANDES -->
+    <div style="display:flex;gap:10px;margin-bottom:14px">
       <!-- Foto conductor -->
       <div style="flex:1;text-align:center">
-        <div id="foto-conductor-wrap" style="width:80px;height:80px;border-radius:50%;border:3px solid var(--gold);overflow:hidden;background:var(--dark2);display:flex;align-items:center;justify-content:center;margin:0 auto 6px;font-size:32px;cursor:pointer;position:relative" onclick="editFoto('conductor')">
+        <div style="width:100%;aspect-ratio:1;border-radius:16px;border:3px solid var(--gold);overflow:hidden;background:var(--dark2);display:flex;align-items:center;justify-content:center;font-size:44px;position:relative">
           <span id="foto-conductor-emoji">👤</span>
-          <img id="foto-conductor-img" src="" alt="" style="display:none;width:100%;height:100%;object-fit:cover;position:absolute;inset:0">
-          <div style="position:absolute;bottom:0;right:0;width:22px;height:22px;background:var(--gold);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;border:2px solid var(--dark)">📷</div>
+          <img id="foto-conductor-img" src="" alt="Foto conductor" style="display:none;width:100%;height:100%;object-fit:cover;position:absolute;inset:0">
         </div>
-        <div style="font-size:10px;color:var(--text3)">Mi foto</div>
+        <div style="font-size:10px;color:var(--text3);margin-top:5px;font-weight:500">📷 Conductor</div>
       </div>
       <!-- Info central -->
-      <div style="flex:2;display:flex;flex-direction:column;justify-content:center;gap:4px">
-        <div class="profile-name" id="profile-name">Cargando...</div>
+      <div style="flex:1.2;display:flex;flex-direction:column;justify-content:center;gap:6px;padding:4px 0">
+        <div class="profile-name" id="profile-name" style="font-size:17px">Cargando...</div>
         <div class="profile-cat" id="profile-cat"></div>
-        <div class="profile-zona" id="profile-zona"></div>
+        <div class="profile-zona" id="profile-zona" style="font-size:10px"></div>
+        <div style="margin-top:4px;padding:6px 10px;background:rgba(200,134,10,.08);border-radius:8px;border:1px solid rgba(200,134,10,.2)">
+          <div style="font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:2px">Placa</div>
+          <div style="font-size:16px;font-weight:800;color:var(--gold);font-family:'Syne',sans-serif;letter-spacing:.1em" id="disp-placa">— — —</div>
+        </div>
       </div>
       <!-- Foto vehículo -->
       <div style="flex:1;text-align:center">
-        <div id="foto-vehiculo-wrap" style="width:80px;height:80px;border-radius:12px;border:2px solid rgba(200,134,10,.3);overflow:hidden;background:var(--dark2);display:flex;align-items:center;justify-content:center;margin:0 auto 6px;font-size:28px;cursor:pointer;position:relative" onclick="editFoto('vehiculo')">
+        <div style="width:100%;aspect-ratio:1;border-radius:16px;border:2px solid rgba(200,134,10,.3);overflow:hidden;background:var(--dark2);display:flex;align-items:center;justify-content:center;font-size:36px;position:relative">
           <span id="foto-vehiculo-emoji">🚗</span>
-          <img id="foto-vehiculo-img" src="" alt="" style="display:none;width:100%;height:100%;object-fit:cover;position:absolute;inset:0">
-          <div style="position:absolute;bottom:0;right:0;width:22px;height:22px;background:var(--gold);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;border:2px solid var(--dark)">📷</div>
+          <img id="foto-vehiculo-img" src="" alt="Foto vehículo" style="display:none;width:100%;height:100%;object-fit:cover;position:absolute;inset:0">
         </div>
-        <div style="font-size:10px;color:var(--text3)">Mi vehículo</div>
+        <div style="font-size:10px;color:var(--text3);margin-top:5px;font-weight:500">🚗 Vehículo</div>
       </div>
     </div>
 
-    <!-- DATOS DEL CONDUCTOR -->
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px">
+    <!-- DATOS -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
       <div style="background:rgba(253,246,236,.04);border:1px solid var(--border);border-radius:10px;padding:10px 12px">
         <div style="font-size:9px;color:var(--text3);font-weight:600;letter-spacing:.06em;text-transform:uppercase;margin-bottom:4px">Cédula</div>
         <div style="font-size:13px;color:var(--cream);font-weight:500" id="disp-cedula">— — —</div>
@@ -287,30 +289,16 @@ html,body{height:100%;overflow-x:hidden;font-family:'DM Sans',sans-serif;backgro
         <div style="font-size:9px;color:var(--text3);font-weight:600;letter-spacing:.06em;text-transform:uppercase;margin-bottom:4px">Teléfono</div>
         <div style="font-size:13px;color:var(--cream);font-weight:500" id="disp-tel">— — —</div>
       </div>
-      <div style="background:rgba(253,246,236,.04);border:1px solid var(--border);border-radius:10px;padding:10px 12px">
-        <div style="font-size:9px;color:var(--text3);font-weight:600;letter-spacing:.06em;text-transform:uppercase;margin-bottom:4px">Placa vehículo</div>
-        <div style="font-size:14px;color:var(--gold);font-weight:700;letter-spacing:.1em;font-family:'Syne',sans-serif" id="disp-placa">— — —</div>
-      </div>
-      <div style="background:rgba(253,246,236,.04);border:1px solid var(--border);border-radius:10px;padding:10px 12px">
+      <div style="grid-column:1/-1;background:rgba(253,246,236,.04);border:1px solid var(--border);border-radius:10px;padding:10px 12px">
         <div style="font-size:9px;color:var(--text3);font-weight:600;letter-spacing:.06em;text-transform:uppercase;margin-bottom:4px">Color / Modelo</div>
         <div style="font-size:12px;color:var(--cream);font-weight:500" id="disp-vehiculo">— — —</div>
       </div>
     </div>
 
-    <!-- EDITAR DATOS -->
-    <div id="edit-datos" style="display:none;flex-direction:column;gap:8px;margin-top:4px">
-      <div style="font-size:10px;color:var(--gold);font-weight:600;letter-spacing:.08em;text-transform:uppercase;margin-bottom:4px">✏️ Actualizar mis datos</div>
-      <input type="text" id="f-cedula" placeholder="Número de cédula" style="width:100%;background:rgba(200,134,10,.06);border:1px solid var(--border);border-radius:8px;padding:10px 12px;color:var(--cream);font-size:13px;font-family:'DM Sans',sans-serif;outline:none">
-      <input type="text" id="f-placa" placeholder="Placa del vehículo (ej: ABC123)" style="width:100%;background:rgba(200,134,10,.06);border:1px solid var(--border);border-radius:8px;padding:10px 12px;color:var(--cream);font-size:13px;font-family:'DM Sans',sans-serif;outline:none;text-transform:uppercase" oninput="this.value=this.value.toUpperCase()">
-      <input type="text" id="f-vehiculo-desc" placeholder="Color y modelo (ej: Roja · Honda CB125)" style="width:100%;background:rgba(200,134,10,.06);border:1px solid var(--border);border-radius:8px;padding:10px 12px;color:var(--cream);font-size:13px;font-family:'DM Sans',sans-serif;outline:none">
-      <input type="text" id="f-foto-conductor" placeholder="URL foto conductor (imgBB — Direct link)" style="width:100%;background:rgba(200,134,10,.06);border:1px solid var(--border);border-radius:8px;padding:10px 12px;color:var(--cream);font-size:12px;font-family:'DM Sans',sans-serif;outline:none">
-      <input type="text" id="f-foto-vehiculo" placeholder="URL foto vehículo (imgBB — Direct link)" style="width:100%;background:rgba(200,134,10,.06);border:1px solid var(--border);border-radius:8px;padding:10px 12px;color:var(--cream);font-size:12px;font-family:'DM Sans',sans-serif;outline:none">
-      <button onclick="saveDatos()" style="width:100%;padding:12px;background:linear-gradient(135deg,var(--gold),#9a6507);border:none;border-radius:10px;color:#fff;font-size:13px;font-weight:600;font-family:'DM Sans',sans-serif;cursor:pointer">Guardar datos ✓</button>
+    <!-- NOTA SEGURIDAD -->
+    <div style="margin-top:10px;padding:8px 12px;background:rgba(200,134,10,.06);border-radius:8px;font-size:10px;color:var(--text3);line-height:1.5;text-align:center">
+      🔒 Tus datos solo pueden ser modificados por el equipo de Fenlora por razones de seguridad.
     </div>
-
-    <button onclick="toggleEditDatos()" id="btn-edit-datos" style="width:100%;margin-top:8px;padding:9px;background:transparent;border:1px solid rgba(200,134,10,.25);border-radius:10px;color:var(--text3);font-size:12px;font-family:'DM Sans',sans-serif;cursor:pointer;transition:all .2s">
-      ✏️ Editar mis datos e imágenes
-    </button>
   </div>
 
   <!-- DISPONIBILIDAD -->
@@ -367,21 +355,23 @@ html,body{height:100%;overflow-x:hidden;font-family:'DM Sans',sans-serif;backgro
     </div>
   </div>
 
-  <!-- ESTADÍSTICAS -->
+  <!-- INFO ÚTIL -->
   <div class="stats-section">
     <div class="stat-box">
-      <div class="stat-num" id="stat-vistas">0</div>
-      <div class="stat-lbl">Veces visto en el mapa</div>
+      <div class="stat-num" id="stat-dias" style="font-size:22px">0</div>
+      <div class="stat-lbl">Días en Fenlora</div>
     </div>
     <div class="stat-box">
-      <div class="stat-num" id="stat-dias">0</div>
-      <div class="stat-lbl">Días activo en Fenlora</div>
+      <div class="stat-num" id="stat-estado" style="font-size:18px">—</div>
+      <div class="stat-lbl">Estado hoy</div>
     </div>
   </div>
 
-  <!-- DISCLAIMER -->
-  <div class="disclaimer">
-    ⚠️ Fenlora es un directorio informativo. La contratación del servicio es directamente entre el turista y el prestador. Fenlora no es intermediario ni responsable de los servicios prestados.
+  <!-- DISCLAIMER PARA EL CONDUCTOR -->
+  <div class="disclaimer" style="text-align:left">
+    <strong style="color:var(--gold);display:block;margin-bottom:4px">📋 Recuerda:</strong>
+    Este panel es tu identificación oficial en la plataforma Fenlora. Tus datos son visibles para los turistas que te buscan en el mapa.<br><br>
+    Fenlora es un directorio informativo — la contratación del servicio es directamente entre tú y el turista. Fenlora no es intermediario ni responsable de los servicios prestados.
   </div>
 
   <div class="footer">Fenlora Visual Studio · Mariquita, Tolima · 2026</div>
@@ -531,11 +521,11 @@ function renderPerfil(d) {
     }
   }
   // Stats
-  document.getElementById('stat-vistas').textContent = d.vistas || 0;
   if (d.created_at) {
     const dias = Math.floor((Date.now() - new Date(d.created_at)) / 86400000);
     document.getElementById('stat-dias').textContent = dias;
   }
+  document.getElementById('stat-estado').textContent = d.disponible ? '🟢 Activo' : '⚫ Inactivo';
 }
 
 function toggleEditDatos() {

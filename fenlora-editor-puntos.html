@@ -1093,6 +1093,18 @@ function closeAddPhoto() {
   prev.src = '';
 }
 
+function previewNewPhoto(url) {
+  const prev = document.getElementById('photo-preview-mini');
+  if (!prev) return;
+  if (url && url.startsWith('http')) {
+    prev.src = url;
+    prev.style.display = 'block';
+    prev.onerror = () => { prev.style.display = 'none'; };
+  } else {
+    prev.style.display = 'none';
+  }
+}
+
 function previewConductorImg(url, imgId) {
   const img = document.getElementById(imgId);
   const icon = document.getElementById(imgId + '-icon');

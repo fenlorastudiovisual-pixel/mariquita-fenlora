@@ -925,9 +925,8 @@ function loadEditor(p) {
 
   // Sección conductor — mostrar si es transporte
   const transCats = ['taxi','moto','chiva','alqmoto','alqbici','vereda','fletero'];
-  const transCats2 = ['taxi','moto','chiva','alqmoto','alqbici','vereda','fletero'];
   const secCond = document.getElementById('section-conductor');
-  if (secCond) secCond.style.display = transCats2.includes(p.cat) ? 'block' : 'none';
+  if (secCond) secCond.style.display = transCats.includes(p.cat) ? 'block' : 'none';
   // Cargar datos conductor desde addons
   const addons = p.addons || {};
   if (document.getElementById('f-cedula')) document.getElementById('f-cedula').value = addons.cedula || '';
@@ -1011,7 +1010,6 @@ function selectCat(cat, el) {
   el.style.setProperty('--selected-color', c.color);
   if (selected) selected.cat = cat;
   // Mostrar sección conductor si es transporte
-  const transCats = ['taxi','moto','chiva','alqmoto','alqbici','vereda','fletero'];
   const transCats = ['taxi','moto','chiva','alqmoto','alqbici','vereda','fletero'];
   const sec = document.getElementById('section-conductor');
   if (sec) sec.style.display = transCats.includes(cat) ? 'block' : 'none';

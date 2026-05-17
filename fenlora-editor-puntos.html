@@ -421,6 +421,21 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Instru
           <label>Notas internas (solo Fenlora)</label>
           <textarea id="f-notas" rows="2" placeholder="Observaciones del equipo sobre este cliente..."></textarea>
         </div>
+
+        <!-- TOGGLE MENÚ DIGITAL -->
+        <div class="form-section" style="margin-top:8px">
+          <div class="form-section-title">Menú / Carta digital</div>
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 14px;background:var(--bg3);border-radius:10px;border:1px solid var(--border2)">
+            <div>
+              <div style="font-size:13px;font-weight:500;color:var(--text)" id="menu-toggle-label">Sin menú digital</div>
+              <div style="font-size:11px;color:var(--text3);margin-top:2px" id="menu-toggle-sub">Activa para mostrar carta y precios en el mapa</div>
+            </div>
+            <div class="status-toggle" id="menu-toggle" onclick="toggleMenuActivo()" style="flex-shrink:0;margin-left:12px"></div>
+          </div>
+          <div style="font-size:11px;color:var(--text3);margin-top:8px;line-height:1.6">
+            💡 Solo actívalo si el negocio tiene productos o servicios con precio. Los puntos históricos, iglesias y entidades públicas generalmente no necesitan menú.
+          </div>
+        </div>
       </div>
     </div>
 
@@ -692,6 +707,7 @@ function sbRowToPoint(row) {
     plan: row.plan_fenlora || row.plan || 'basic',
     activo: row.is_active !== false,
     notas: row.notas_admin || '',
+    tiene_menu: row.tiene_menu === true,
     menu: row.menu || { cats: ['Platos', 'Bebidas'], items: [], promo: { big: '', sub: '' } },
   };
 }
@@ -715,6 +731,7 @@ function pointToSbRow(p) {
     is_active: p.activo !== false,
     notas_admin: p.notas || '',
     menu: p.menu || {},
+    tiene_menu: p.tiene_menu === true,
     updated_at: new Date().toISOString(),
   };
 }
@@ -857,6 +874,15 @@ function loadEditor(p) {
   document.getElementById('status-sub').textContent = isActive ? 'Los visitantes pueden encontrar este punto' : 'Este punto no aparecerá hasta que se reactive';
   document.getElementById('btn-toggle-status').textContent = isActive ? '⏸ Desactivar' : '▶ Activar';
 
+  // Menu toggle
+  const menuTog = document.getElementById('menu-toggle');
+  const tieneMenu = p.tiene_menu === true;
+  menuTog.classList.toggle('on', tieneMenu);
+  document.getElementById('menu-toggle-label').textContent = tieneMenu ? 'Menú digital activo' : 'Sin menú digital';
+  document.getElementById('menu-toggle-sub').textContent = tieneMenu
+    ? 'Los visitantes verán la carta y precios en el mapa'
+    : 'Activa para mostrar carta y precios en el mapa';
+
   // Category
   document.querySelectorAll('.cat-opt').forEach(opt => {
     opt.classList.toggle('selected', opt.dataset.cat === p.cat);
@@ -926,6 +952,17 @@ function toggleStatusUI() {
   tog.classList.toggle('on', isNowActive);
   document.getElementById('status-label').textContent = isNowActive ? 'Activo — visible en el mapa público' : 'Inactivo — oculto del mapa público';
   document.getElementById('status-sub').textContent = isNowActive ? 'Los visitantes pueden encontrar este punto' : 'Este punto no aparecerá hasta que se reactive';
+}
+
+function toggleMenuActivo() {
+  if (!selected) return;
+  selected.tiene_menu = !selected.tiene_menu;
+  const tog = document.getElementById('menu-toggle');
+  tog.classList.toggle('on', selected.tiene_menu);
+  document.getElementById('menu-toggle-label').textContent = selected.tiene_menu ? 'Menú digital activo' : 'Sin menú digital';
+  document.getElementById('menu-toggle-sub').textContent = selected.tiene_menu
+    ? 'Los visitantes verán la carta y precios en el mapa'
+    : 'Activa para mostrar carta y precios en el mapa';
 }
 
 async function toggleStatus() {

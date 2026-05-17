@@ -448,18 +448,26 @@ async function init() {
     console.log('Data:', data, 'Error:', error);
     if (error || !data) { showError(); return; }
     punto = data;
+    console.log('Punto asignado OK');
     // Verificar autorización — Supabase o localStorage
     const authLocal = localStorage.getItem('fenlora_auth_' + conductorId);
     const authDb = data.autorizado_datos === true;
     autorizado = authDb || !!authLocal;
+    console.log('Autorizado:', autorizado, 'authLocal:', authLocal, 'authDb:', authDb);
     document.getElementById('loading').style.display = 'none';
     if (!autorizado) {
-      // Mostrar pantalla de autorización
+      console.log('Mostrando auth screen');
       document.getElementById('auth-screen').style.display = 'flex';
       document.getElementById('auth-screen').style.flexDirection = 'column';
     } else {
+      console.log('Mostrando app');
       document.getElementById('app').style.display = 'block';
-      renderPerfil(data);
+      try {
+        renderPerfil(data);
+        console.log('renderPerfil OK');
+      } catch(re) {
+        console.error('Error en renderPerfil:', re);
+      }
       suscribirCambios();
     }
   } catch(e) {

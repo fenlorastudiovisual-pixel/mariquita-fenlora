@@ -55,7 +55,30 @@ html,body{height:100%;overflow-x:hidden;font-family:'DM Sans',sans-serif;backgro
 .info-row{display:flex;align-items:center;gap:10px;font-size:13px;color:var(--text2)}
 .info-icon{font-size:15px;width:20px;text-align:center;flex-shrink:0}
 
-/* ── DISPONIBILIDAD ── */
+/* ── AUTORIZACIÓN GPS ── */
+#auth-screen{position:fixed;inset:0;background:var(--dark);display:none;flex-direction:column;z-index:998;overflow-y:auto}
+.auth-header{padding:20px 20px 0;display:flex;align-items:center;justify-content:space-between}
+.auth-logo{font-family:'Syne',sans-serif;font-size:14px;font-weight:700;color:var(--gold);letter-spacing:.05em}
+.auth-body{padding:24px 20px;flex:1}
+.auth-icon{font-size:52px;text-align:center;margin-bottom:16px}
+.auth-title{font-family:'Syne',sans-serif;font-size:22px;font-weight:800;color:var(--cream);text-align:center;margin-bottom:8px;line-height:1.2}
+.auth-sub{font-size:13px;color:var(--text3);text-align:center;margin-bottom:24px;line-height:1.6}
+.auth-box{background:rgba(253,246,236,.04);border:1px solid var(--border);border-radius:16px;padding:18px;margin-bottom:16px}
+.auth-box-title{font-size:11px;font-weight:700;color:var(--gold);text-transform:uppercase;letter-spacing:.08em;margin-bottom:12px}
+.auth-item{display:flex;gap:10px;margin-bottom:10px;align-items:flex-start}
+.auth-item:last-child{margin-bottom:0}
+.auth-item-icon{font-size:16px;flex-shrink:0;margin-top:1px}
+.auth-item-text{font-size:12px;color:var(--text2);line-height:1.55}
+.auth-item-text strong{color:var(--cream)}
+.auth-check{display:flex;gap:12px;align-items:flex-start;padding:14px;background:rgba(200,134,10,.08);border:1px solid rgba(200,134,10,.2);border-radius:12px;cursor:pointer;margin-bottom:20px;transition:background .2s}
+.auth-check:hover{background:rgba(200,134,10,.14)}
+.auth-check input{width:18px;height:18px;flex-shrink:0;accent-color:var(--gold);margin-top:1px;cursor:pointer}
+.auth-check-text{font-size:12px;color:var(--text2);line-height:1.55}
+.auth-check-text strong{color:var(--cream)}
+.auth-btn{width:100%;padding:16px;background:linear-gradient(135deg,var(--gold),#9a6507);border:none;border-radius:14px;color:#fff;font-size:15px;font-weight:700;font-family:'DM Sans',sans-serif;cursor:pointer;letter-spacing:.02em;box-shadow:0 4px 20px rgba(200,134,10,.35);transition:opacity .2s;opacity:.4;pointer-events:none}
+.auth-btn.active{opacity:1;pointer-events:auto}
+.auth-btn.active:hover{opacity:.85}
+.auth-footer{font-size:10px;color:var(--text3);text-align:center;margin-top:12px;line-height:1.6;padding-bottom:24px}
 .avail-section{margin:16px 20px 0}
 .avail-label{font-size:10px;color:var(--text3);font-weight:600;letter-spacing:.1em;text-transform:uppercase;margin-bottom:10px}
 
@@ -136,6 +159,78 @@ html,body{height:100%;overflow-x:hidden;font-family:'DM Sans',sans-serif;backgro
   <div class="err-icon">🔗</div>
   <div class="err-title">Enlace inválido</div>
   <div class="err-sub">Este enlace no corresponde a ningún conductor registrado en Fenlora.<br>Contacta a Fenlora para obtener tu enlace personalizado.</div>
+</div>
+
+<!-- AUTORIZACIÓN GPS -->
+<div id="auth-screen">
+  <div class="auth-header">
+    <div class="auth-logo">FENLORA</div>
+    <div class="hdr-badge">Autorización requerida</div>
+  </div>
+  <div class="auth-body">
+    <div class="auth-icon">📍</div>
+    <div class="auth-title">Autorización de uso de datos</div>
+    <div class="auth-sub">Antes de activar tu panel necesitamos tu autorización. Lee con atención — es importante.</div>
+
+    <div class="auth-box">
+      <div class="auth-box-title">¿Qué datos usamos?</div>
+      <div class="auth-item">
+        <div class="auth-item-icon">🟢</div>
+        <div class="auth-item-text"><strong>Estado de disponibilidad</strong> — si estás activo o no activo. Visible para todos los turistas en el mapa.</div>
+      </div>
+      <div class="auth-item">
+        <div class="auth-item-icon">🕐</div>
+        <div class="auth-item-text"><strong>Horario declarado</strong> — el horario que tú mismo ingreses. Solo tú puedes modificarlo.</div>
+      </div>
+      <div class="auth-item">
+        <div class="auth-item-icon">📝</div>
+        <div class="auth-item-text"><strong>Nota para turistas</strong> — el mensaje corto que tú escribas. Visible públicamente en el mapa.</div>
+      </div>
+      <div class="auth-item">
+        <div class="auth-item-icon">📊</div>
+        <div class="auth-item-text"><strong>Estadísticas de visitas</strong> — cuántas veces han visto tu perfil en el mapa. Solo visible para ti.</div>
+      </div>
+    </div>
+
+    <div class="auth-box">
+      <div class="auth-box-title">¿Cómo usamos tus datos?</div>
+      <div class="auth-item">
+        <div class="auth-item-icon">✅</div>
+        <div class="auth-item-text">Mostrarte en el mapa turístico de Mariquita cuando estés disponible.</div>
+      </div>
+      <div class="auth-item">
+        <div class="auth-item-icon">✅</div>
+        <div class="auth-item-text">Permitir que los turistas te contacten directamente por teléfono.</div>
+      </div>
+      <div class="auth-item">
+        <div class="auth-item-icon">❌</div>
+        <div class="auth-item-text"><strong>No vendemos</strong> tus datos a terceros.</div>
+      </div>
+      <div class="auth-item">
+        <div class="auth-item-icon">❌</div>
+        <div class="auth-item-text"><strong>No rastreamos</strong> tu ubicación GPS en tiempo real sin tu consentimiento adicional.</div>
+      </div>
+      <div class="auth-item">
+        <div class="auth-item-icon">❌</div>
+        <div class="auth-item-text">Fenlora <strong>no es intermediario</strong> del servicio — la contratación es directa entre tú y el turista.</div>
+      </div>
+    </div>
+
+    <label class="auth-check" onclick="toggleAuthCheck()">
+      <input type="checkbox" id="auth-checkbox">
+      <div class="auth-check-text">He leído y <strong>acepto</strong> que Fenlora use mis datos de perfil (nombre, teléfono, horario, estado de disponibilidad y nota) para mostrarme en el directorio turístico digital de Mariquita, según la Ley 1581 de 2012 de protección de datos personales de Colombia.</div>
+    </label>
+
+    <button class="auth-btn" id="auth-btn" onclick="acceptAuth()">
+      Acepto y quiero aparecer en el mapa →
+    </button>
+
+    <div class="auth-footer">
+      Al aceptar, tu autorización queda registrada con fecha y hora.<br>
+      Puedes solicitar la eliminación de tus datos escribiendo a Fenlora.<br>
+      <strong style="color:var(--gold)">Fenlora Visual Studio · Mariquita, Tolima</strong>
+    </div>
+  </div>
 </div>
 
 <!-- APP -->
@@ -257,28 +352,66 @@ const CAT_CONFIG = {
 let punto = null;
 let disponible = false;
 let conductorId = null;
+let autorizado = false;
 
 // Leer ID de la URL
 const params = new URLSearchParams(window.location.search);
 conductorId = params.get('id');
 
+// ── AUTORIZACIÓN ──
+function toggleAuthCheck() {
+  const cb = document.getElementById('auth-checkbox');
+  const btn = document.getElementById('auth-btn');
+  cb.checked = !cb.checked;
+  btn.classList.toggle('active', cb.checked);
+}
+
+async function acceptAuth() {
+  const btn = document.getElementById('auth-btn');
+  btn.textContent = 'Guardando...';
+  btn.style.opacity = '.6';
+  try {
+    await _sb.from('businesses').update({
+      autorizado_datos: true,
+      fecha_autorizacion: new Date().toISOString(),
+      updated_at: new Date().toISOString()
+    }).eq('id', conductorId);
+    localStorage.setItem('fenlora_auth_' + conductorId, new Date().toISOString());
+  } catch(e) {
+    localStorage.setItem('fenlora_auth_' + conductorId, new Date().toISOString());
+  }
+  autorizado = true;
+  document.getElementById('auth-screen').style.display = 'none';
+  document.getElementById('app').style.display = 'block';
+  renderPerfil(punto);
+  suscribirCambios();
+  showToast('✅ Autorización registrada — bienvenido a Fenlora');
+}
+
 async function init() {
   if (!conductorId) { showError(); return; }
-
   try {
     const { data, error } = await _sb
       .from('businesses')
       .select('*')
       .eq('id', conductorId)
       .single();
-
     if (error || !data) { showError(); return; }
     punto = data;
-    renderPerfil(data);
+    // Verificar autorización — Supabase o localStorage
+    const authLocal = localStorage.getItem('fenlora_auth_' + conductorId);
+    const authDb = data.autorizado_datos === true;
+    autorizado = authDb || !!authLocal;
     document.getElementById('loading').style.display = 'none';
-    document.getElementById('app').style.display = 'block';
-    // Suscripción en tiempo real
-    suscribirCambios();
+    if (!autorizado) {
+      // Mostrar pantalla de autorización
+      document.getElementById('auth-screen').style.display = 'flex';
+      document.getElementById('auth-screen').style.flexDirection = 'column';
+    } else {
+      document.getElementById('app').style.display = 'block';
+      renderPerfil(data);
+      suscribirCambios();
+    }
   } catch(e) {
     showError();
   }

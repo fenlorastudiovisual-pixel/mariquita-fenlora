@@ -753,9 +753,10 @@ function sbRowToPunto(row) {
     email:      row.email || '',
     horario:    row.horario || '',
     gmaps:      row.google_maps_url || '',
-    addons:     row.addons || [],
+    addons:     row.addons || {},
     menu:       row.menu || {},
     tiene_menu: row.tiene_menu || false,
+    disponible: row.disponible === true,
   };
 }
 
@@ -1220,16 +1221,35 @@ function openPanel(p){
     aventura: {emoji:'🧗', label:'Ver planes y tarifas',    color:'#CA6F1E', bg:'rgba(202,111,30,.15)'},
   };
   const mc = menuConfig[p.cat] || {emoji:'📋', label:'Ver menú', color:'var(--gold)', bg:'rgba(200,134,10,.15)'};
-  // Solo mostrar botón menú si el punto tiene menú activo
   const menuBtn = (p.tiene_menu && p.menu && p.menu.items && p.menu.items.length > 0)
     ? `<button class="bmenu" onclick="openMenu()" style="background:${mc.bg};border-color:${mc.color};color:${mc.color}">${mc.emoji} ${mc.label}</button>`
     : '';
-  acts.innerHTML=`
-    <a class="bmaps" href="${p.gmaps}" target="_blank">🗺️ Cómo llegar — Google Maps</a>
-    ${p.wsp?`<a class="bwsp" href="https://wa.me/${p.wsp}?text=Hola! Vi su negocio en la Ruta del Mangostino y quiero información _(Desde la Ruta del Mangostino)_" target="_blank">💬 Escribir por WhatsApp</a>`:''}
-    <button class="bshare" onclick="sharePoint()">📤 Compartir ubicación</button>
-    ${menuBtn}
-  `;
+
+  const transCatsActs = ['taxi','moto','chiva','alqmoto','alqbici','vereda','fletero'];
+  if (transCatsActs.includes(p.cat)) {
+    // Panel especial para transporte
+    const wsp = p.wsp || p.tel;
+    const wspMsg = `Hola ${p.nombre}! Te vi en la Ruta del Mangostino de Fenlora y necesito transporte. ¿Estás disponible?`;
+    acts.innerHTML = `
+      ${p.disponible && wsp
+        ? `<a class="bwsp" href="https://wa.me/57${wsp.replace(/\D/g,'')}?text=${encodeURIComponent(wspMsg)}" target="_blank" style="background:rgba(37,168,100,.15);border-color:rgba(37,168,100,.5);color:#1A7A4A;font-weight:700">
+            💬 Contactar ahora por WhatsApp
+           </a>`
+        : ''}
+      ${p.tel
+        ? `<a class="bmaps" href="tel:${p.tel}" style="text-align:center">📞 Llamar: ${p.tel}</a>`
+        : ''}
+      ${menuBtn}
+    `;
+  } else {
+    // Panel normal para otros negocios
+    acts.innerHTML=`
+      <a class="bmaps" href="${p.gmaps}" target="_blank">🗺️ Cómo llegar — Google Maps</a>
+      ${p.wsp?`<a class="bwsp" href="https://wa.me/${p.wsp.replace(/\D/g,'')}?text=${encodeURIComponent('Hola! Vi su negocio en la Ruta del Mangostino y quiero información')}" target="_blank">💬 Escribir por WhatsApp</a>`:''}
+      <button class="bshare" onclick="sharePoint()">📤 Compartir ubicación</button>
+      ${menuBtn}
+    `;
+  }
   // Disclaimer transporte — solo para categorías de transporte
   const transGrupo = ['taxi','moto','chiva','alqmoto','alqbici','vereda','fletero'];
   const prevSection = document.getElementById('prev-section');

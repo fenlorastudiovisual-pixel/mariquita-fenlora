@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="theme-color" content="#1C1208">
+<title>Panel Conductor · Fenlora</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+:root{
+  --gold:#C8860A;--gold2:#E5A800;--dark:#1C1208;--dark2:#2D1A05;
+  --cream:#FDF6EC;--text:#5A3F20;--text2:#7A5C2E;--text3:#9A7A50;
+  --green:#1A7A4A;--green2:#25A864;--red:#C0392B;--red2:#E74C3C;
+  --border:rgba(200,134,10,.2);--bg2:rgba(200,134,10,.06);
+}
+html,body{height:100%;overflow-x:hidden;font-family:'DM Sans',sans-serif;background:var(--dark);color:var(--cream)}
+
+/* ── LOADING ── */
+#loading{position:fixed;inset:0;background:var(--dark);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:999;gap:16px}
+.loading-logo{font-family:'Syne',sans-serif;font-size:28px;font-weight:800;color:var(--gold);letter-spacing:.02em}
+.loading-sub{font-size:12px;color:var(--text3);letter-spacing:.1em;text-transform:uppercase}
+.loading-dot{width:8px;height:8px;border-radius:50%;background:var(--gold);animation:pulse 1.2s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:.2;transform:scale(.8)}50%{opacity:1;transform:scale(1)}}
+
+/* ── ERROR ── */
+#error-screen{position:fixed;inset:0;background:var(--dark);display:none;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:32px;gap:16px}
+.err-icon{font-size:48px}
+.err-title{font-family:'Syne',sans-serif;font-size:22px;font-weight:700;color:var(--cream)}
+.err-sub{font-size:13px;color:var(--text3);line-height:1.6}
+
+/* ── MAIN ── */
+#app{display:none;min-height:100vh;background:linear-gradient(160deg,var(--dark) 0%,#2D1A05 100%)}
+
+/* HEADER */
+.hdr{padding:16px 20px 0;display:flex;align-items:center;justify-content:space-between}
+.hdr-logo{font-family:'Syne',sans-serif;font-size:13px;font-weight:700;color:var(--gold);letter-spacing:.05em}
+.hdr-badge{font-size:10px;color:var(--text3);background:rgba(200,134,10,.1);border:1px solid var(--border);border-radius:20px;padding:3px 10px;letter-spacing:.04em}
+
+/* PROFILE CARD */
+.profile-card{margin:20px 20px 0;background:rgba(253,246,236,.04);border:1px solid var(--border);border-radius:20px;padding:24px;position:relative;overflow:hidden}
+.profile-card::before{content:'';position:absolute;top:-30px;right:-30px;width:120px;height:120px;background:radial-gradient(circle,rgba(200,134,10,.15),transparent 70%);pointer-events:none}
+.profile-top{display:flex;align-items:center;gap:16px;margin-bottom:20px}
+.avatar{width:72px;height:72px;border-radius:50%;border:3px solid var(--gold);object-fit:cover;flex-shrink:0;background:var(--dark2);display:flex;align-items:center;justify-content:center;font-size:28px;overflow:hidden}
+.avatar img{width:100%;height:100%;object-fit:cover}
+.profile-info{}
+.profile-name{font-family:'Syne',sans-serif;font-size:20px;font-weight:700;color:var(--cream);line-height:1.1;margin-bottom:4px}
+.profile-cat{font-size:12px;color:var(--gold);font-weight:500;letter-spacing:.03em}
+.profile-zona{font-size:11px;color:var(--text3);margin-top:2px}
+
+/* INFO ROWS */
+.info-rows{display:flex;flex-direction:column;gap:8px}
+.info-row{display:flex;align-items:center;gap:10px;font-size:13px;color:var(--text2)}
+.info-icon{font-size:15px;width:20px;text-align:center;flex-shrink:0}
+
+/* ── DISPONIBILIDAD ── */
+.avail-section{margin:16px 20px 0}
+.avail-label{font-size:10px;color:var(--text3);font-weight:600;letter-spacing:.1em;text-transform:uppercase;margin-bottom:10px}
+
+/* BIG TOGGLE */
+.big-toggle{border-radius:20px;border:2px solid;padding:28px 24px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;transition:all .3s ease;position:relative;overflow:hidden;user-select:none;-webkit-user-select:none;active:scale(.98)}
+.big-toggle::before{content:'';position:absolute;inset:0;opacity:0;transition:opacity .3s}
+.big-toggle.available{border-color:var(--green2);background:rgba(26,122,74,.12)}
+.big-toggle.available::before{background:radial-gradient(circle at 20% 50%,rgba(37,168,100,.1),transparent 60%);opacity:1}
+.big-toggle.unavailable{border-color:rgba(200,134,10,.3);background:rgba(200,134,10,.04)}
+.toggle-left{}
+.toggle-status-txt{font-family:'Syne',sans-serif;font-size:24px;font-weight:800;line-height:1;margin-bottom:4px;transition:color .3s}
+.big-toggle.available .toggle-status-txt{color:var(--green2)}
+.big-toggle.unavailable .toggle-status-txt{color:var(--text3)}
+.toggle-hint{font-size:12px;color:var(--text3)}
+.toggle-right{flex-shrink:0;width:64px;height:36px;border-radius:18px;background:var(--dark2);border:2px solid rgba(200,134,10,.2);position:relative;transition:all .3s}
+.big-toggle.available .toggle-right{background:var(--green);border-color:var(--green2)}
+.toggle-knob-big{position:absolute;top:3px;left:3px;width:26px;height:26px;border-radius:50%;background:var(--text3);transition:all .3s;box-shadow:0 2px 8px rgba(0,0,0,.3)}
+.big-toggle.available .toggle-knob-big{left:31px;background:#fff}
+
+/* NOTA RAPIDA */
+.nota-section{margin:12px 20px 0}
+.nota-box{background:rgba(253,246,236,.04);border:1px solid var(--border);border-radius:14px;overflow:hidden}
+.nota-header{padding:10px 14px;font-size:10px;color:var(--text3);font-weight:600;letter-spacing:.08em;text-transform:uppercase;border-bottom:1px solid var(--border)}
+.nota-input{width:100%;background:transparent;border:none;outline:none;color:var(--cream);font-size:13px;font-family:'DM Sans',sans-serif;padding:12px 14px;resize:none;min-height:60px}
+.nota-input::placeholder{color:var(--text3)}
+.nota-footer{padding:8px 14px;display:flex;align-items:center;justify-content:space-between;border-top:1px solid var(--border)}
+.nota-hint{font-size:10px;color:var(--text3)}
+.nota-btn{font-size:11px;font-weight:600;color:var(--gold);background:none;border:none;cursor:pointer;font-family:'DM Sans',sans-serif;padding:4px 8px;border-radius:6px;transition:background .2s}
+.nota-btn:hover{background:rgba(200,134,10,.1)}
+
+/* HORARIO */
+.horario-section{margin:12px 20px 0}
+.horario-box{background:rgba(253,246,236,.04);border:1px solid var(--border);border-radius:14px;padding:14px}
+.horario-title{font-size:10px;color:var(--text3);font-weight:600;letter-spacing:.08em;text-transform:uppercase;margin-bottom:10px}
+.horario-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.horario-field{flex:1;min-width:120px}
+.horario-field label{font-size:10px;color:var(--text3);display:block;margin-bottom:4px}
+.horario-field input{width:100%;background:rgba(200,134,10,.06);border:1px solid var(--border);border-radius:8px;padding:8px 10px;color:var(--cream);font-size:12px;font-family:'DM Sans',sans-serif;outline:none;transition:border-color .2s}
+.horario-field input:focus{border-color:var(--gold)}
+.horario-save-btn{margin-top:10px;width:100%;padding:10px;background:rgba(200,134,10,.12);border:1px solid var(--border);border-radius:10px;color:var(--gold);font-size:12px;font-weight:600;font-family:'DM Sans',sans-serif;cursor:pointer;transition:all .2s}
+.horario-save-btn:hover{background:rgba(200,134,10,.2)}
+
+/* STATS */
+.stats-section{margin:12px 20px 0;display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.stat-box{background:rgba(253,246,236,.04);border:1px solid var(--border);border-radius:14px;padding:14px;text-align:center}
+.stat-num{font-family:'Syne',sans-serif;font-size:28px;font-weight:800;color:var(--gold)}
+.stat-lbl{font-size:10px;color:var(--text3);margin-top:2px;letter-spacing:.04em}
+
+/* DISCLAIMER */
+.disclaimer{margin:16px 20px;padding:12px 14px;background:rgba(200,134,10,.06);border:1px solid rgba(200,134,10,.15);border-radius:12px;font-size:10.5px;color:var(--text3);line-height:1.6;text-align:center}
+
+/* FOOTER */
+.footer{margin:8px 20px 32px;text-align:center;font-size:10px;color:var(--text3);opacity:.5}
+
+/* TOAST */
+#toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--dark2);border:1px solid var(--border);border-radius:20px;padding:10px 20px;font-size:12px;color:var(--cream);opacity:0;transition:all .3s;z-index:9999;white-space:nowrap;pointer-events:none}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* PING INDICATOR */
+.ping{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--green2);margin-right:4px;animation:ping 2s ease-in-out infinite}
+@keyframes ping{0%,100%{box-shadow:0 0 0 0 rgba(37,168,100,.6)}50%{box-shadow:0 0 0 6px rgba(37,168,100,0)}}
+
+/* ACTIVE PRESS */
+.big-toggle:active{transform:scale(.98)}
+</style>
+</head>
+<body>
+
+<!-- LOADING -->
+<div id="loading">
+  <div class="loading-logo">FENLORA</div>
+  <div class="loading-dot"></div>
+  <div class="loading-sub">Cargando tu perfil...</div>
+</div>
+
+<!-- ERROR -->
+<div id="error-screen">
+  <div class="err-icon">🔗</div>
+  <div class="err-title">Enlace inválido</div>
+  <div class="err-sub">Este enlace no corresponde a ningún conductor registrado en Fenlora.<br>Contacta a Fenlora para obtener tu enlace personalizado.</div>
+</div>
+
+<!-- APP -->
+<div id="app">
+  <div class="hdr">
+    <div class="hdr-logo">FENLORA</div>
+    <div class="hdr-badge">Panel conductor</div>
+  </div>
+
+  <!-- PERFIL -->
+  <div class="profile-card">
+    <div class="profile-top">
+      <div class="avatar" id="avatar-wrap">
+        <span id="avatar-emoji">🚕</span>
+      </div>
+      <div class="profile-info">
+        <div class="profile-name" id="profile-name">Cargando...</div>
+        <div class="profile-cat" id="profile-cat"></div>
+        <div class="profile-zona" id="profile-zona"></div>
+      </div>
+    </div>
+    <div class="info-rows" id="info-rows"></div>
+  </div>
+
+  <!-- DISPONIBILIDAD -->
+  <div class="avail-section">
+    <div class="avail-label"><span class="ping" id="ping-dot" style="display:none"></span>Estado actual</div>
+    <div class="big-toggle unavailable" id="big-toggle" onclick="toggleDisponibilidad()">
+      <div class="toggle-left">
+        <div class="toggle-status-txt" id="toggle-txt">No disponible</div>
+        <div class="toggle-hint" id="toggle-hint">Toca para activarte</div>
+      </div>
+      <div class="toggle-right">
+        <div class="toggle-knob-big"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- NOTA RÁPIDA -->
+  <div class="nota-section">
+    <div class="nota-box">
+      <div class="nota-header">📝 Nota para los turistas</div>
+      <textarea class="nota-input" id="nota-input" maxlength="120" placeholder="Ej: Disponible hasta las 6pm · Solo viajes locales · Llama primero..."></textarea>
+      <div class="nota-footer">
+        <div class="nota-hint" id="nota-chars">0 / 120</div>
+        <button class="nota-btn" onclick="saveNota()">Guardar nota ✓</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- HORARIO -->
+  <div class="horario-section">
+    <div class="horario-box">
+      <div class="horario-title">🕐 Mi horario habitual</div>
+      <div class="horario-row">
+        <div class="horario-field">
+          <label>Entrada mañana</label>
+          <input type="time" id="h-inicio-m" value="07:00">
+        </div>
+        <div class="horario-field">
+          <label>Salida mañana</label>
+          <input type="time" id="h-fin-m" value="12:00">
+        </div>
+      </div>
+      <div class="horario-row" style="margin-top:8px">
+        <div class="horario-field">
+          <label>Entrada tarde</label>
+          <input type="time" id="h-inicio-t" value="14:00">
+        </div>
+        <div class="horario-field">
+          <label>Salida tarde</label>
+          <input type="time" id="h-fin-t" value="18:00">
+        </div>
+      </div>
+      <button class="horario-save-btn" onclick="saveHorario()">Guardar horario</button>
+    </div>
+  </div>
+
+  <!-- ESTADÍSTICAS -->
+  <div class="stats-section">
+    <div class="stat-box">
+      <div class="stat-num" id="stat-vistas">0</div>
+      <div class="stat-lbl">Veces visto en el mapa</div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-num" id="stat-dias">0</div>
+      <div class="stat-lbl">Días activo en Fenlora</div>
+    </div>
+  </div>
+
+  <!-- DISCLAIMER -->
+  <div class="disclaimer">
+    ⚠️ Fenlora es un directorio informativo. La contratación del servicio es directamente entre el turista y el prestador. Fenlora no es intermediario ni responsable de los servicios prestados.
+  </div>
+
+  <div class="footer">Fenlora Visual Studio · Mariquita, Tolima · 2026</div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+const SUPABASE_URL = 'https://ikcutinvnkktfasgnanv.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_G_MCq1M-a_CM77AKPocYvA_KOgmiw7h';
+const _sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+const CAT_CONFIG = {
+  taxi:     {emoji:'🚕', label:'Taxi local',             color:'#F1C40F'},
+  moto:     {emoji:'🏍️', label:'Mototransporte',         color:'#E5A800'},
+  chiva:    {emoji:'🚌', label:'Chiva turística',        color:'#D4AC0D'},
+  alqmoto:  {emoji:'🛵', label:'Alquiler de motos',      color:'#B8860B'},
+  alqbici:  {emoji:'🚲', label:'Alquiler de bicicletas', color:'#A0820A'},
+  vereda:   {emoji:'🛻', label:'Transporte a veredas',   color:'#8B6914'},
+  fletero:  {emoji:'📦', label:'Fletero',                color:'#7A5C10'},
+  agencia:  {emoji:'✈️', label:'Agencia de viajes',      color:'#D4580A'},
+  guia:     {emoji:'🧭', label:'Guía turístico',         color:'#E67E22'},
+  aventura: {emoji:'🧗', label:'Aventura / Senderismo',  color:'#CA6F1E'},
+};
+
+let punto = null;
+let disponible = false;
+let conductorId = null;
+
+// Leer ID de la URL
+const params = new URLSearchParams(window.location.search);
+conductorId = params.get('id');
+
+async function init() {
+  if (!conductorId) { showError(); return; }
+
+  try {
+    const { data, error } = await _sb
+      .from('businesses')
+      .select('*')
+      .eq('id', conductorId)
+      .single();
+
+    if (error || !data) { showError(); return; }
+    punto = data;
+    renderPerfil(data);
+    document.getElementById('loading').style.display = 'none';
+    document.getElementById('app').style.display = 'block';
+    // Suscripción en tiempo real
+    suscribirCambios();
+  } catch(e) {
+    showError();
+  }
+}
+
+function renderPerfil(d) {
+  const cat = CAT_CONFIG[d.category] || {emoji:'🚗', label:'Transporte', color:'#C8860A'};
+  // Avatar
+  document.getElementById('avatar-emoji').textContent = cat.emoji;
+  // Info
+  document.getElementById('profile-name').textContent = d.name || 'Sin nombre';
+  document.getElementById('profile-cat').textContent = cat.label;
+  document.getElementById('profile-zona').textContent = d.sub || d.address || '';
+  // Info rows
+  const rows = [];
+  if (d.phone) rows.push(`<div class="info-row"><span class="info-icon">📞</span><span>${d.phone}</span></div>`);
+  if (d.horario) rows.push(`<div class="info-row"><span class="info-icon">🕐</span><span>${d.horario}</span></div>`);
+  document.getElementById('info-rows').innerHTML = rows.join('');
+  // Estado disponibilidad
+  disponible = d.disponible === true;
+  updateToggleUI();
+  // Nota
+  const nota = (d.notas_admin || '').replace(/^\[NOTA_TURISTA\]/, '').trim();
+  document.getElementById('nota-input').value = nota;
+  updateNotaChars();
+  // Horario en campos
+  if (d.horario) {
+    const match = d.horario.match(/(\d{1,2}:\d{2})\s*[–-]\s*(\d{1,2}:\d{2})/);
+    if (match) {
+      document.getElementById('h-inicio-m').value = to24(match[1]);
+      document.getElementById('h-fin-m').value = to24(match[2]);
+    }
+  }
+  // Stats
+  document.getElementById('stat-vistas').textContent = d.vistas || 0;
+  // Días activo (desde created_at)
+  if (d.created_at) {
+    const dias = Math.floor((Date.now() - new Date(d.created_at)) / 86400000);
+    document.getElementById('stat-dias').textContent = dias;
+  }
+}
+
+function to24(t) {
+  return t.length === 4 ? '0' + t : t;
+}
+
+function updateToggleUI() {
+  const tog = document.getElementById('big-toggle');
+  const txt = document.getElementById('toggle-txt');
+  const hint = document.getElementById('toggle-hint');
+  const ping = document.getElementById('ping-dot');
+  if (disponible) {
+    tog.className = 'big-toggle available';
+    txt.textContent = '🟢 Disponible ahora';
+    hint.textContent = 'Los turistas te ven activo en el mapa';
+    ping.style.display = 'inline-block';
+  } else {
+    tog.className = 'big-toggle unavailable';
+    txt.textContent = 'No disponible';
+    hint.textContent = 'Toca para activarte';
+    ping.style.display = 'none';
+  }
+}
+
+async function toggleDisponibilidad() {
+  disponible = !disponible;
+  updateToggleUI();
+  try {
+    await _sb.from('businesses').update({
+      disponible: disponible,
+      updated_at: new Date().toISOString()
+    }).eq('id', conductorId);
+    showToast(disponible ? '✅ Ahora apareces disponible en el mapa' : '⏸ Te marcaste como no disponible');
+  } catch(e) {
+    disponible = !disponible;
+    updateToggleUI();
+    showToast('❌ Error al actualizar. Intenta de nuevo.');
+  }
+}
+
+async function saveNota() {
+  const nota = document.getElementById('nota-input').value.trim();
+  try {
+    await _sb.from('businesses').update({
+      notas_admin: nota,
+      updated_at: new Date().toISOString()
+    }).eq('id', conductorId);
+    showToast('✅ Nota guardada');
+  } catch(e) {
+    showToast('❌ Error al guardar la nota');
+  }
+}
+
+async function saveHorario() {
+  const im = document.getElementById('h-inicio-m').value;
+  const fm = document.getElementById('h-fin-m').value;
+  const it = document.getElementById('h-inicio-t').value;
+  const ft = document.getElementById('h-fin-t').value;
+  const horario = `${im}–${fm} / ${it}–${ft}`;
+  try {
+    await _sb.from('businesses').update({
+      horario: horario,
+      updated_at: new Date().toISOString()
+    }).eq('id', conductorId);
+    document.getElementById('info-rows').innerHTML =
+      `<div class="info-row"><span class="info-icon">🕐</span><span>${horario}</span></div>`;
+    showToast('✅ Horario guardado');
+  } catch(e) {
+    showToast('❌ Error al guardar el horario');
+  }
+}
+
+function updateNotaChars() {
+  const len = document.getElementById('nota-input').value.length;
+  document.getElementById('nota-chars').textContent = `${len} / 120`;
+}
+document.getElementById('nota-input').addEventListener('input', updateNotaChars);
+
+function suscribirCambios() {
+  _sb.channel('conductor-' + conductorId)
+    .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'businesses', filter: `id=eq.${conductorId}` },
+      payload => {
+        if (payload.new && payload.new.disponible !== undefined) {
+          disponible = payload.new.disponible;
+          updateToggleUI();
+        }
+      }
+    ).subscribe();
+}
+
+function showError() {
+  document.getElementById('loading').style.display = 'none';
+  document.getElementById('error-screen').style.display = 'flex';
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2800);
+}
+
+init();
+</script>
+</body>
+</html>

@@ -364,6 +364,13 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Instru
           <div class="field-hint">Aparece bajo el nombre en el panel. Incluye tipo y dirección resumida.</div>
         </div>
         <div class="field">
+          <label>Municipio *</label>
+          <select id="f-municipio">
+            <option value="mariquita">🥭 San Sebastián de Mariquita — Ruta del Mangostino</option>
+            <option value="chaparral">☕ Chaparral — Ruta del Café y la Paz</option>
+          </select>
+        </div>
+        <div class="field">
           <label>Categoría *</label>
           <div class="cat-grid" id="cat-grid"></div>
         </div>
@@ -787,6 +794,7 @@ function sbRowToPoint(row) {
     menu: row.menu || { cats: ['Platos', 'Bebidas'], items: [], promo: { big: '', sub: '' } },
     addons: row.addons || {},
     docs: row.docs || {},
+    municipio: row.municipio || 'mariquita',
   };
 }
 
@@ -811,6 +819,8 @@ function pointToSbRow(p) {
     menu: p.menu || {},
     tiene_menu: p.tiene_menu === true,
     addons: p.addons || {},
+    docs: p.docs || {},
+    municipio: p.municipio || 'mariquita',
     updated_at: new Date().toISOString(),
   };
 }
@@ -931,6 +941,7 @@ function loadEditor(p) {
 
   // Info
   document.getElementById('f-nombre').value = p.nombre || '';
+  if (document.getElementById('f-municipio')) document.getElementById('f-municipio').value = p.municipio || 'mariquita';
   document.getElementById('f-sub').value = p.sub || '';
   document.getElementById('f-desc').value = p.desc || '';
   countChars('f-desc','desc-count',600);
@@ -1374,6 +1385,7 @@ function removeVideo() {
 async function savePoint() {
   if (!selected) return;
   selected.nombre = document.getElementById('f-nombre').value.trim();
+  selected.municipio = document.getElementById('f-municipio')?.value || 'mariquita';
   selected.sub = document.getElementById('f-sub').value.trim();
   selected.desc = document.getElementById('f-desc').value.trim();
   selected.tel = document.getElementById('f-tel').value.trim();

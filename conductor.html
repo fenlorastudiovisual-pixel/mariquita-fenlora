@@ -948,13 +948,14 @@ function abrirTarjeta() {
   // ── SECCIÓN SUPERIOR: info conductor ──
   var PAD=28;
 
-  // Logo
+  // Logo obturador + texto
+  dibujarLogoCanvas(ctx, PAD, PAD-4, 36);
   ctx.fillStyle='#C8860A';
-  ctx.font='bold 18px sans-serif';
-  ctx.fillText('FENLORA', PAD, PAD+18);
+  ctx.font='bold 16px sans-serif';
+  ctx.fillText('FENLORA', PAD+44, PAD+16);
   ctx.fillStyle='rgba(200,134,10,.45)';
   ctx.font='9px sans-serif';
-  ctx.fillText('VISUAL STUDIO', PAD, PAD+32);
+  ctx.fillText('VISUAL STUDIO', PAD+44, PAD+30);
 
   // Badge verificado (derecha)
   ctx.fillStyle='rgba(200,134,10,.12)';
@@ -1051,6 +1052,47 @@ function abrirTarjeta() {
   } else {
     dibujarFoto(null);
   }
+}
+
+// Función para dibujar el obturador Fenlora en canvas
+function dibujarLogoCanvas(ctx, x, y, size) {
+  ctx.save();
+  ctx.translate(x, y);
+  var s = size / 120;
+  ctx.scale(s, s);
+  // Pétalos del obturador
+  var g1 = ctx.createLinearGradient(0,0,120,120);
+  g1.addColorStop(0,'#FFD700'); g1.addColorStop(1,'#C8860A');
+  var g2 = ctx.createLinearGradient(120,0,0,120);
+  g2.addColorStop(0,'#FF8C00'); g2.addColorStop(1,'#E65C00');
+  var g3 = ctx.createLinearGradient(120,120,0,0);
+  g3.addColorStop(0,'#9B59B6'); g3.addColorStop(1,'#6C3483');
+  var g4 = ctx.createLinearGradient(0,120,120,0);
+  g4.addColorStop(0,'#4A90D9'); g4.addColorStop(1,'#9B59B6');
+  ctx.globalAlpha = .95;
+  ctx.fillStyle = g1;
+  ctx.beginPath(); ctx.moveTo(60,12); ctx.bezierCurveTo(50,12,42,18,40,28); ctx.lineTo(55,58); ctx.bezierCurveTo(57,54,63,54,65,58); ctx.lineTo(80,28); ctx.bezierCurveTo(78,18,70,12,60,12); ctx.fill();
+  ctx.globalAlpha = .9;
+  ctx.fillStyle = g2;
+  ctx.beginPath(); ctx.moveTo(108,60); ctx.bezierCurveTo(108,50,102,42,92,40); ctx.lineTo(62,55); ctx.bezierCurveTo(66,57,66,63,62,65); ctx.lineTo(92,80); ctx.bezierCurveTo(102,78,108,70,108,60); ctx.fill();
+  ctx.globalAlpha = .95;
+  ctx.fillStyle = g3;
+  ctx.beginPath(); ctx.moveTo(60,108); ctx.bezierCurveTo(70,108,78,102,80,92); ctx.lineTo(65,62); ctx.bezierCurveTo(63,66,57,66,55,62); ctx.lineTo(40,92); ctx.bezierCurveTo(42,102,50,108,60,108); ctx.fill();
+  ctx.globalAlpha = .9;
+  ctx.fillStyle = g4;
+  ctx.beginPath(); ctx.moveTo(12,60); ctx.bezierCurveTo(12,70,18,78,28,80); ctx.lineTo(58,65); ctx.bezierCurveTo(54,63,54,57,58,55); ctx.lineTo(28,40); ctx.bezierCurveTo(18,42,12,50,12,60); ctx.fill();
+  // Centro
+  ctx.globalAlpha = .7;
+  ctx.fillStyle = '#111';
+  ctx.beginPath(); ctx.arc(60,60,16,0,Math.PI*2); ctx.fill();
+  var gc = ctx.createRadialGradient(60,60,2,60,60,10);
+  gc.addColorStop(0,'#FFD700'); gc.addColorStop(1,'#C8860A');
+  ctx.globalAlpha = 1;
+  ctx.fillStyle = gc;
+  ctx.beginPath(); ctx.arc(60,60,10,0,Math.PI*2); ctx.fill();
+  ctx.fillStyle = 'rgba(255,255,255,.5)';
+  ctx.beginPath(); ctx.arc(56,56,3,0,Math.PI*2); ctx.fill();
+  ctx.restore();
 }
 
 // Función helper para rectángulos redondeados

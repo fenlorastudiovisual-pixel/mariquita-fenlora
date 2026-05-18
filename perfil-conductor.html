@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="theme-color" content="#1a0f02">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>Conductor verificado · Fenlora</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --gold:#C8860A;--gold-light:#F5D38A;--gold-dim:rgba(200,134,10,.12);--gold-border:rgba(200,134,10,.3);
+  --dark:#1a0f02;--dark2:#2e1a08;--dark3:#3d2510;
+  --text:#FDF6EC;--text2:#C4A870;--text3:rgba(253,246,236,.45);
+  --green:#25A864;--green-dim:rgba(37,168,100,.12);--green-border:rgba(37,168,100,.3);
+  --border:rgba(200,134,10,.15);--radius:18px;
+}
+html,body{min-height:100vh;background:var(--dark);color:var(--text);font-family:'DM Sans',sans-serif;overflow-x:hidden}
+body{display:flex;flex-direction:column;align-items:center}
+
+/* ── HEADER ── */
+.hdr{width:100%;max-width:480px;display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid var(--border)}
+.hdr-logo{display:flex;align-items:center;gap:8px}
+.hdr-logo-text{font-family:'Syne',sans-serif;font-size:13px;font-weight:700;color:var(--gold);letter-spacing:.06em}
+.hdr-logo-sub{font-size:9px;color:var(--text3);letter-spacing:.1em;text-transform:uppercase;display:block}
+.hdr-badge{font-size:10px;color:var(--gold);background:var(--gold-dim);border:1px solid var(--gold-border);border-radius:20px;padding:4px 12px;font-weight:600;letter-spacing:.04em}
+
+/* ── HERO FOTO ── */
+.hero{width:100%;max-width:480px;position:relative;height:280px;overflow:hidden}
+.hero img{width:100%;height:100%;object-fit:cover;display:block}
+.hero-gradient{position:absolute;inset:0;background:linear-gradient(to top,rgba(26,15,2,.95) 0%,rgba(26,15,2,.4) 50%,rgba(26,15,2,.1) 100%)}
+.hero-placeholder{width:100%;height:100%;background:var(--dark2);display:flex;align-items:center;justify-content:center;font-size:80px}
+
+/* ── CARD PRINCIPAL ── */
+.card{width:100%;max-width:480px;padding:24px 20px;position:relative}
+
+/* Estado disponibilidad */
+.status-row{display:flex;align-items:center;gap:8px;margin-bottom:16px}
+.status-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.status-dot.activo{background:var(--green);box-shadow:0 0 0 3px rgba(37,168,100,.2);animation:ping 2s infinite}
+.status-dot.inactivo{background:#666}
+.status-txt{font-size:12px;font-weight:600;letter-spacing:.04em}
+.status-txt.activo{color:var(--green)}
+.status-txt.inactivo{color:#666}
+@keyframes ping{0%,100%{box-shadow:0 0 0 0 rgba(37,168,100,.5)}50%{box-shadow:0 0 0 6px rgba(37,168,100,0)}}
+
+/* Nombre y tipo */
+.conductor-nombre{font-family:'Syne',sans-serif;font-size:28px;font-weight:800;color:var(--text);line-height:1.15;margin-bottom:4px}
+.conductor-tipo{font-size:13px;font-weight:600;color:var(--gold);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px}
+.conductor-zona{font-size:12px;color:var(--text3);margin-bottom:20px}
+
+/* Placa */
+.placa-box{display:inline-flex;align-items:center;gap:8px;background:var(--gold-dim);border:1px solid var(--gold-border);border-radius:10px;padding:8px 16px;margin-bottom:20px}
+.placa-label{font-size:9px;color:var(--text3);font-weight:600;letter-spacing:.1em;text-transform:uppercase}
+.placa-val{font-size:20px;font-weight:800;color:var(--gold);font-family:'Syne',sans-serif;letter-spacing:.12em}
+
+/* Datos verificados */
+.datos-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:24px}
+.dato-box{background:rgba(253,246,236,.04);border:1px solid var(--border);border-radius:12px;padding:12px 14px}
+.dato-label{font-size:9px;color:var(--text3);font-weight:600;letter-spacing:.08em;text-transform:uppercase;margin-bottom:4px}
+.dato-val{font-size:13px;color:var(--text);font-weight:500}
+
+/* Foto vehículo */
+.vehiculo-wrap{width:100%;height:160px;border-radius:14px;overflow:hidden;background:var(--dark2);margin-bottom:20px;border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:48px}
+.vehiculo-wrap img{width:100%;height:100%;object-fit:cover}
+
+/* Botones CTA */
+.cta-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
+.cta-btn{display:flex;align-items:center;justify-content:center;gap:8px;padding:16px;border-radius:14px;font-size:14px;font-weight:700;cursor:pointer;text-decoration:none;border:none;font-family:'DM Sans',sans-serif;transition:opacity .2s}
+.cta-btn:active{opacity:.8}
+.cta-llamar{background:linear-gradient(135deg,var(--gold),#9a6507);color:#fff}
+.cta-whatsapp{background:linear-gradient(135deg,#25A864,#1a7a4a);color:#fff}
+.cta-mapa{width:100%;background:rgba(200,134,10,.08);border:1px solid var(--gold-border);color:var(--gold);display:flex;align-items:center;justify-content:center;gap:8px;padding:14px;border-radius:14px;font-size:13px;font-weight:600;text-decoration:none;margin-bottom:20px}
+
+/* Nota del conductor */
+.nota-box{background:var(--gold-dim);border:1px solid var(--gold-border);border-radius:12px;padding:14px 16px;margin-bottom:20px;display:none}
+.nota-txt{font-size:13px;color:var(--text2);line-height:1.6;font-style:italic}
+
+/* Ruta */
+.ruta-badge{display:flex;align-items:center;gap:8px;background:rgba(253,246,236,.04);border:1px solid var(--border);border-radius:12px;padding:12px 16px;margin-bottom:8px}
+.ruta-emoji{font-size:20px}
+.ruta-info{}
+.ruta-label{font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;font-weight:600}
+.ruta-nombre{font-size:13px;color:var(--gold);font-weight:600}
+
+/* Disclaimer */
+.disclaimer{font-size:10px;color:var(--text3);text-align:center;line-height:1.6;padding:16px 20px;border-top:1px solid var(--border);max-width:480px;width:100%}
+
+/* Loading / Error */
+#loading-screen,#error-screen{width:100%;height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:40px 20px;text-align:center}
+.loading-dot{width:8px;height:8px;border-radius:50%;background:var(--gold);animation:pulse 1.2s infinite}
+@keyframes pulse{0%,100%{opacity:.3}50%{opacity:1}}
+.err-icon{font-size:48px;margin-bottom:8px}
+.err-title{font-size:20px;font-weight:700;color:var(--gold)}
+.err-sub{font-size:13px;color:var(--text3);max-width:300px}
+</style>
+</head>
+<body>
+
+<div id="loading-screen">
+  <div style="font-family:'Syne',sans-serif;font-size:16px;font-weight:700;color:var(--gold)">FENLORA</div>
+  <div class="loading-dot"></div>
+  <div style="font-size:12px;color:var(--text3)">Cargando perfil del conductor...</div>
+</div>
+
+<div id="error-screen" style="display:none">
+  <div class="err-icon">🔗</div>
+  <div class="err-title">Perfil no encontrado</div>
+  <div class="err-sub">Este conductor no está registrado en Fenlora o el enlace es inválido.</div>
+</div>
+
+<div id="app" style="display:none;width:100%;max-width:480px;flex-direction:column;align-items:center">
+
+  <!-- HEADER -->
+  <div class="hdr">
+    <div class="hdr-logo">
+      <svg width="26" height="26" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="pg1" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#FFD700"/><stop offset="1" stop-color="#C8860A"/></linearGradient>
+          <linearGradient id="pg2" x1="1" y1="0" x2="0" y2="1"><stop stop-color="#FF8C00"/><stop offset="1" stop-color="#E65C00"/></linearGradient>
+          <linearGradient id="pg3" x1="1" y1="1" x2="0" y2="0"><stop stop-color="#9B59B6"/><stop offset="1" stop-color="#6C3483"/></linearGradient>
+          <linearGradient id="pg4" x1="0" y1="1" x2="1" y2="0"><stop stop-color="#4A90D9"/><stop offset="1" stop-color="#9B59B6"/></linearGradient>
+          <radialGradient id="pgc" cx="50%" cy="50%" r="50%"><stop stop-color="#FFD700"/><stop offset="1" stop-color="#C8860A"/></radialGradient>
+        </defs>
+        <path d="M60 12 C50 12 42 18 40 28 L55 58 C57 54 63 54 65 58 L80 28 C78 18 70 12 60 12Z" fill="url(#pg1)" opacity=".95"/>
+        <path d="M108 60 C108 50 102 42 92 40 L62 55 C66 57 66 63 62 65 L92 80 C102 78 108 70 108 60Z" fill="url(#pg2)" opacity=".9"/>
+        <path d="M60 108 C70 108 78 102 80 92 L65 62 C63 66 57 66 55 62 L40 92 C42 102 50 108 60 108Z" fill="url(#pg3)" opacity=".95"/>
+        <path d="M12 60 C12 70 18 78 28 80 L58 65 C54 63 54 57 58 55 L28 40 C18 42 12 50 12 60Z" fill="url(#pg4)" opacity=".9"/>
+        <circle cx="60" cy="60" r="16" fill="#111" opacity=".7"/>
+        <circle cx="60" cy="60" r="10" fill="url(#pgc)"/>
+        <circle cx="56" cy="56" r="3" fill="white" opacity=".5"/>
+      </svg>
+      <div>
+        <div class="hdr-logo-text">FENLORA</div>
+        <span class="hdr-logo-sub">Visual Studio</span>
+      </div>
+    </div>
+    <div class="hdr-badge">✓ Conductor verificado</div>
+  </div>
+
+  <!-- HERO FOTO CONDUCTOR -->
+  <div class="hero" id="hero-foto">
+    <div class="hero-placeholder" id="hero-placeholder">👤</div>
+    <img id="hero-img" src="" alt="Foto conductor" style="display:none;position:absolute;inset:0;width:100%;height:100%;object-fit:cover">
+    <div class="hero-gradient"></div>
+  </div>
+
+  <!-- INFO PRINCIPAL -->
+  <div class="card">
+
+    <!-- Estado disponibilidad -->
+    <div class="status-row">
+      <div class="status-dot inactivo" id="status-dot"></div>
+      <div class="status-txt inactivo" id="status-txt">Verificando disponibilidad...</div>
+    </div>
+
+    <!-- Nombre y tipo -->
+    <div class="conductor-nombre" id="nombre">—</div>
+    <div class="conductor-tipo" id="tipo">—</div>
+    <div class="conductor-zona" id="zona">—</div>
+
+    <!-- Placa -->
+    <div class="placa-box">
+      <div>
+        <div class="placa-label">Placa</div>
+        <div class="placa-val" id="placa">—</div>
+      </div>
+    </div>
+
+    <!-- Botones CTA -->
+    <div class="cta-grid">
+      <a class="cta-btn cta-llamar" id="btn-llamar" href="#">📞 Llamar</a>
+      <a class="cta-btn cta-whatsapp" id="btn-wsp" href="#" target="_blank">💬 WhatsApp</a>
+    </div>
+    <a class="cta-mapa" id="btn-mapa" href="https://rutas.fenloravisual.com" target="_blank">
+      🗺️ Ver en el mapa de Fenlora
+    </a>
+
+    <!-- Nota del conductor -->
+    <div class="nota-box" id="nota-box">
+      <div style="font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;font-weight:600;margin-bottom:6px">📝 Nota del conductor</div>
+      <div class="nota-txt" id="nota-txt"></div>
+    </div>
+
+    <!-- Datos verificados -->
+    <div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;font-weight:600;margin-bottom:10px">🔒 Datos verificados por Fenlora</div>
+    <div class="datos-grid">
+      <div class="dato-box">
+        <div class="dato-label">C.C.</div>
+        <div class="dato-val" id="cedula-masked">—</div>
+      </div>
+      <div class="dato-box">
+        <div class="dato-label">Color / Modelo</div>
+        <div class="dato-val" id="vehiculo">—</div>
+      </div>
+      <div class="dato-box" style="grid-column:1/-1">
+        <div class="dato-label">Zona de operación</div>
+        <div class="dato-val" id="zona2">—</div>
+      </div>
+    </div>
+
+    <!-- Foto vehículo -->
+    <div class="vehiculo-wrap" id="vehiculo-wrap">🚗</div>
+
+    <!-- Ruta temática -->
+    <div class="ruta-badge">
+      <div class="ruta-emoji" id="ruta-emoji">📍</div>
+      <div class="ruta-info">
+        <div class="ruta-label">Ruta temática</div>
+        <div class="ruta-nombre" id="ruta-nombre">Fenlora Visual Studio</div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- DISCLAIMER -->
+  <div class="disclaimer">
+    Este conductor ha sido registrado y verificado por el equipo de Fenlora. La información de identidad y vehículo fue validada en el momento del registro.<br><br>
+    Fenlora es un directorio informativo — la contratación es directa entre el turista y el conductor. Fenlora no es intermediario ni responsable de los servicios.
+  </div>
+
+</div>
+
+<script>
+const SUPA_URL = 'https://ikcutinvnkktfasgnanv.supabase.co';
+const SUPA_KEY = 'sb_publishable_G_MCq1M-a_CM77AKPocYvA_KOgmiw7h';
+
+const MUN_CONFIG = {
+  mariquita: { emoji:'🥭', ruta:'Ruta del Mangostino', zona:'Mariquita, Tolima' },
+  chaparral: { emoji:'☕', ruta:'Ruta del Café y la Paz', zona:'Chaparral, Tolima' },
+};
+
+const CAT_LABELS = {
+  taxi:'Taxi',moto:'Mototransporte',chiva:'Chiva / Escalera',
+  alqmoto:'Moto en alquiler',alqbici:'Bici en alquiler',
+  vereda:'Transporte veredal',fletero:'Fletero / Carga'
+};
+
+async function cargarPerfil() {
+  const uuid = new URLSearchParams(window.location.search).get('id');
+  if (!uuid) { mostrarError(); return; }
+
+  try {
+    const res = await fetch(SUPA_URL + '/rest/v1/businesses?id=eq.' + uuid + '&select=*', {
+      headers: { 'apikey': SUPA_KEY, 'Authorization': 'Bearer ' + SUPA_KEY }
+    });
+    const data = await res.json();
+    if (!Array.isArray(data) || !data.length) { mostrarError(); return; }
+    const d = data[0];
+    renderPerfil(d);
+  } catch(e) {
+    mostrarError();
+  }
+}
+
+function renderPerfil(d) {
+  document.getElementById('loading-screen').style.display = 'none';
+  var app = document.getElementById('app');
+  app.style.display = 'flex';
+
+  // Nombre
+  document.getElementById('nombre').textContent = d.name || 'Conductor';
+  var cat = CAT_LABELS[d.category] || d.category || 'Transporte';
+  document.getElementById('tipo').textContent = cat;
+
+  // Municipio / zona
+  var mun = d.municipio || 'mariquita';
+  var munCfg = MUN_CONFIG[mun] || MUN_CONFIG.mariquita;
+  document.getElementById('zona').textContent = cat + ' · ' + munCfg.zona;
+  document.getElementById('zona2').textContent = (d.addons && d.addons.zona) ? d.addons.zona : munCfg.zona;
+  document.getElementById('ruta-emoji').textContent = munCfg.emoji;
+  document.getElementById('ruta-nombre').textContent = munCfg.ruta;
+
+  // Placa
+  var placa = (d.addons && d.addons.placa) ? d.addons.placa : (d.plate || '—');
+  document.getElementById('placa').textContent = placa;
+
+  // Disponibilidad
+  var dot = document.getElementById('status-dot');
+  var txt = document.getElementById('status-txt');
+  if (d.disponible) {
+    dot.className = 'status-dot activo';
+    txt.className = 'status-txt activo';
+    txt.textContent = 'Disponible ahora';
+  } else {
+    dot.className = 'status-dot inactivo';
+    txt.className = 'status-txt inactivo';
+    txt.textContent = 'No disponible en este momento';
+  }
+
+  // Foto conductor
+  var fotoUrl = d.addons && d.addons.foto_url ? d.addons.foto_url : null;
+  if (fotoUrl) {
+    var img = document.getElementById('hero-img');
+    img.src = fotoUrl;
+    img.style.display = 'block';
+    document.getElementById('hero-placeholder').style.display = 'none';
+  }
+
+  // Foto vehículo
+  var fotoVeh = d.addons && d.addons.foto_vehiculo_url ? d.addons.foto_vehiculo_url : null;
+  var vWrap = document.getElementById('vehiculo-wrap');
+  if (fotoVeh) {
+    vWrap.innerHTML = '<img src="' + fotoVeh + '" alt="Vehículo" style="width:100%;height:100%;object-fit:cover">';
+  } else {
+    var emojis = {taxi:'🚕',moto:'🏍️',chiva:'🚌',alqmoto:'🏍️',alqbici:'🚲',vereda:'🚐',fletero:'🚛'};
+    vWrap.textContent = emojis[d.category] || '🚗';
+  }
+
+  // Color / Modelo vehículo
+  var vehiculoInfo = d.addons && d.addons.vehiculo ? d.addons.vehiculo : '—';
+  document.getElementById('vehiculo').textContent = vehiculoInfo;
+
+  // Cédula enmascarada
+  var cc = d.addons && d.addons.cedula ? d.addons.cedula : '';
+  if (cc && cc.length >= 4) {
+    document.getElementById('cedula-masked').textContent = '•••••' + cc.slice(-4);
+  } else {
+    document.getElementById('cedula-masked').textContent = 'Verificada';
+  }
+
+  // Teléfono
+  var tel = d.phone || '';
+  var telLimpio = tel.replace(/\D/g,'');
+  if (telLimpio) {
+    document.getElementById('btn-llamar').href = 'tel:' + telLimpio;
+    document.getElementById('btn-wsp').href = 'https://wa.me/57' + telLimpio.slice(-10) + '?text=' + encodeURIComponent('Hola ' + (d.name||'conductor') + ', te vi en el mapa de Fenlora y quiero solicitar un servicio.');
+  }
+
+  // Nota del conductor
+  var nota = d.addons && d.addons.nota ? d.addons.nota : '';
+  if (nota) {
+    document.getElementById('nota-txt').textContent = nota;
+    document.getElementById('nota-box').style.display = 'block';
+  }
+
+  // Título de la página
+  document.title = (d.name || 'Conductor') + ' · Fenlora';
+}
+
+function mostrarError() {
+  document.getElementById('loading-screen').style.display = 'none';
+  document.getElementById('error-screen').style.display = 'flex';
+}
+
+cargarPerfil();
+</script>
+</body>
+</html>

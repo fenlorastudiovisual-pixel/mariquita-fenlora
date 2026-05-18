@@ -475,26 +475,26 @@ tr:hover td{background:var(--bg3)}
         <div class="metric-card">
           <div class="metric-label">🏪 Clientes activos</div>
           <div class="metric-val" id="dash-total-clientes">0</div>
-          <div class="metric-sub">De 350 negocios potenciales</div>
-          <div class="metric-delta delta-up">▲ +8 este mes</div>
+          <div class="metric-sub">Negocios registrados</div>
+          <div class="metric-delta" style="color:var(--text3)">— Empezando</div>
         </div>
         <div class="metric-card">
           <div class="metric-label">💰 Ingresos mayo</div>
-          <div class="metric-val">$9.4M</div>
-          <div class="metric-sub">COP · Meta: $12M</div>
-          <div class="metric-delta delta-up">▲ +18% vs abril</div>
+          <div class="metric-val">$0</div>
+          <div class="metric-sub">COP · Sin ingresos aún</div>
+          <div class="metric-delta" style="color:var(--text3)">— Empezando</div>
         </div>
         <div class="metric-card">
           <div class="metric-label">🔄 Renovaciones pendientes</div>
-          <div class="metric-val">8</div>
+          <div class="metric-val" id="dash-renov">0</div>
           <div class="metric-sub">Próximos 15 días</div>
-          <div class="metric-delta delta-down">▼ 2 en mora</div>
+          <div class="metric-delta" style="color:var(--text3)">— Sin pendientes</div>
         </div>
         <div class="metric-card">
           <div class="metric-label">👁️ Vistas al mapa (mayo)</div>
-          <div class="metric-val">4.2K</div>
-          <div class="metric-sub">Clics en puntos del mapa</div>
-          <div class="metric-delta delta-up">▲ +34% vs abril</div>
+          <div class="metric-val">—</div>
+          <div class="metric-sub">Conectar analytics</div>
+          <div class="metric-delta" style="color:var(--text3)">— Sin datos aún</div>
         </div>
       </div>
 
@@ -553,41 +553,7 @@ tr:hover td{background:var(--bg3)}
             <div class="panel-title">Actividad reciente</div>
           </div>
           <div class="panel-body" style="padding:8px 18px">
-            <div class="alert-log-item">
-              <div class="alert-dot" style="background:#4CAF82"></div>
-              <div>
-                <div class="alert-log-text">Cotización recibida: turista pregunta por 3 hoteles</div>
-                <div class="alert-log-meta">Hace 12 min · Desde Bogotá</div>
-              </div>
-            </div>
-            <div class="alert-log-item">
-              <div class="alert-dot" style="background:var(--gold)"></div>
-              <div>
-<div class="alert-log-text">Sin actividad reciente</div>
-                <div class="alert-log-meta">Hace 34 min</div>
-              </div>
-            </div>
-            <div class="alert-log-item">
-              <div class="alert-dot" style="background:#E57373"></div>
-              <div>
-                <div class="alert-log-text"><strong>Alerta fraude</strong> enviada · 67 negocios notificados</div>
-                <div class="alert-log-meta">Hace 2 horas · Por: Admin Fenlora</div>
-              </div>
-            </div>
-            <div class="alert-log-item">
-              <div class="alert-dot" style="background:#4CAF82"></div>
-              <div>
-<div class="alert-log-text">—</div>
-                <div class="alert-log-meta">Hoy 9:14am</div>
-              </div>
-            </div>
-            <div class="alert-log-item">
-              <div class="alert-dot" style="background:var(--gold)"></div>
-              <div>
-                <div class="alert-log-text">Menú actualizado: Otto Sabor y Café — 3 precios</div>
-                <div class="alert-log-meta">Ayer 4:22pm</div>
-              </div>
-            </div>
+            <div id="actividad-feed" style="color:var(--text3);font-size:12px;padding:16px 0;text-align:center">Sin actividad reciente</div>
           </div>
         </div>
       </div>
@@ -597,37 +563,21 @@ tr:hover td{background:var(--bg3)}
         <div class="panel-card">
           <div class="panel-hdr"><div class="panel-title">Mix de planes</div></div>
           <div class="panel-body">
-            <div class="metric-bar-wrap">
-              <div class="metric-bar-label"><span>Básico · 38 clientes</span><span>$3.416.200</span></div>
-              <div class="metric-bar-bg"><div class="metric-bar-fill" style="width:54%;background:#8A8680"></div></div>
-            </div>
-            <div class="metric-bar-wrap">
-              <div class="metric-bar-label"><span>Pro · 24 clientes</span><span>$4.317.600</span></div>
-              <div class="metric-bar-bg"><div class="metric-bar-fill" style="width:34%;background:var(--gold)"></div></div>
-            </div>
-            <div class="metric-bar-wrap">
-              <div class="metric-bar-label"><span>Premium · 9 clientes</span><span>$2.969.100</span></div>
-              <div class="metric-bar-bg"><div class="metric-bar-fill" style="width:13%;background:#FFB940"></div></div>
-            </div>
+            <div id="mix-planes-content" style="color:var(--text3);font-size:12px;padding:16px 0;text-align:center">Sin clientes registrados aún</div>
           </div>
         </div>
         <div class="panel-card">
           <div class="panel-hdr"><div class="panel-title">Top negocios (vistas)</div></div>
           <div class="panel-body">
-<div class="stat-row"><div class="sl" style="color:var(--text3)">Sin datos aún</div><div class="sv">—</div></div>
-            <div class="stat-row"><div class="sl">Cataratas de Medina</div><div class="sv">298</div></div>
-            <div class="stat-row"><div class="sl">Finca Brabante</div><div class="sv">241</div></div>
-            <div class="stat-row"><div class="sl">Otto Sabor y Café</div><div class="sv">187</div></div>
+<div style="color:var(--text3);font-size:12px;padding:16px 0;text-align:center">Sin datos de vistas aún</div>
           </div>
         </div>
         <div class="panel-card">
           <div class="panel-hdr"><div class="panel-title">Cotizaciones del mes</div></div>
           <div class="panel-body">
-            <div class="stat-row"><div class="sl">Recibidas</div><div class="sv">23</div></div>
-            <div class="stat-row"><div class="sl">Respondidas</div><div class="sv">19</div></div>
-            <div class="stat-row"><div class="sl">Convertidas a venta</div><div class="sv">7</div></div>
-            <div class="stat-row"><div class="sl">Tasa de conversión</div><div class="sv">30%</div></div>
-            <div class="stat-row"><div class="sl">WhatsApps generados</div><div class="sv">54</div></div>
+<div class="stat-row"><div class="sl">Recibidas</div><div class="sv">0</div></div>
+            <div class="stat-row"><div class="sl">Respondidas</div><div class="sv">0</div></div>
+            <div class="stat-row"><div class="sl">Conversión</div><div class="sv">—</div></div>
           </div>
         </div>
       </div>
@@ -910,53 +860,17 @@ tr:hover td{background:var(--bg3)}
         Es un argumento de venta poderoso para que los negocios renueven su suscripción.
       </div>
       <div class="metrics-grid" style="grid-template-columns:repeat(4,1fr)">
-        <div class="metric-card"><div class="metric-label">📋 Pendientes</div><div class="metric-val">5</div><div class="metric-sub">Sin responder</div></div>
-        <div class="metric-card"><div class="metric-label">✅ Respondidas</div><div class="metric-val">19</div><div class="metric-sub">Este mes</div></div>
-        <div class="metric-card"><div class="metric-label">💬 WhatsApps gen.</div><div class="metric-val">54</div><div class="metric-sub">Leads directos</div></div>
-        <div class="metric-card"><div class="metric-label">🎯 Conversión</div><div class="metric-val">30%</div><div class="metric-sub">Cotización → cliente</div></div>
+        <div class="metric-card"><div class="metric-label">📋 Pendientes</div><div class="metric-val">0</div><div class="metric-sub">Sin responder</div></div>
+        <div class="metric-card"><div class="metric-label">✅ Respondidas</div><div class="metric-val">0</div><div class="metric-sub">Este mes</div></div>
+        <div class="metric-card"><div class="metric-label">💬 WhatsApps gen.</div><div class="metric-val">0</div><div class="metric-sub">Leads directos</div></div>
+        <div class="metric-card"><div class="metric-label">🎯 Conversión</div><div class="metric-val">—</div><div class="metric-sub">Sin datos aún</div></div>
       </div>
       <div class="section-header">
         <div class="section-title">Solicitudes de cotización recientes</div>
         <div style="font-size:12px;color:var(--text3)">Los turistas piden presupuesto a varios negocios al tiempo desde el mapa</div>
       </div>
-      <div id="cotiz-list">
-        <div class="cotiz-card">
-          <div class="cotiz-header"><div class="cotiz-from">María Rodríguez · Bogotá</div><div class="cotiz-time">Hace 12 min</div></div>
-          <div class="cotiz-msg">"Hola, viajamos 4 personas el puente. Necesitamos hospedaje para 2 noches con desayuno incluido. ¿Tienen disponibilidad 17–19 mayo?"</div>
-          <div class="cotiz-negocios">Sin destinatarios aún</div>
-          <div style="display:flex;gap:6px">
-            <span class="badge b-vence">⏳ Sin respuesta</span>
-            <button class="btn-sm gold" onclick="showNotif('Notificación enviada a los 3 hoteles ✓')">Notificar negocios</button>
-            <button class="btn-sm" onclick="showNotif('Enlace copiado al portapapeles')">Ver detalle</button>
-          </div>
-        </div>
-        <div class="cotiz-card">
-          <div class="cotiz-header"><div class="cotiz-from">Carlos Mendoza · Ibagué</div><div class="cotiz-time">Hace 1 hora</div></div>
-          <div class="cotiz-msg">"Buscamos almuerzo típico tolimense para grupo de 15 personas el sábado. ¿Qué opciones hay? ¿Manejan menú ejecutivo?"</div>
-          <div class="cotiz-negocios">Sin destinatarios aún</div>
-          <div style="display:flex;gap:6px">
-            <span class="badge b-active">✅ 2 respondieron</span>
-            <button class="btn-sm" onclick="showNotif('Ver respuestas')">Ver respuestas</button>
-          </div>
-        </div>
-        <div class="cotiz-card">
-          <div class="cotiz-header"><div class="cotiz-from">Turista anónimo · Medellín</div><div class="cotiz-time">Hace 3 horas</div></div>
-          <div class="cotiz-msg">"¿Cuánto cuesta el tour de mangostino? ¿Se puede ir con niños? Somos 6 adultos y 2 niños."</div>
-          <div class="cotiz-negocios">Sin destinatarios aún</div>
-          <div style="display:flex;gap:6px">
-            <span class="badge b-active">✅ 3 respondieron</span>
-            <button class="btn-sm" onclick="showNotif('Ver respuestas')">Ver respuestas</button>
-          </div>
-        </div>
-        <div class="cotiz-card">
-          <div class="cotiz-header"><div class="cotiz-from">Laura Gómez · Cali</div><div class="cotiz-time">Ayer 6:45pm</div></div>
-          <div class="cotiz-msg">"¿Tienen disponibilidad de glamping para este fin de semana? ¿Qué incluye? ¿Hay WiFi?"</div>
-          <div class="cotiz-negocios">Sin destinatarios aún</div>
-          <div style="display:flex;gap:6px">
-            <span class="badge b-active">✅ 1 respondió</span>
-            <button class="btn-sm" onclick="showNotif('Ver respuestas')">Ver respuestas</button>
-          </div>
-        </div>
+      <div id="cotiz-list" style="color:var(--text3);font-size:12px;padding:32px;text-align:center">
+        Sin solicitudes de cotización aún. Cuando un turista use el botón de cotización en el mapa, aparecerá aquí.
       </div>
     </div>
 
@@ -1104,45 +1018,10 @@ tr:hover td{background:var(--bg3)}
         <div class="panel-card">
           <div class="panel-hdr">
             <div class="panel-title">Descuentos activos</div>
-            <div class="table-sub" style="margin-left:8px">8 activos</div>
+            <div class="table-sub" id="desc-count-label" style="margin-left:8px">0 activos</div>
           </div>
           <div class="panel-body" style="padding:8px 18px" id="descuentos-lista">
-            <div class="discount-row" style="position:relative">
-              <div><div class="discount-name">El Gran Ranchón</div><div class="discount-meta">Cód: MANGO20 · 47/100 usos · Vence 31 mayo</div></div>
-              <div class="discount-pct">20%</div>
-              <div class="toggle on" onclick="this.classList.toggle('on')"></div>
-              <button onclick="this.closest('.discount-row').remove();showNotif('Descuento eliminado')" style="background:transparent;border:none;color:var(--red);cursor:pointer;font-size:14px;padding:0 4px" title="Eliminar">✕</button>
-            </div>
-            <div class="discount-row" style="position:relative">
-<div><div class="discount-name" style="color:var(--text3)">Sin descuentos activos</div></div>
-              <div class="discount-pct">15%</div>
-              <div class="toggle on" onclick="this.classList.toggle('on')"></div>
-              <button onclick="this.closest('.discount-row').remove();showNotif('Descuento eliminado')" style="background:transparent;border:none;color:var(--red);cursor:pointer;font-size:14px;padding:0 4px" title="Eliminar">✕</button>
-            </div>
-            <div class="discount-row" style="position:relative">
-              <div><div class="discount-name">Cataratas de Medina (tour)</div><div class="discount-meta">Cód: CATA10 · 12/50 usos · Vence 30 jun</div></div>
-              <div class="discount-pct">10%</div>
-              <div class="toggle on" onclick="this.classList.toggle('on')"></div>
-              <button onclick="this.closest('.discount-row').remove();showNotif('Descuento eliminado')" style="background:transparent;border:none;color:var(--red);cursor:pointer;font-size:14px;padding:0 4px" title="Eliminar">✕</button>
-            </div>
-            <div class="discount-row" style="position:relative">
-              <div><div class="discount-name">Selvatik Rutas · Grupos</div><div class="discount-meta">Min 4 personas · Ilimitado · Permanente</div></div>
-              <div class="discount-pct">15%</div>
-              <div class="toggle on" onclick="this.classList.toggle('on')"></div>
-              <button onclick="this.closest('.discount-row').remove();showNotif('Descuento eliminado')" style="background:transparent;border:none;color:var(--red);cursor:pointer;font-size:14px;padding:0 4px" title="Eliminar">✕</button>
-            </div>
-            <div class="discount-row" style="position:relative">
-              <div><div class="discount-name">Casa Lumka Spa</div><div class="discount-meta">Cód: SPA25 · 8/30 usos · Vence 15 jun</div></div>
-              <div class="discount-pct">25%</div>
-              <div class="toggle" onclick="this.classList.toggle('on')"></div>
-              <button onclick="this.closest('.discount-row').remove();showNotif('Descuento eliminado')" style="background:transparent;border:none;color:var(--red);cursor:pointer;font-size:14px;padding:0 4px" title="Eliminar">✕</button>
-            </div>
-            <div class="discount-row" style="position:relative">
-              <div><div class="discount-name">🎉 Campaña Feria Mangostino</div><div class="discount-meta">Todos los restaurantes · 34 negocios · 20 mayo</div></div>
-              <div class="discount-pct">10%</div>
-              <div class="toggle" onclick="this.classList.toggle('on')"></div>
-              <button onclick="this.closest('.discount-row').remove();showNotif('Descuento eliminado')" style="background:transparent;border:none;color:var(--red);cursor:pointer;font-size:14px;padding:0 4px" title="Eliminar">✕</button>
-            </div>
+            <div style="color:var(--text3);font-size:12px;padding:24px 0;text-align:center">Sin descuentos activos. Crea el primero usando el formulario.</div>
           </div>
         </div>
       </div>
@@ -1170,42 +1049,7 @@ tr:hover td{background:var(--bg3)}
               </div>
               <span class="badge b-active">Siempre</span>
             </div>
-            <div class="totem-slot">
-              <div class="totem-order">2</div>
-              <div class="totem-thumb">🏨</div>
-              <div class="totem-info">
-                <div class="totem-name">Terrakota Heritage House</div>
-                <div class="totem-dur">25 seg · Plan Premium</div>
-              </div>
-              <button class="btn-sm" onclick="showNotif('Spot pausado')">⏸</button>
-            </div>
-            <div class="totem-slot">
-              <div class="totem-order">3</div>
-              <div class="totem-thumb">🌿</div>
-              <div class="totem-info">
-                <div class="totem-name">Eco Glamping Shalom</div>
-                <div class="totem-dur">20 seg · Plan Premium</div>
-              </div>
-              <button class="btn-sm" onclick="showNotif('Spot pausado')">⏸</button>
-            </div>
-            <div class="totem-slot">
-              <div class="totem-order">4</div>
-              <div class="totem-thumb">🍽️</div>
-              <div class="totem-info">
-                <div class="totem-name">El Gran Ranchón</div>
-                <div class="totem-dur">20 seg · Add-on $95.000/mes</div>
-              </div>
-              <button class="btn-sm" onclick="showNotif('Spot pausado')">⏸</button>
-            </div>
-            <div class="totem-slot">
-              <div class="totem-order">5</div>
-              <div class="totem-thumb">🧴</div>
-              <div class="totem-info">
-                <div class="totem-name">Casa Lumka Spa</div>
-                <div class="totem-dur">25 seg · Plan Premium</div>
-              </div>
-              <button class="btn-sm" onclick="showNotif('Spot pausado')">⏸</button>
-            </div>
+            <div style="color:var(--text3);font-size:12px;padding:12px 0;text-align:center">Los spots de negocios aparecerán aquí cuando tengas clientes con Plan Premium.</div>
             <div class="totem-slot">
               <div class="totem-order">6</div>
               <div class="totem-thumb">📋</div>
@@ -1226,33 +1070,14 @@ tr:hover td{background:var(--bg3)}
             <div class="metrics-grid" style="grid-template-columns:1fr 1fr;margin-bottom:12px">
               <div class="metric-card" style="background:var(--bg3)">
                 <div class="metric-label" style="font-size:10px">Impresiones hoy</div>
-                <div class="metric-val" style="font-size:20px">1.240</div>
+                <div class="metric-val" style="font-size:20px">—</div>
               </div>
               <div class="metric-card" style="background:var(--bg3)">
                 <div class="metric-label" style="font-size:10px">QR escaneados</div>
-                <div class="metric-val" style="font-size:20px">87</div>
+                <div class="metric-val" style="font-size:20px">—</div>
               </div>
             </div>
-            <div class="metric-bar-wrap">
-              <div class="metric-bar-label"><span>Terrakota Heritage</span><span>312 imp.</span></div>
-              <div class="metric-bar-bg"><div class="metric-bar-fill" style="width:85%"></div></div>
-            </div>
-            <div class="metric-bar-wrap">
-              <div class="metric-bar-label"><span>Casa Lumka Spa</span><span>287 imp.</span></div>
-              <div class="metric-bar-bg"><div class="metric-bar-fill" style="width:74%"></div></div>
-            </div>
-            <div class="metric-bar-wrap">
-              <div class="metric-bar-label"><span>El Gran Ranchón</span><span>198 imp.</span></div>
-              <div class="metric-bar-bg"><div class="metric-bar-fill" style="width:51%"></div></div>
-            </div>
-            <div class="metric-bar-wrap">
-              <div class="metric-bar-label"><span>Eco Glamping Shalom</span><span>172 imp.</span></div>
-              <div class="metric-bar-bg"><div class="metric-bar-fill" style="width:44%"></div></div>
-            </div>
-            <div class="metric-bar-wrap">
-              <div class="metric-bar-label"><span>Intro Fenlora/Ruta</span><span>271 imp.</span></div>
-              <div class="metric-bar-bg"><div class="metric-bar-fill" style="width:70%;background:var(--text3)"></div></div>
-            </div>
+            <div style="color:var(--text3);font-size:12px;padding:12px 0;text-align:center">Sin estadísticas aún</div>
           </div>
         </div>
       </div>
@@ -1569,10 +1394,10 @@ tr:hover td{background:var(--bg3)}
           Cuando conectes Supabase, estos números serán reales y exportables.
         </div>
         <div class="metrics-grid">
-          <div class="metric-card"><div class="metric-label">💰 Ingreso acumulado 2026</div><div class="metric-val">$38.2M</div><div class="metric-sub">Ene – May 2026</div><div class="metric-delta delta-up">▲ +42% vs 2025</div></div>
-          <div class="metric-card"><div class="metric-label">📊 Promedio mensual</div><div class="metric-val">$7.6M</div><div class="metric-sub">Suscripciones + add-ons</div><div class="metric-delta delta-up">▲ Meta: $12M/mes</div></div>
-          <div class="metric-card"><div class="metric-label">📉 Cancelaciones</div><div class="metric-val">4.2%</div><div class="metric-sub">Churn rate mensual</div><div class="metric-delta delta-down">▼ Industria: 6%</div></div>
-          <div class="metric-card"><div class="metric-label">💼 Clientes activos</div><div class="metric-val" id="rep-total-clientes">71</div><div class="metric-sub">De 350 potenciales</div><div class="metric-delta delta-up">▲ +8 este mes</div></div>
+          <div class="metric-card"><div class="metric-label">💰 Ingreso acumulado 2026</div><div class="metric-val">$0</div><div class="metric-sub">Sin ingresos aún</div><div class="metric-delta" style="color:var(--text3)">— Empezando</div></div>
+          <div class="metric-card"><div class="metric-label">📊 Promedio mensual</div><div class="metric-val">$0</div><div class="metric-sub">Sin clientes aún</div><div class="metric-delta" style="color:var(--text3)">—</div></div>
+          <div class="metric-card"><div class="metric-label">📉 Cancelaciones</div><div class="metric-val">—</div><div class="metric-sub">Sin datos aún</div><div class="metric-delta" style="color:var(--text3)">—</div></div>
+          <div class="metric-card"><div class="metric-label">💼 Clientes activos</div><div class="metric-val" id="rep-total-clientes">0</div><div class="metric-sub">Negocios suscritos</div><div class="metric-delta" style="color:var(--text3)">— Empezando</div></div>
         </div>
         <div class="two-col">
           <div class="panel-card">
@@ -1581,19 +1406,13 @@ tr:hover td{background:var(--bg3)}
               <button class="btn-sm gold" style="margin-left:auto" onclick="exportarReporteFinanciero()">📄 Exportar</button>
             </div>
             <div class="panel-body">
-              <div class="metric-bar-wrap" style="margin-bottom:12px"><div class="metric-bar-label"><span>Enero</span><span>$5.2M</span></div><div class="metric-bar-bg" style="height:8px"><div class="metric-bar-fill" style="width:43%"></div></div></div>
-              <div class="metric-bar-wrap" style="margin-bottom:12px"><div class="metric-bar-label"><span>Febrero</span><span>$6.1M</span></div><div class="metric-bar-bg" style="height:8px"><div class="metric-bar-fill" style="width:51%"></div></div></div>
-              <div class="metric-bar-wrap" style="margin-bottom:12px"><div class="metric-bar-label"><span>Marzo</span><span>$7.4M</span></div><div class="metric-bar-bg" style="height:8px"><div class="metric-bar-fill" style="width:62%"></div></div></div>
-              <div class="metric-bar-wrap" style="margin-bottom:12px"><div class="metric-bar-label"><span>Abril</span><span>$9.0M</span></div><div class="metric-bar-bg" style="height:8px"><div class="metric-bar-fill" style="width:75%"></div></div></div>
-              <div class="metric-bar-wrap" style="margin-bottom:12px"><div class="metric-bar-label"><span>Mayo</span><span>$10.5M</span></div><div class="metric-bar-bg" style="height:8px"><div class="metric-bar-fill" style="width:87%"></div></div></div>
+              <div style="color:var(--text3);font-size:12px;padding:16px 0;text-align:center">Sin ingresos registrados aún. Los datos aparecerán aquí cuando registres pagos de clientes.</div>
             </div>
           </div>
           <div class="panel-card">
             <div class="panel-hdr"><div class="panel-title">Distribución por plan</div></div>
             <div class="panel-body">
-              <div class="metric-bar-wrap" style="margin-bottom:12px"><div class="metric-bar-label"><span>Básico · 38 clientes</span><span>$3.4M/mes</span></div><div class="metric-bar-bg" style="height:8px"><div class="metric-bar-fill" style="width:32%"></div></div></div>
-              <div class="metric-bar-wrap" style="margin-bottom:12px"><div class="metric-bar-label"><span>Pro · 24 clientes</span><span>$4.3M/mes</span></div><div class="metric-bar-bg" style="height:8px"><div class="metric-bar-fill" style="width:40%"></div></div></div>
-              <div class="metric-bar-wrap" style="margin-bottom:12px"><div class="metric-bar-label"><span>Premium · 9 clientes</span><span>$3.0M/mes</span></div><div class="metric-bar-bg" style="height:8px"><div class="metric-bar-fill" style="width:28%"></div></div></div>
+              <div id="rep-dist-planes" style="color:var(--text3);font-size:12px;padding:16px 0;text-align:center">Sin clientes registrados aún</div>
             </div>
           </div>
         </div>
@@ -1650,7 +1469,7 @@ tr:hover td{background:var(--bg3)}
           </div>
           <div class="panel-body" style="padding:8px 18px" id="rutas-list">
             <!-- 🥭 MARIQUITA -->
-            <div style="font-size:9px;font-weight:700;color:var(--gold);letter-spacing:.1em;text-transform:uppercase;padding:8px 0 4px">🥭 Mariquita</div>
+            <div data-sec-municipio="mariquita" style="font-size:9px;font-weight:700;color:var(--gold);letter-spacing:.1em;text-transform:uppercase;padding:8px 0 4px">🥭 Mariquita</div>
             <div data-municipio="mariquita" style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)">
               <div style="width:48px;height:48px;border-radius:8px;overflow:hidden;flex-shrink:0"><img src="https://images.unsplash.com/photo-1416879595882-3373a0480b5b?w=80&q=60" style="width:100%;height:100%;object-fit:cover"></div>
               <div style="flex:1"><div style="font-size:13px;font-weight:500;color:var(--text)">🍇 Ruta del Mangostino</div><div style="font-size:11px;color:var(--text3)">5 paradas · Medio día · 4–5 h</div></div>
@@ -1694,7 +1513,7 @@ tr:hover td{background:var(--bg3)}
               <button class="btn-sm" onclick="deleteRuta('r6')" style="color:var(--red)">🗑️</button>
             </div>
             <!-- ☕ CHAPARRAL -->
-            <div style="font-size:9px;font-weight:700;color:var(--gold);letter-spacing:.1em;text-transform:uppercase;padding:12px 0 4px">☕ Chaparral</div>
+            <div data-sec-municipio="chaparral" style="font-size:9px;font-weight:700;color:var(--gold);letter-spacing:.1em;text-transform:uppercase;padding:12px 0 4px">☕ Chaparral</div>
             <div data-municipio="chaparral" style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)">
               <div style="width:48px;height:48px;border-radius:8px;overflow:hidden;background:rgba(200,134,10,.1);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:22px">☕</div>
               <div style="flex:1"><div style="font-size:13px;font-weight:500;color:var(--text)">☕ Ruta del Café de Origen</div><div style="font-size:11px;color:var(--text3)">Fincas cafeteras · Degustación · Medio día</div></div>
@@ -1749,10 +1568,10 @@ tr:hover td{background:var(--bg3)}
         </select>
       </div>
       <div class="metrics-grid" style="grid-template-columns:repeat(4,1fr)">
-        <div class="metric-card"><div class="metric-label">⭐ Reseñas totales</div><div class="metric-val">47</div><div class="metric-sub">Acumuladas</div></div>
-        <div class="metric-card"><div class="metric-label">🌟 Promedio global</div><div class="metric-val">4.6</div><div class="metric-sub">De 5 estrellas</div></div>
-        <div class="metric-card"><div class="metric-label">📅 Esta semana</div><div class="metric-val">12</div><div class="metric-delta delta-up">▲ +5 vs semana ant.</div></div>
-        <div class="metric-card"><div class="metric-label">⚠️ Pendientes revisión</div><div class="metric-val" style="color:var(--gold)">3</div><div class="metric-sub">Sin aprobar</div></div>
+        <div class="metric-card"><div class="metric-label">⭐ Reseñas totales</div><div class="metric-val" id="res-total">0</div><div class="metric-sub">Acumuladas</div></div>
+        <div class="metric-card"><div class="metric-label">🌟 Promedio global</div><div class="metric-val">—</div><div class="metric-sub">De 5 estrellas</div></div>
+        <div class="metric-card"><div class="metric-label">📅 Esta semana</div><div class="metric-val">0</div><div class="metric-delta" style="color:var(--text3)">—</div></div>
+        <div class="metric-card"><div class="metric-label">⚠️ Pendientes revisión</div><div class="metric-val" style="color:var(--gold)">0</div><div class="metric-sub">Sin aprobar</div></div>
       </div>
       <div class="two-col">
         <div class="panel-card">
@@ -1760,10 +1579,9 @@ tr:hover td{background:var(--bg3)}
             <div class="panel-title">Últimas reseñas recibidas</div>
             <div class="table-actions">
               <select style="background:var(--bg3);border:1px solid var(--border);border-radius:7px;padding:5px 9px;color:var(--text2);font-size:11px;outline:none">
-                <option>Todos los negocios</option>
-                <option>Terrakota Heritage</option>
-                <option>El Gran Ranchón</option>
-                <option>Cataratas de Medina</option>
+                <option>Todos los puntos</option>
+                <option>Casa de la Expedición Botánica · Mutis</option>
+                <option>Plaza Principal de Mariquita</option>
               </select>
               <select style="background:var(--bg3);border:1px solid var(--border);border-radius:7px;padding:5px 9px;color:var(--text2);font-size:11px;outline:none">
                 <option>Todas las calificaciones</option>
@@ -1784,26 +1602,7 @@ tr:hover td{background:var(--bg3)}
             <div class="panel-title">Top negocios por calificación</div>
           </div>
           <div class="panel-body" style="padding:8px 18px">
-            <div class="metric-bar-wrap">
-              <div class="metric-bar-label"><span>Terrakota Heritage ⭐ 4.8</span><span>23 reseñas</span></div>
-              <div class="metric-bar-bg"><div class="metric-bar-fill" style="width:96%"></div></div>
-            </div>
-            <div class="metric-bar-wrap">
-              <div class="metric-bar-label"><span>Casa Mutis ⭐ 4.7</span><span>8 reseñas</span></div>
-              <div class="metric-bar-bg"><div class="metric-bar-fill" style="width:94%"></div></div>
-            </div>
-            <div class="metric-bar-wrap">
-              <div class="metric-bar-label"><span>Cataratas de Medina ⭐ 4.5</span><span>11 reseñas</span></div>
-              <div class="metric-bar-bg"><div class="metric-bar-fill" style="width:90%"></div></div>
-            </div>
-            <div class="metric-bar-wrap">
-              <div class="metric-bar-label"><span>El Gran Ranchón ⭐ 4.4</span><span>5 reseñas</span></div>
-              <div class="metric-bar-bg"><div class="metric-bar-fill" style="width:88%"></div></div>
-            </div>
-            <div class="metric-bar-wrap">
-              <div class="metric-bar-label"><span>Selvatik Rutas ⭐ 4.3</span><span>4 reseñas</span></div>
-              <div class="metric-bar-bg"><div class="metric-bar-fill" style="width:86%"></div></div>
-            </div>
+            <div style="color:var(--text3);font-size:12px;padding:16px 0;text-align:center">Sin reseñas aún</div>
           </div>
         </div>
         <!-- Panel de filtro de malas palabras -->
@@ -1836,8 +1635,8 @@ tr:hover td{background:var(--bg3)}
         <strong>¿Cómo se ve en el mapa?</strong> Cuando el turista activa EN, el panel de cada negocio muestra el texto que escribiste aquí. Si está vacío, muestra el texto en español.
       </div>
       <div class="metrics-grid" style="grid-template-columns:repeat(3,1fr)">
-        <div class="metric-card"><div class="metric-label">✅ Traducidos</div><div class="metric-val" style="color:#4CAF82">9</div><div class="metric-sub">Puntos históricos y públicos</div></div>
-        <div class="metric-card"><div class="metric-label">⏳ Pendientes</div><div class="metric-val" style="color:var(--gold)">16</div><div class="metric-sub">Sin descripción EN</div></div>
+        <div class="metric-card"><div class="metric-label">✅ Traducidos</div><div class="metric-val" style="color:#4CAF82" id="trans-done">0</div><div class="metric-sub">Puntos históricos y públicos</div></div>
+        <div class="metric-card"><div class="metric-label">⏳ Pendientes</div><div class="metric-val" style="color:var(--gold)" id="trans-pending">—</div><div class="metric-sub">Sin descripción EN</div></div>
         <div class="metric-card"><div class="metric-label">🌐 Toggle activo</div><div class="metric-val">ES+EN</div><div class="metric-sub">Botón en el mapa</div></div>
       </div>
       <div class="panel-card">
@@ -4322,8 +4121,13 @@ function enviarLinkConductor(btn) {
 // ── FILTROS MUNICIPIO — RUTAS, EVENTOS, RESEÑAS, CLIMA, REPORTES ──
 function filtrarRutas() {
   var mun = document.getElementById('rutas-municipio')?.value || '';
-  document.querySelectorAll('#mod-rutas [data-municipio]').forEach(function(el) {
+  // Ocultar/mostrar filas con data-municipio
+  document.querySelectorAll('#rutas-list [data-municipio]').forEach(function(el) {
     el.style.display = (!mun || el.dataset.municipio === mun) ? '' : 'none';
+  });
+  // Ocultar/mostrar headers de sección
+  document.querySelectorAll('#rutas-list [data-sec-municipio]').forEach(function(el) {
+    el.style.display = (!mun || el.dataset.secMunicipio === mun) ? '' : 'none';
   });
 }
 function filtrarEventos() {

@@ -156,8 +156,17 @@ html,body{height:100%;overflow-x:hidden;font-family:'DM Sans',sans-serif;backgro
 
 /* ACTIVE PRESS */
 .big-toggle:active{transform:scale(.98)}
+
+/* ── TARJETA DE PRESENTACIÓN ══ */
+#tarjeta-overlay{position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,.92);z-index:99999;display:flex;align-items:center;justify-content:center;padding:16px;box-sizing:border-box}
+#tarjeta-sheet{background:#1a0f02;width:100%;max-width:380px;border-radius:24px;padding:20px;border:1px solid rgba(200,134,10,.25)}
+#tc-canvas-wrap{width:100%;border-radius:14px;overflow:hidden;margin-bottom:14px;background:#1a0f02;box-shadow:0 8px 32px rgba(0,0,0,.5)}
+#tc-canvas{width:100%;height:auto;display:block;border-radius:14px}
+#tc-hint{font-size:11px;color:rgba(200,134,10,.5);text-align:center;margin-bottom:12px}
+.tarjeta-btn-save{width:100%;padding:15px;background:linear-gradient(135deg,#C8860A,#9a6507);border:none;border-radius:14px;color:#fff;font-size:15px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;margin-bottom:10px;display:block}
+.tarjeta-btn-close{width:100%;padding:12px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:14px;color:rgba(255,255,255,.5);font-size:13px;cursor:pointer;font-family:'DM Sans',sans-serif;display:block}
 </style>
-<script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js"></script>
 </head>
 <body>
 
@@ -450,56 +459,23 @@ html,body{height:100%;overflow-x:hidden;font-family:'DM Sans',sans-serif;backgro
 </div>
 
 <!-- MODAL TARJETA -->
-
-
 <div id="tarjeta-overlay" style="display:none" onclick="if(event.target===this)cerrarTarjeta()">
   <div id="tarjeta-sheet">
-    <div class="tarjeta-handle"></div>
-    <div style="padding:0 20px 12px;display:flex;align-items:center;justify-content:space-between">
-      <div style="font-size:15px;font-weight:700;color:#1C1208">📇 Mi tarjeta Fenlora</div>
-      <button onclick="cerrarTarjeta()" style="background:none;border:none;font-size:20px;color:#999;cursor:pointer">✕</button>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+      <div style="font-size:14px;font-weight:700;color:var(--gold)">📇 Mi tarjeta Fenlora</div>
+      <button onclick="cerrarTarjeta()" style="background:rgba(255,255,255,.08);border:none;width:30px;height:30px;border-radius:50%;color:#fff;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center">✕</button>
     </div>
-    <!-- PREVIEW TARJETA -->
-    <div class="tarjeta-preview">
-      <div class="tc-card" id="tc-card">
-        <div class="tc-header">
-          <svg width="22" height="22" viewBox="0 0 120 120" fill="none"><defs><linearGradient id="tg1" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#FFD700"/><stop offset="1" stop-color="#C8860A"/></linearGradient><linearGradient id="tg2" x1="1" y1="0" x2="0" y2="1"><stop stop-color="#FF8C00"/><stop offset="1" stop-color="#E65C00"/></linearGradient><linearGradient id="tg3" x1="1" y1="1" x2="0" y2="0"><stop stop-color="#9B59B6"/><stop offset="1" stop-color="#6C3483"/></linearGradient><linearGradient id="tg4" x1="0" y1="1" x2="1" y2="0"><stop stop-color="#4A90D9"/><stop offset="1" stop-color="#9B59B6"/></linearGradient><radialGradient id="tgc" cx="50%" cy="50%" r="50%"><stop stop-color="#FFD700"/><stop offset="1" stop-color="#C8860A"/></radialGradient></defs><path d="M60 12 C50 12 42 18 40 28 L55 58 C57 54 63 54 65 58 L80 28 C78 18 70 12 60 12Z" fill="url(#tg1)" opacity=".95"/><path d="M108 60 C108 50 102 42 92 40 L62 55 C66 57 66 63 62 65 L92 80 C102 78 108 70 108 60Z" fill="url(#tg2)" opacity=".9"/><path d="M60 108 C70 108 78 102 80 92 L65 62 C63 66 57 66 55 62 L40 92 C42 102 50 108 60 108Z" fill="url(#tg3)" opacity=".95"/><path d="M12 60 C12 70 18 78 28 80 L58 65 C54 63 54 57 58 55 L28 40 C18 42 12 50 12 60Z" fill="url(#tg4)" opacity=".9"/><circle cx="60" cy="60" r="16" fill="#111" opacity=".7"/><circle cx="60" cy="60" r="10" fill="url(#tgc)"/><circle cx="56" cy="56" r="3" fill="white" opacity=".5"/></svg>
-          <div>
-            <div class="tc-logo-text">FENLORA</div>
-            <div class="tc-verified">✓ Conductor verificado</div>
-          </div>
-        </div>
-        <div class="tc-body">
-          <div class="tc-foto" id="tc-foto-wrap">
-            <span id="tc-foto-emoji">👤</span>
-            <img id="tc-foto-img" src="" style="display:none;width:100%;height:100%;object-fit:cover">
-          </div>
-          <div class="tc-info">
-            <div class="tc-nombre" id="tc-nombre">—</div>
-            <div class="tc-tipo" id="tc-tipo">—</div>
-            <div class="tc-placa" id="tc-placa">—</div>
-            <div class="tc-tel" id="tc-tel">—</div>
-          </div>
-          <div class="tc-qr" id="tc-qr-wrap">
-            <div id="tc-qr" style="width:68px;height:68px"></div>
-          </div>
-        </div>
-        <div class="tc-footer">
-          <div class="tc-ruta" id="tc-ruta-label">Fenlora Visual Studio · Rutas Tolima</div>
-          <div class="tc-scan">Escanea para<br>ver mi perfil</div>
-        </div>
-      </div>
+    <!-- CANVAS donde se dibuja la tarjeta -->
+    <div id="tc-canvas-wrap">
+      <canvas id="tc-canvas" width="720" height="420"></canvas>
     </div>
-    <div style="padding:8px 20px 4px;font-size:11px;color:#999;text-align:center">Toca "Imprimir / Guardar" para descargarla o imprimirla</div>
+    <div id="tc-hint">Toca "Guardar imagen" para descargarla</div>
     <div class="tarjeta-actions">
-      <button class="tarjeta-btn-print" onclick="imprimirTarjeta()">🖨️ Imprimir / Guardar como imagen</button>
+      <button class="tarjeta-btn-save" onclick="guardarTarjeta()">⬇️ Guardar imagen</button>
       <button class="tarjeta-btn-close" onclick="cerrarTarjeta()">Cerrar</button>
     </div>
   </div>
 </div>
-
-<!-- ÁREA DE IMPRESIÓN -->
-<div id="print-area"></div>
 
 <div id="toast"></div>
 
@@ -922,76 +898,171 @@ function showToast(msg) {
 init();
 
 // ── TARJETA DE PRESENTACIÓN ──
-var _tarjetaQRGenerado = false;
-
 function abrirTarjeta() {
-  try {
-    var overlay = document.getElementById('tarjeta-overlay');
-    if (!overlay) { alert('Error: no se encontró el modal'); return; }
-    // Mostrar overlay
-    overlay.style.cssText = 'display:flex!important;position:fixed;top:0;left:0;right:0;bottom:0;width:100vw;height:100vh;background:rgba(0,0,0,.88);z-index:99999;align-items:flex-end;justify-content:center;backdrop-filter:blur(6px)';
-    document.body.style.overflow = 'hidden';
+  var overlay = document.getElementById('tarjeta-overlay');
+  if (!overlay) return;
+  overlay.style.display = 'flex';
+  document.body.style.overflow = 'hidden';
 
-    // Llenar datos desde el DOM
-    var nombre = (document.getElementById('profile-name') || {}).textContent || '—';
-    var tipo   = (document.getElementById('profile-cat') || {}).textContent || '—';
-    var placa  = (document.getElementById('disp-placa') || {}).textContent || '—';
-    var tel    = (document.getElementById('disp-tel') || {}).textContent || '';
+  // Recoger datos del conductor
+  var nombre = (document.getElementById('profile-name') || {}).textContent || 'Conductor';
+  var tipo   = (document.getElementById('profile-cat') || {}).textContent || 'Transporte';
+  var placa  = (document.getElementById('disp-placa') || {}).textContent || '—';
+  var tel    = (document.getElementById('disp-tel') || {}).textContent || '';
+  if (tel === '— — —') tel = '';
 
-    var elNombre = document.getElementById('tc-nombre');
-    var elTipo   = document.getElementById('tc-tipo');
-    var elPlaca  = document.getElementById('tc-placa');
-    var elTel    = document.getElementById('tc-tel');
-    if (elNombre) elNombre.textContent = nombre;
-    if (elTipo)   elTipo.textContent   = tipo;
-    if (elPlaca)  elPlaca.textContent  = placa;
-    if (elTel)    elTel.textContent    = tel !== '— — —' ? '📞 ' + tel : '';
+  var munEl  = document.getElementById('profile-zona');
+  var munTxt = munEl ? munEl.textContent : '';
+  var ruta   = munTxt.toLowerCase().includes('chaparral')
+    ? 'Ruta del Café y la Paz · Chaparral'
+    : 'Ruta del Mangostino · Mariquita';
 
-    // Foto conductor
-    var fotoImg = document.getElementById('foto-conductor-img');
-    var tcImg   = document.getElementById('tc-foto-img');
-    var tcEmoji = document.getElementById('tc-foto-emoji');
-    if (fotoImg && tcImg && fotoImg.src && fotoImg.src !== window.location.href && fotoImg.style.display !== 'none') {
-      tcImg.src = fotoImg.src;
-      tcImg.style.display = 'block';
-      if (tcEmoji) tcEmoji.style.display = 'none';
+  var url    = window.location.href;
+  var fotoEl = document.getElementById('foto-conductor-img');
+  var fotoSrc = (fotoEl && fotoEl.style.display !== 'none' && fotoEl.src) ? fotoEl.src : null;
+
+  // Generar QR como matriz de módulos
+  var qr = qrcode(0, 'M');
+  qr.addData(url);
+  qr.make();
+  var mods   = qr.getModuleCount();
+
+  // Dibujar la tarjeta en canvas
+  var cv  = document.getElementById('tc-canvas');
+  var ctx = cv.getContext('2d');
+  var W = 720, H = 420;
+  cv.width = W; cv.height = H;
+
+  // Fondo oscuro
+  var bg = ctx.createLinearGradient(0,0,W,H);
+  bg.addColorStop(0,'#1a0f02'); bg.addColorStop(.5,'#2e1a08'); bg.addColorStop(1,'#1a0f02');
+  ctx.fillStyle = bg; ctx.fillRect(0,0,W,H);
+
+  // Acento dorado sutil
+  var glow = ctx.createRadialGradient(W*.7,H*.3,10,W*.7,H*.3,200);
+  glow.addColorStop(0,'rgba(200,134,10,.12)'); glow.addColorStop(1,'rgba(0,0,0,0)');
+  ctx.fillStyle = glow; ctx.fillRect(0,0,W,H);
+
+  // ── Franja lateral dorada ──
+  ctx.fillStyle = '#C8860A'; ctx.fillRect(0,0,5,H);
+
+  // ── Logo FENLORA ──
+  ctx.fillStyle = '#C8860A';
+  ctx.font = 'bold 22px DM Sans, sans-serif';
+  ctx.fillText('FENLORA', 28, 44);
+  ctx.fillStyle = 'rgba(200,134,10,.5)';
+  ctx.font = '10px DM Sans, sans-serif';
+  ctx.fillText('VISUAL STUDIO', 28, 60);
+
+  // ── Badge verificado ──
+  ctx.fillStyle = 'rgba(200,134,10,.15)';
+  roundRect(ctx, 24, 70, 130, 22, 11);
+  ctx.fill();
+  ctx.strokeStyle = 'rgba(200,134,10,.4)'; ctx.lineWidth = 1;
+  roundRect(ctx, 24, 70, 130, 22, 11);
+  ctx.stroke();
+  ctx.fillStyle = '#C8860A';
+  ctx.font = 'bold 10px DM Sans, sans-serif';
+  ctx.fillText('✓ Conductor verificado', 34, 85);
+
+  // ── Foto del conductor ──
+  var fotoX = 24, fotoY = 108, fotoS = 130;
+  ctx.save();
+  roundRect(ctx, fotoX, fotoY, fotoS, fotoS, 16);
+  ctx.clip();
+  ctx.fillStyle = '#2e1a08'; ctx.fillRect(fotoX, fotoY, fotoS, fotoS);
+  ctx.restore();
+  // Borde dorado foto
+  ctx.strokeStyle = '#C8860A'; ctx.lineWidth = 2.5;
+  roundRect(ctx, fotoX, fotoY, fotoS, fotoS, 16); ctx.stroke();
+
+  // Función para dibujar foto cuando cargue
+  function dibujarResto() {
+    // ── Nombre ──
+    ctx.fillStyle = '#fff';
+    ctx.font = 'bold 28px DM Sans, sans-serif';
+    ctx.fillText(nombre, 176, 148);
+    // ── Tipo ──
+    ctx.fillStyle = '#C8860A';
+    ctx.font = 'bold 13px DM Sans, sans-serif';
+    ctx.fillText(tipo.toUpperCase(), 176, 172);
+    // ── Placa ──
+    ctx.fillStyle = 'rgba(200,134,10,.15)';
+    roundRect(ctx, 176, 182, 110, 32, 8); ctx.fill();
+    ctx.strokeStyle = 'rgba(200,134,10,.4)'; ctx.lineWidth = 1;
+    roundRect(ctx, 176, 182, 110, 32, 8); ctx.stroke();
+    ctx.fillStyle = '#C8860A';
+    ctx.font = 'bold 16px DM Mono, monospace';
+    ctx.fillText(placa, 186, 203);
+    // ── Teléfono ──
+    if (tel) {
+      ctx.fillStyle = 'rgba(255,255,255,.55)';
+      ctx.font = '13px DM Sans, sans-serif';
+      ctx.fillText('📞 ' + tel, 176, 232);
     }
-
-    // Ruta según municipio
-    var munEl  = document.getElementById('profile-zona');
-    var munTxt = munEl ? munEl.textContent : '';
-    var ruta   = munTxt.toLowerCase().includes('chaparral') ? '☕ Ruta del Café y la Paz · Chaparral' : '🥭 Ruta del Mangostino · Mariquita';
-    var elRuta = document.getElementById('tc-ruta-label');
-    if (elRuta) elRuta.textContent = ruta;
-
-    // Generar QR
-    if (!_tarjetaQRGenerado) {
-      var qrUrl = window.location.href;
-      var qrEl  = document.getElementById('tc-qr');
-      if (qrEl) {
-        qrEl.innerHTML = '';
-        if (typeof QRCode !== 'undefined') {
-          // qrcode.js (vieja API)
-          try {
-            new QRCode(qrEl, { text: qrUrl, width: 68, height: 68, colorDark: '#1C1208', colorLight: '#ffffff' });
-            _tarjetaQRGenerado = true;
-          } catch(e2) {}
-        } else if (typeof qrcode !== 'undefined') {
-          // nueva API
-          qrcode.toCanvas(document.createElement('canvas'), qrUrl).then(function(cv){
-            cv.style.cssText = 'width:68px;height:68px';
-            qrEl.appendChild(cv);
-            _tarjetaQRGenerado = true;
-          }).catch(function(){});
-        } else {
-          // Fallback: mostrar URL
-          qrEl.innerHTML = '<div style="font-size:8px;word-break:break-all;color:#666;text-align:center">'+qrUrl+'</div>';
-        }
+    // ── Separador ──
+    ctx.strokeStyle = 'rgba(200,134,10,.2)'; ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(24, 260); ctx.lineTo(W-24, 260); ctx.stroke();
+    // ── Ruta ──
+    ctx.fillStyle = 'rgba(200,134,10,.55)';
+    ctx.font = '11px DM Sans, sans-serif';
+    ctx.fillText(ruta, 24, 282);
+    // ── Escanea texto ──
+    ctx.fillStyle = 'rgba(255,255,255,.35)';
+    ctx.font = '10px DM Sans, sans-serif';
+    ctx.fillText('Escanea para ver mi perfil verificado', W - 170, 370);
+    ctx.fillText('Fenlora Visual Studio · 2026', W - 150, 385);
+    // ── QR ──
+    var qrX = W - 140, qrY = 280, qrS = 120;
+    // Fondo blanco QR
+    ctx.fillStyle = '#fff';
+    roundRect(ctx, qrX - 8, qrY - 8, qrS + 16, qrS + 16, 10); ctx.fill();
+    // Dibujar módulos del QR
+    var cell = qrS / mods;
+    for (var r = 0; r < mods; r++) {
+      for (var c = 0; c < mods; c++) {
+        ctx.fillStyle = qr.isDark(r, c) ? '#1a0f02' : '#fff';
+        ctx.fillRect(qrX + c * cell, qrY + r * cell, cell, cell);
       }
     }
-  } catch(err) {
-    console.error('abrirTarjeta error:', err);
   }
+
+  if (fotoSrc) {
+    var img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.onload = function() {
+      ctx.save();
+      roundRect(ctx, fotoX, fotoY, fotoS, fotoS, 16); ctx.clip();
+      ctx.drawImage(img, fotoX, fotoY, fotoS, fotoS);
+      ctx.restore();
+      ctx.strokeStyle = '#C8860A'; ctx.lineWidth = 2.5;
+      roundRect(ctx, fotoX, fotoY, fotoS, fotoS, 16); ctx.stroke();
+      dibujarResto();
+    };
+    img.onerror = function() { dibujarFotoPlaceholder(); dibujarResto(); };
+    img.src = fotoSrc;
+  } else {
+    dibujarFotoPlaceholder(); dibujarResto();
+  }
+
+  function dibujarFotoPlaceholder() {
+    ctx.fillStyle = '#2e1a08'; ctx.fillRect(fotoX, fotoY, fotoS, fotoS);
+    ctx.fillStyle = 'rgba(200,134,10,.3)';
+    ctx.font = '52px serif'; ctx.textAlign = 'center';
+    ctx.fillText('👤', fotoX + fotoS/2, fotoY + fotoS/2 + 18);
+    ctx.textAlign = 'left';
+  }
+}
+
+// Función helper para rectángulos redondeados
+function roundRect(ctx, x, y, w, h, r) {
+  ctx.beginPath();
+  ctx.moveTo(x+r, y);
+  ctx.lineTo(x+w-r, y); ctx.quadraticCurveTo(x+w, y, x+w, y+r);
+  ctx.lineTo(x+w, y+h-r); ctx.quadraticCurveTo(x+w, y+h, x+w-r, y+h);
+  ctx.lineTo(x+r, y+h); ctx.quadraticCurveTo(x, y+h, x, y+h-r);
+  ctx.lineTo(x, y+r); ctx.quadraticCurveTo(x, y, x+r, y);
+  ctx.closePath();
 }
 
 function cerrarTarjeta() {
@@ -999,14 +1070,21 @@ function cerrarTarjeta() {
   document.body.style.overflow = '';
 }
 
-function imprimirTarjeta() {
-  var card = document.getElementById('tc-card');
-  if (!card) return;
-  var printArea = document.getElementById('print-area');
-  printArea.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;min-height:100vh;background:#f5f5f5"><div style="max-width:380px;width:100%;border-radius:16px;overflow:hidden;box-shadow:0 8px 32px rgba(0,0,0,.2)">' + card.outerHTML + '</div></div>';
-  printArea.style.display = 'block';
-  window.print();
-  setTimeout(function(){ printArea.style.display = 'none'; }, 1000);
+function guardarTarjeta() {
+  var cv = document.getElementById('tc-canvas');
+  var nombre = (document.getElementById('profile-name') || {}).textContent || 'conductor';
+  // En móvil: abrir imagen en nueva pestaña para guardar
+  var dataUrl = cv.toDataURL('image/png');
+  var a = document.createElement('a');
+  a.href = dataUrl;
+  a.download = 'tarjeta-fenlora-' + nombre.replace(/\s+/g, '-').toLowerCase() + '.png';
+  a.click();
+  // Fallback móvil
+  setTimeout(function(){
+    if (!document.hidden) {
+      window.open(dataUrl, '_blank');
+    }
+  }, 500);
 }
 </script>
 </body>

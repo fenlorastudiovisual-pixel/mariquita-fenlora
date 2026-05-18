@@ -657,6 +657,11 @@ tr:hover td{background:var(--bg3)}
               <option value="vereda">🚐 Vereda</option>
               <option value="fletero">🚚 Fletero</option>
             </select>
+            <select id="cond-municipio" style="background:var(--bg3);border:1px solid var(--border);border-radius:7px;padding:6px 10px;color:var(--text2);font-size:12px;outline:none" onchange="filtrarConductores()">
+              <option value="">Todos los municipios</option>
+              <option value="mariquita">🥭 Mariquita</option>
+              <option value="chaparral">☕ Chaparral</option>
+            </select>
             <button class="btn" onclick="cargarConductores()">↻ Actualizar</button>
           </div>
         </div>
@@ -703,6 +708,11 @@ tr:hover td{background:var(--bg3)}
               <option value="vence">Por vencer</option>
               <option value="mora">En mora</option>
               <option value="pausa">En pausa</option>
+            </select>
+            <select id="filter-municipio" style="background:var(--bg3);border:1px solid var(--border);border-radius:7px;padding:6px 10px;color:var(--text2);font-size:12px;outline:none" onchange="applyFilters()">
+              <option value="">Todos los municipios</option>
+              <option value="mariquita">🥭 Mariquita</option>
+              <option value="chaparral">☕ Chaparral</option>
             </select>
             <input class="search-input" id="filter-search" placeholder="🔍 Buscar negocio..." oninput="applyFilters()">
           </div>
@@ -2078,10 +2088,12 @@ function applyFilters(){
   var cat   = (document.getElementById('filter-cat')||{}).value||'';
   var estado= (document.getElementById('filter-estado')||{}).value||'';
   var q     = ((document.getElementById('filter-search')||{}).value||'').toLowerCase();
+  var municipio = (document.getElementById('filter-municipio')||{}).value||'';
   filteredClients = CLIENTS.filter(function(c){
-    if(plan   && c.plan   !== plan)   return false;
-    if(cat    && c.cat    !== cat)    return false;
-    if(estado && c.estado !== estado) return false;
+    if(plan      && c.plan      !== plan)      return false;
+    if(cat       && c.cat       !== cat)       return false;
+    if(estado    && c.estado    !== estado)    return false;
+    if(municipio && (c.municipio||'mariquita') !== municipio) return false;
     if(q && !c.nombre.toLowerCase().includes(q) && !c.catLabel.toLowerCase().includes(q) && !c.dir.toLowerCase().includes(q)) return false;
     return true;
   });
@@ -4142,8 +4154,11 @@ async function cargarConductores() {
 function filtrarConductores() {
   var q   = (document.getElementById('cond-search') ? document.getElementById('cond-search').value : '').toLowerCase();
   var cat = document.getElementById('cond-cat') ? document.getElementById('cond-cat').value : '';
+  var mun = document.getElementById('cond-municipio') ? document.getElementById('cond-municipio').value : '';
   var filtrados = todosLosConductores.filter(function(c) {
-    return (!q || (c.name||'').toLowerCase().includes(q)) && (!cat || c.category === cat);
+    return (!q   || (c.name||'').toLowerCase().includes(q))
+        && (!cat || c.category === cat)
+        && (!mun || (c.municipio||'mariquita') === mun);
   });
   renderConductores(filtrados);
 }
@@ -4155,7 +4170,7 @@ function renderConductores(lista) {
     tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--text3);padding:32px">Sin conductores registrados</td></tr>';
     return;
   }
-  var base = 'https://mariquita.fenloravisual.com/conductor.html?id=';
+  var base = 'https://rutas.fenloravisual.com/conductor.html?id=';
   var rows = '';
   for (var i = 0; i < lista.length; i++) {
     var c = lista[i];
@@ -4194,7 +4209,7 @@ function enviarLinkConductor(btn) {
   var id     = btn.dataset.cid;
   var nombre = decodeURIComponent(btn.dataset.cnm);
   var tel    = btn.dataset.tel;
-  var link   = 'https://mariquita.fenloravisual.com/conductor.html?id=' + id;
+  var link   = 'https://rutas.fenloravisual.com/conductor.html?id=' + id;
   var msg    = 'Hola *' + nombre + '* 🏍\n\n'
     + 'Bienvenido a *Fenlora - Ruta del Mangostino*.\n\n'
     + 'Este es tu panel personal de conductor. Guárdalo en tu celular:\n'

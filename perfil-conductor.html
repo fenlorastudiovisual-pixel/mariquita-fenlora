@@ -270,7 +270,7 @@ function renderPerfil(d) {
   var mun = d.municipio || 'mariquita';
   var munCfg = MUN_CONFIG[mun] || MUN_CONFIG.mariquita;
   document.getElementById('zona').textContent = cat + ' · ' + munCfg.zona;
-  document.getElementById('zona2').textContent = (d.addons && d.addons.zona) ? d.addons.zona : munCfg.zona;
+  document.getElementById('zona2').textContent = (d.addons && (d.addons.zona || d.addons.vehiculo_zona)) ? (d.addons.zona || d.addons.vehiculo_zona) : munCfg.zona;
   document.getElementById('ruta-emoji').textContent = munCfg.emoji;
   document.getElementById('ruta-nombre').textContent = munCfg.ruta;
 
@@ -301,7 +301,7 @@ function renderPerfil(d) {
   }
 
   // Foto vehículo
-  var fotoVeh = (d.addons && (d.addons.foto_vehiculo || d.addons.foto_vehiculo_url)) || null;
+  var fotoVeh = (d.addons && (d.addons.foto_vehiculo || d.addons.foto_vehiculo_url || d.addons.foto_veh)) || null;
   var vWrap = document.getElementById('vehiculo-wrap');
   if (fotoVeh) {
     vWrap.innerHTML = '<img src="' + fotoVeh + '" alt="Vehículo" style="width:100%;height:100%;object-fit:cover">';
@@ -311,7 +311,7 @@ function renderPerfil(d) {
   }
 
   // Color / Modelo vehículo
-  var vehiculoInfo = d.addons && d.addons.vehiculo ? d.addons.vehiculo : '—';
+  var vehiculoInfo = (d.addons && (d.addons.vehiculo_desc || d.addons.vehiculo)) || '—';
   document.getElementById('vehiculo').textContent = vehiculoInfo;
 
   // Cédula enmascarada

@@ -757,6 +757,8 @@ function sbRowToPoint(row) {
     notas: row.notas_admin || '',
     tiene_menu: row.tiene_menu === true,
     menu: row.menu || { cats: ['Platos', 'Bebidas'], items: [], promo: { big: '', sub: '' } },
+    addons: row.addons || {},
+    docs: row.docs || {},
   };
 }
 

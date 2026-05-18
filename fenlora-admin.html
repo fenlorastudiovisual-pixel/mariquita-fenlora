@@ -1986,21 +1986,7 @@ function buildPlanSelect(selectId, selectedVal){
 }
 
 // ── CLIENTES DATA ──
-const CLIENTS=[
-  {id:1,nombre:"Terrakota Heritage House",cat:"hotel",catLabel:"Hotel",plan:"premium",planVal:329900,estado:"active",dir:"Calle 11 # 5-68",tel:"+57 313 287 2686",email:"contact@terrakota.house",vistas:482,wsp:67,gmaps:89,vence:"2 días",visPct:95},
-  {id:2,nombre:"Hotel Los Mangostinos",cat:"hotel",catLabel:"Hotel",plan:"basic",planVal:89900,estado:"active",dir:"Calle 7 # 5-26",tel:"+57 313 453 5496",email:"paola.rojas1201@yahoo.com",vistas:201,wsp:28,gmaps:34,vence:"18 días",visPct:42},
-  {id:3,nombre:"Casa Lumka Spa",cat:"hotel",catLabel:"Hotel",plan:"premium",planVal:329900,estado:"mora",dir:"Cra 4 # 12-57",tel:"+57 315 726 6931",email:"luzmyriamcastano@hotmail.com",vistas:361,wsp:54,gmaps:71,vence:"-3 días",visPct:72},
-  {id:4,nombre:"El Gran Ranchón",cat:"rest",catLabel:"Restaurante",plan:"pro",planVal:179900,estado:"active",dir:"Vda Pantano Grande",tel:"+57 320 953 0772",email:"milefertovar3@gmail.com",vistas:143,wsp:31,gmaps:27,vence:"22 días",visPct:38},
-  {id:5,nombre:"Balneario Villa del Río",cat:"rest",catLabel:"Restaurante",plan:"pro",planVal:179900,estado:"pausa",dir:"Vda Las Lomas",tel:"+57 320 831 0013",email:"alexmolano7430@gmail.com",vistas:112,wsp:15,gmaps:19,vence:"—",visPct:0,pausaDesde:"1 jun",pausaHasta:"31 jul",pausaMotivo:"Temporada baja — regresa en agosto"},
-  {id:5,nombre:"Finca Ecoturística Brabante",cat:"finca",catLabel:"Finca",plan:"basic",planVal:89900,estado:"active",dir:"Vda El Caucho km 4",tel:"+57 601 533 3800",email:"vanuden@gmail.com",vistas:241,wsp:19,gmaps:44,vence:"12 días",visPct:58},
-  {id:6,nombre:"Selvatik Rutas",cat:"agencia",catLabel:"Agencia",plan:"pro",planVal:179900,estado:"active",dir:"Cra 4 # 4-25",tel:"+57 252 5529",email:"aleja.mm23@gmail.com",vistas:187,wsp:42,gmaps:38,vence:"9 días",visPct:49},
-  {id:7,nombre:"Santa Lucía Gastro Bar",cat:"bar",catLabel:"Bar",plan:"pro",planVal:179900,estado:"active",dir:"Cra 3 # 3-12 P2",tel:"+57 314 642 4011",email:"kreyesguarin@gmail.com",vistas:98,wsp:22,gmaps:15,vence:"25 días",visPct:31},
-  {id:8,nombre:"Mostachos Bar Gourmet",cat:"bar",catLabel:"Bar",plan:"pro",planVal:179900,estado:"vence",dir:"Cra 3 # 6-20",tel:"+57 320 227 2549",email:"jaimeacero1@hotmail.com",vistas:156,wsp:38,gmaps:29,vence:"5 días",visPct:44},
-  {id:9,nombre:"Balneario Villa del Río",cat:"rest",catLabel:"Restaurante",plan:"pro",planVal:179900,estado:"mora",dir:"Vda Las Lomas",tel:"+57 320 831 0013",email:"alexmolano7430@gmail.com",vistas:112,wsp:15,gmaps:19,vence:"-8 días",visPct:28},
-  {id:10,nombre:"Casa Campestre La Linda",cat:"finca",catLabel:"Finca",plan:"basic",planVal:89900,estado:"active",dir:"Vda Pantano Grande",tel:"+57 313 217 2157",email:"gonzalezgar1984@gmail.com",vistas:89,wsp:11,gmaps:16,vence:"20 días",visPct:22},
-  {id:11,nombre:"Eco Glamping Shalom",cat:"hotel",catLabel:"Hotel",plan:"premium",planVal:329900,estado:"active",dir:"Vda El Amayo",tel:"+57 316 281 0659",email:"giovanny.prada@shalomcg.com",vistas:198,wsp:34,gmaps:41,vence:"16 días",visPct:53},
-  {id:12,nombre:"San Senderismo Mariquita",cat:"agencia",catLabel:"Agencia",plan:"basic",planVal:89900,estado:"active",dir:"Calle 2 # 5-91",tel:"+57 320 695 5577",email:"rubionelson@hotmail.com",vistas:67,wsp:18,gmaps:12,vence:"28 días",visPct:19},
-];
+const CLIENTS=[];
 
 let filteredClients=[...CLIENTS];
 let currentPage = 0;

@@ -783,6 +783,8 @@ async function cargarPuntosDesdeSupabase() {
     data.forEach(function(row){
       var p = sbRowToPunto(row);
       PUNTOS.push(p);
+      // Transporte inactivo no aparece en el mapa
+      if(TRANS_CATS.has(p.cat) && !p.disponible) return;
       var mk = L.marker(p.coords, {icon: makeIcon(p)}).addTo(map);
       mk.on('click', function(){ openPanel(p); });
       markers.push({mk: mk, cat: p.cat, id: p.id, coords: p.coords});
@@ -806,7 +808,28 @@ function suscribirCambiosEnVivo() {
           PUNTOS[idx].disponible = updated.disponible;
           PUNTOS[idx].horario = updated.horario || PUNTOS[idx].horario;
           const markerObj = markers.find(function(m){ return String(m.id) === String(updated.id); });
-          if (markerObj) markerObj.mk.setIcon(makeIcon(PUNTOS[idx]));
+          const p = PUNTOS[idx];
+          if (TRANS_CATS.has(p.cat)) {
+            if (p.disponible) {
+              // Se activó — agregar al mapa si no estaba
+              if (!markerObj) {
+                const mk = L.marker(p.coords, {icon: makeIcon(p)}).addTo(map);
+                mk.on('click', function(){ openPanel(p); });
+                markers.push({mk: mk, cat: p.cat, id: p.id, coords: p.coords});
+              } else {
+                markerObj.mk.setIcon(makeIcon(p));
+              }
+            } else {
+              // Se desactivó — quitar del mapa
+              if (markerObj) {
+                map.removeLayer(markerObj.mk);
+                const mi = markers.findIndex(function(m){ return String(m.id) === String(updated.id); });
+                if (mi >= 0) markers.splice(mi, 1);
+              }
+            }
+          } else {
+            if (markerObj) markerObj.mk.setIcon(makeIcon(p));
+          }
           // Si el panel está abierto mostrando este punto, refrescarlo
           if (currentPunto && String(currentPunto.id) === String(updated.id)) {
             currentPunto.disponible = updated.disponible;
@@ -967,6 +990,8 @@ function makeIcon(p){
 }
 
 PUNTOS.forEach(p=>{
+  // Transporte inactivo no aparece en el mapa
+  if(TRANS_CATS.has(p.cat) && !p.disponible) return;
   const mk=L.marker(p.coords,{icon:makeIcon(p)}).addTo(map);
   mk.on('click',()=>openPanel(p));
   markers.push({mk,cat:p.cat,id:p.id,coords:p.coords});

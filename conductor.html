@@ -467,7 +467,7 @@ html,body{height:100%;overflow-x:hidden;font-family:'DM Sans',sans-serif;backgro
     </div>
     <!-- CANVAS donde se dibuja la tarjeta -->
     <div id="tc-canvas-wrap">
-      <canvas id="tc-canvas" width="720" height="420"></canvas>
+      <canvas id="tc-canvas" width="460" height="680"></canvas>
     </div>
     <div id="tc-hint">Toca "Guardar imagen" para descargarla</div>
     <div class="tarjeta-actions">
@@ -904,153 +904,149 @@ function abrirTarjeta() {
   overlay.style.display = 'flex';
   document.body.style.overflow = 'hidden';
 
-  // Recoger datos del conductor
-  var nombre = (document.getElementById('profile-name') || {}).textContent || 'Conductor';
-  var tipo   = (document.getElementById('profile-cat') || {}).textContent || 'Transporte';
-  var placa  = (document.getElementById('disp-placa') || {}).textContent || '—';
-  var tel    = (document.getElementById('disp-tel') || {}).textContent || '';
-  if (tel === '— — —') tel = '';
+  var nombre  = (document.getElementById('profile-name')||{}).textContent||'Conductor';
+  var tipo    = (document.getElementById('profile-cat')||{}).textContent||'Transporte';
+  var placa   = (document.getElementById('disp-placa')||{}).textContent||'—';
+  var tel     = (document.getElementById('disp-tel')||{}).textContent||'';
+  if(tel==='— — —') tel='';
+  var munEl   = document.getElementById('profile-zona');
+  var munTxt  = munEl ? munEl.textContent : '';
+  var esChap  = munTxt.toLowerCase().includes('chaparral');
+  var ruta    = esChap ? 'Ruta del Café y la Paz · Chaparral' : 'Ruta del Mangostino · Mariquita';
+  var url     = window.location.href;
+  var fotoEl  = document.getElementById('foto-conductor-img');
+  var fotoSrc = (fotoEl && fotoEl.style.display!=='none' && fotoEl.src && fotoEl.src!==window.location.href) ? fotoEl.src : null;
 
-  var munEl  = document.getElementById('profile-zona');
-  var munTxt = munEl ? munEl.textContent : '';
-  var ruta   = munTxt.toLowerCase().includes('chaparral')
-    ? 'Ruta del Café y la Paz · Chaparral'
-    : 'Ruta del Mangostino · Mariquita';
+  // QR
+  var qr = qrcode(0,'M');
+  qr.addData(url); qr.make();
+  var mods = qr.getModuleCount();
 
-  var url    = window.location.href;
-  var fotoEl = document.getElementById('foto-conductor-img');
-  var fotoSrc = (fotoEl && fotoEl.style.display !== 'none' && fotoEl.src) ? fotoEl.src : null;
-
-  // Generar QR como matriz de módulos
-  var qr = qrcode(0, 'M');
-  qr.addData(url);
-  qr.make();
-  var mods   = qr.getModuleCount();
-
-  // Dibujar la tarjeta en canvas
-  var cv  = document.getElementById('tc-canvas');
+  // Canvas — layout vertical: info arriba, QR grande abajo
+  var cv = document.getElementById('tc-canvas');
   var ctx = cv.getContext('2d');
-  var W = 720, H = 420;
-  cv.width = W; cv.height = H;
+  var W=460, H=680;
+  cv.width=W; cv.height=H;
 
-  // Fondo oscuro
-  var bg = ctx.createLinearGradient(0,0,W,H);
-  bg.addColorStop(0,'#1a0f02'); bg.addColorStop(.5,'#2e1a08'); bg.addColorStop(1,'#1a0f02');
-  ctx.fillStyle = bg; ctx.fillRect(0,0,W,H);
+  // Fondo
+  var bg=ctx.createLinearGradient(0,0,0,H);
+  bg.addColorStop(0,'#1f1108'); bg.addColorStop(1,'#120a02');
+  ctx.fillStyle=bg; ctx.fillRect(0,0,W,H);
 
-  // Acento dorado sutil
-  var glow = ctx.createRadialGradient(W*.7,H*.3,10,W*.7,H*.3,200);
-  glow.addColorStop(0,'rgba(200,134,10,.12)'); glow.addColorStop(1,'rgba(0,0,0,0)');
-  ctx.fillStyle = glow; ctx.fillRect(0,0,W,H);
+  // Glow dorado top
+  var gl=ctx.createRadialGradient(W/2,0,10,W/2,0,260);
+  gl.addColorStop(0,'rgba(200,134,10,.18)'); gl.addColorStop(1,'rgba(0,0,0,0)');
+  ctx.fillStyle=gl; ctx.fillRect(0,0,W,H);
 
-  // ── Franja lateral dorada ──
-  ctx.fillStyle = '#C8860A'; ctx.fillRect(0,0,5,H);
+  // Borde dorado
+  ctx.strokeStyle='rgba(200,134,10,.4)'; ctx.lineWidth=1.5;
+  roundRect(ctx,1,1,W-2,H-2,20); ctx.stroke();
 
-  // ── Logo FENLORA ──
-  ctx.fillStyle = '#C8860A';
-  ctx.font = 'bold 22px DM Sans, sans-serif';
-  ctx.fillText('FENLORA', 28, 44);
-  ctx.fillStyle = 'rgba(200,134,10,.5)';
-  ctx.font = '10px DM Sans, sans-serif';
-  ctx.fillText('VISUAL STUDIO', 28, 60);
+  // ── SECCIÓN SUPERIOR: info conductor ──
+  var PAD=28;
 
-  // ── Badge verificado ──
-  ctx.fillStyle = 'rgba(200,134,10,.15)';
-  roundRect(ctx, 24, 70, 130, 22, 11);
-  ctx.fill();
-  ctx.strokeStyle = 'rgba(200,134,10,.4)'; ctx.lineWidth = 1;
-  roundRect(ctx, 24, 70, 130, 22, 11);
-  ctx.stroke();
-  ctx.fillStyle = '#C8860A';
-  ctx.font = 'bold 10px DM Sans, sans-serif';
-  ctx.fillText('✓ Conductor verificado', 34, 85);
+  // Logo
+  ctx.fillStyle='#C8860A';
+  ctx.font='bold 18px sans-serif';
+  ctx.fillText('FENLORA', PAD, PAD+18);
+  ctx.fillStyle='rgba(200,134,10,.45)';
+  ctx.font='9px sans-serif';
+  ctx.fillText('VISUAL STUDIO', PAD, PAD+32);
 
-  // ── Foto del conductor ──
-  var fotoX = 24, fotoY = 108, fotoS = 130;
-  ctx.save();
-  roundRect(ctx, fotoX, fotoY, fotoS, fotoS, 16);
-  ctx.clip();
-  ctx.fillStyle = '#2e1a08'; ctx.fillRect(fotoX, fotoY, fotoS, fotoS);
-  ctx.restore();
-  // Borde dorado foto
-  ctx.strokeStyle = '#C8860A'; ctx.lineWidth = 2.5;
-  roundRect(ctx, fotoX, fotoY, fotoS, fotoS, 16); ctx.stroke();
+  // Badge verificado (derecha)
+  ctx.fillStyle='rgba(200,134,10,.12)';
+  roundRect(ctx,W-PAD-120,PAD,120,22,11); ctx.fill();
+  ctx.strokeStyle='rgba(200,134,10,.35)'; ctx.lineWidth=1;
+  roundRect(ctx,W-PAD-120,PAD,120,22,11); ctx.stroke();
+  ctx.fillStyle='#C8860A'; ctx.font='bold 9px sans-serif';
+  ctx.textAlign='center';
+  ctx.fillText('✓ Conductor verificado',W-PAD-60,PAD+15);
+  ctx.textAlign='left';
 
-  // Función para dibujar foto cuando cargue
-  function dibujarResto() {
-    // ── Nombre ──
-    ctx.fillStyle = '#fff';
-    ctx.font = 'bold 28px DM Sans, sans-serif';
-    ctx.fillText(nombre, 176, 148);
-    // ── Tipo ──
-    ctx.fillStyle = '#C8860A';
-    ctx.font = 'bold 13px DM Sans, sans-serif';
-    ctx.fillText(tipo.toUpperCase(), 176, 172);
-    // ── Placa ──
-    ctx.fillStyle = 'rgba(200,134,10,.15)';
-    roundRect(ctx, 176, 182, 110, 32, 8); ctx.fill();
-    ctx.strokeStyle = 'rgba(200,134,10,.4)'; ctx.lineWidth = 1;
-    roundRect(ctx, 176, 182, 110, 32, 8); ctx.stroke();
-    ctx.fillStyle = '#C8860A';
-    ctx.font = 'bold 16px DM Mono, monospace';
-    ctx.fillText(placa, 186, 203);
-    // ── Teléfono ──
-    if (tel) {
-      ctx.fillStyle = 'rgba(255,255,255,.55)';
-      ctx.font = '13px DM Sans, sans-serif';
-      ctx.fillText('📞 ' + tel, 176, 232);
+  // Línea separadora
+  ctx.strokeStyle='rgba(200,134,10,.2)'; ctx.lineWidth=1;
+  ctx.beginPath(); ctx.moveTo(PAD,PAD+48); ctx.lineTo(W-PAD,PAD+48); ctx.stroke();
+
+  // Foto conductor (circular)
+  var fX=PAD, fY=PAD+64, fS=90;
+  function dibujarFoto(imgEl) {
+    ctx.save();
+    ctx.beginPath(); ctx.arc(fX+fS/2,fY+fS/2,fS/2,0,Math.PI*2); ctx.clip();
+    if(imgEl){
+      ctx.drawImage(imgEl,fX,fY,fS,fS);
+    } else {
+      ctx.fillStyle='#2e1a08'; ctx.fillRect(fX,fY,fS,fS);
+      ctx.fillStyle='rgba(200,134,10,.4)'; ctx.font='38px serif';
+      ctx.textAlign='center'; ctx.fillText('👤',fX+fS/2,fY+fS/2+13); ctx.textAlign='left';
     }
-    // ── Separador ──
-    ctx.strokeStyle = 'rgba(200,134,10,.2)'; ctx.lineWidth = 1;
-    ctx.beginPath(); ctx.moveTo(24, 260); ctx.lineTo(W-24, 260); ctx.stroke();
-    // ── Ruta ──
-    ctx.fillStyle = 'rgba(200,134,10,.55)';
-    ctx.font = '11px DM Sans, sans-serif';
-    ctx.fillText(ruta, 24, 282);
-    // ── Escanea texto ──
-    ctx.fillStyle = 'rgba(255,255,255,.35)';
-    ctx.font = '10px DM Sans, sans-serif';
-    ctx.fillText('Escanea para ver mi perfil verificado', W - 170, 370);
-    ctx.fillText('Fenlora Visual Studio · 2026', W - 150, 385);
-    // ── QR ──
-    var qrX = W - 140, qrY = 280, qrS = 120;
-    // Fondo blanco QR
-    ctx.fillStyle = '#fff';
-    roundRect(ctx, qrX - 8, qrY - 8, qrS + 16, qrS + 16, 10); ctx.fill();
-    // Dibujar módulos del QR
-    var cell = qrS / mods;
-    for (var r = 0; r < mods; r++) {
-      for (var c = 0; c < mods; c++) {
-        ctx.fillStyle = qr.isDark(r, c) ? '#1a0f02' : '#fff';
-        ctx.fillRect(qrX + c * cell, qrY + r * cell, cell, cell);
+    ctx.restore();
+    ctx.strokeStyle='#C8860A'; ctx.lineWidth=2.5;
+    ctx.beginPath(); ctx.arc(fX+fS/2,fY+fS/2,fS/2,0,Math.PI*2); ctx.stroke();
+    dibujarInfo();
+  }
+
+  function dibujarInfo() {
+    var tX=fX+fS+18, tY=fY;
+    // Nombre
+    ctx.fillStyle='#fff'; ctx.font='bold 22px sans-serif';
+    ctx.fillText(nombre.length>16?nombre.slice(0,16)+'…':nombre, tX, tY+24);
+    // Tipo
+    ctx.fillStyle='#C8860A'; ctx.font='bold 11px sans-serif';
+    ctx.fillText(tipo.toUpperCase(), tX, tY+44);
+    // Placa
+    ctx.fillStyle='rgba(200,134,10,.15)';
+    roundRect(ctx,tX,tY+52,100,28,7); ctx.fill();
+    ctx.strokeStyle='rgba(200,134,10,.4)'; ctx.lineWidth=1;
+    roundRect(ctx,tX,tY+52,100,28,7); ctx.stroke();
+    ctx.fillStyle='#C8860A'; ctx.font='bold 15px monospace';
+    ctx.fillText(placa,tX+10,tY+71);
+    // Tel
+    if(tel){
+      ctx.fillStyle='rgba(255,255,255,.5)'; ctx.font='12px sans-serif';
+      ctx.fillText('📞 '+tel, tX, tY+96);
+    }
+
+    // Línea separadora central
+    var sep=fY+fS+20;
+    ctx.strokeStyle='rgba(200,134,10,.2)'; ctx.lineWidth=1;
+    ctx.beginPath(); ctx.moveTo(PAD,sep); ctx.lineTo(W-PAD,sep); ctx.stroke();
+
+    // ── SECCIÓN INFERIOR: QR grande ──
+    var qrArea=H-sep-60;
+    var qrS=Math.min(qrArea-24, W-PAD*2-16);
+    var qrX=(W-qrS)/2;
+    var qrY=sep+20;
+
+    // Fondo blanco QR con padding
+    var pad=10;
+    ctx.fillStyle='#fff';
+    roundRect(ctx,qrX-pad,qrY-pad,qrS+pad*2,qrS+pad*2,14); ctx.fill();
+    // Módulos del QR
+    var cell=qrS/mods;
+    for(var r=0;r<mods;r++){
+      for(var c=0;c<mods;c++){
+        ctx.fillStyle=qr.isDark(r,c)?'#1a0f02':'#fff';
+        ctx.fillRect(qrX+c*cell, qrY+r*cell, cell+0.5, cell+0.5);
       }
     }
+
+    // Ruta y footer
+    ctx.fillStyle='rgba(200,134,10,.55)'; ctx.font='10px sans-serif';
+    ctx.textAlign='center';
+    ctx.fillText(ruta, W/2, qrY+qrS+pad*2+16);
+    ctx.fillStyle='rgba(255,255,255,.25)'; ctx.font='9px sans-serif';
+    ctx.fillText('Escanea para ver mi perfil verificado · Fenlora 2026', W/2, qrY+qrS+pad*2+30);
+    ctx.textAlign='left';
   }
 
-  if (fotoSrc) {
-    var img = new Image();
-    img.crossOrigin = 'anonymous';
-    img.onload = function() {
-      ctx.save();
-      roundRect(ctx, fotoX, fotoY, fotoS, fotoS, 16); ctx.clip();
-      ctx.drawImage(img, fotoX, fotoY, fotoS, fotoS);
-      ctx.restore();
-      ctx.strokeStyle = '#C8860A'; ctx.lineWidth = 2.5;
-      roundRect(ctx, fotoX, fotoY, fotoS, fotoS, 16); ctx.stroke();
-      dibujarResto();
-    };
-    img.onerror = function() { dibujarFotoPlaceholder(); dibujarResto(); };
-    img.src = fotoSrc;
+  if(fotoSrc){
+    var img=new Image();
+    img.crossOrigin='anonymous';
+    img.onload=function(){ dibujarFoto(img); };
+    img.onerror=function(){ dibujarFoto(null); };
+    img.src=fotoSrc;
   } else {
-    dibujarFotoPlaceholder(); dibujarResto();
-  }
-
-  function dibujarFotoPlaceholder() {
-    ctx.fillStyle = '#2e1a08'; ctx.fillRect(fotoX, fotoY, fotoS, fotoS);
-    ctx.fillStyle = 'rgba(200,134,10,.3)';
-    ctx.font = '52px serif'; ctx.textAlign = 'center';
-    ctx.fillText('👤', fotoX + fotoS/2, fotoY + fotoS/2 + 18);
-    ctx.textAlign = 'left';
+    dibujarFoto(null);
   }
 }
 

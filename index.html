@@ -658,8 +658,8 @@ function applyLang(){
 // ── SELECTOR DE MUNICIPIO ──
 var municipioActual = 'mariquita';
 var MUNICIPIOS_CONFIG = {
-  mariquita: { lat: 5.2012,  lng: -74.9030, nombre: 'Mariquita',  tz: 'America/Bogota' },
-  chaparral: { lat: 3.7254,  lng: -75.4865, nombre: 'Chaparral',  tz: 'America/Bogota' },
+  mariquita: { lat: 5.2012, lng: -74.9030, nombre: 'Mariquita',  tz: 'America/Bogota', ruta: 'Ruta del Mangostino',    sub: 'San Sebastián de Mariquita · Tolima' },
+  chaparral: { lat: 3.7254, lng: -75.4865, nombre: 'Chaparral',  tz: 'America/Bogota', ruta: 'Ruta del Café y la Paz', sub: 'Chaparral · Tolima' },
 };
 
 function toggleMunDropdown() {
@@ -692,6 +692,15 @@ function seleccionarMunicipio(e, slug, nombre, ruta, coords, zoom) {
   document.getElementById('mun-dropdown').classList.remove('open');
   // Volar al municipio
   map.flyTo(coords, zoom, {duration: 1.2});
+  // Actualizar brand en el header
+  var cfg = MUNICIPIOS_CONFIG[slug] || MUNICIPIOS_CONFIG.mariquita;
+  var h1 = document.querySelector('.brand h1');
+  if (h1) {
+    h1.childNodes[0].textContent = cfg.ruta + ' ';
+    var spanSub = h1.querySelector('span');
+    if (spanSub) spanSub.textContent = cfg.sub;
+  }
+  document.title = cfg.ruta + ' · ' + cfg.nombre;
   // Recargar puntos del municipio
   cargarPuntosDesdeSupabase();
   // Actualizar clima del municipio

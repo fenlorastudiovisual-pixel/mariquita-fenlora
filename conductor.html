@@ -163,7 +163,7 @@ html,body{height:100%;overflow-x:hidden;font-family:'DM Sans',sans-serif;backgro
 #tc-canvas-wrap{width:100%;border-radius:14px;overflow:hidden;margin-bottom:14px;background:#1a0f02;box-shadow:0 8px 32px rgba(0,0,0,.5)}
 #tc-canvas{width:100%;height:auto;display:block;border-radius:14px}
 #tc-hint{font-size:11px;color:rgba(200,134,10,.5);text-align:center;margin-bottom:12px}
-.tarjeta-btn-save{width:100%;padding:15px;background:linear-gradient(135deg,#C8860A,#9a6507);border:none;border-radius:14px;color:#fff;font-size:15px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;margin-bottom:10px;display:block}
+.tarjeta-btn-save{width:100%;padding:14px;background:linear-gradient(135deg,#C8860A,#9a6507);border:none;border-radius:14px;color:#fff;font-size:14px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;margin-bottom:10px;display:flex;align-items:center;justify-content:center;gap:8px}
 .tarjeta-btn-close{width:100%;padding:12px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:14px;color:rgba(255,255,255,.5);font-size:13px;cursor:pointer;font-family:'DM Sans',sans-serif;display:block}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js"></script>
@@ -469,8 +469,11 @@ html,body{height:100%;overflow-x:hidden;font-family:'DM Sans',sans-serif;backgro
     <div id="tc-canvas-wrap">
       <canvas id="tc-canvas" width="460" height="680"></canvas>
     </div>
-    <div id="tc-hint">Toca "Guardar imagen" para descargarla</div>
+    <div id="tc-hint">Guarda o comparte tu tarjeta directamente por WhatsApp</div>
     <div class="tarjeta-actions">
+      <button class="tarjeta-btn-save" onclick="compartirWhatsApp()" style="background:linear-gradient(135deg,#25A864,#1a7a4a)">
+        <span style="font-size:18px">💬</span> Compartir por WhatsApp
+      </button>
       <button class="tarjeta-btn-save" onclick="guardarTarjeta()">⬇️ Guardar imagen</button>
       <button class="tarjeta-btn-close" onclick="cerrarTarjeta()">Cerrar</button>
     </div>
@@ -1069,18 +1072,52 @@ function cerrarTarjeta() {
 function guardarTarjeta() {
   var cv = document.getElementById('tc-canvas');
   var nombre = (document.getElementById('profile-name') || {}).textContent || 'conductor';
-  // En móvil: abrir imagen en nueva pestaña para guardar
   var dataUrl = cv.toDataURL('image/png');
-  var a = document.createElement('a');
-  a.href = dataUrl;
-  a.download = 'tarjeta-fenlora-' + nombre.replace(/\s+/g, '-').toLowerCase() + '.png';
-  a.click();
-  // Fallback móvil
-  setTimeout(function(){
-    if (!document.hidden) {
-      window.open(dataUrl, '_blank');
+  // Intentar descarga directa
+  try {
+    var a = document.createElement('a');
+    a.href = dataUrl;
+    a.download = 'tarjeta-fenlora-' + nombre.toLowerCase().replace(/\s+/g,'-') + '.png';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+  } catch(e) {}
+  // Fallback: abrir en nueva pestaña para guardar manualmente
+  setTimeout(function(){ window.open(dataUrl, '_blank'); }, 400);
+}
+
+function compartirWhatsApp() {
+  var cv = document.getElementById('tc-canvas');
+  var nombre = (document.getElementById('profile-name') || {}).textContent || 'Conductor';
+  var url = window.location.href;
+
+  // Intentar Web Share API (nativa en móvil — igual que compartir un doc en WhatsApp)
+  cv.toBlob(function(blob) {
+    if (navigator.share && blob) {
+      var file = new File([blob], 'tarjeta-fenlora-' + nombre.toLowerCase().replace(/\s+/g,'-') + '.png', { type: 'image/png' });
+      navigator.share({
+        title: 'Mi tarjeta Fenlora — ' + nombre,
+        text: '¡Hola! Soy ' + nombre + ', conductor verificado en Fenlora. Escanea el QR para ver mi perfil. ' + url,
+        files: [file]
+      }).catch(function(err) {
+        // Usuario canceló o no soporta files — fallback a link
+        if (err.name !== 'AbortError') compartirFallback(url, nombre);
+      });
+    } else {
+      compartirFallback(url, nombre);
     }
-  }, 500);
+  }, 'image/png');
+}
+
+function compartirFallback(url, nombre) {
+  // Descargar imagen primero, luego abrir WhatsApp con el link
+  guardarTarjeta();
+  setTimeout(function() {
+    var msg = 'Hola! Soy *' + nombre + '*, conductor verificado en *Fenlora*.'
+      + ' Escanea mi tarjeta QR o visita mi perfil: ' + url
+      + ' _Verificado por Fenlora Visual Studio_';
+    window.open('https://wa.me/?text=' + encodeURIComponent(msg), '_blank');
+  }, 800);
 }
 </script>
 </body>

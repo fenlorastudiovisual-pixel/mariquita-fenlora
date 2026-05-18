@@ -157,7 +157,7 @@ html,body{height:100%;overflow-x:hidden;font-family:'DM Sans',sans-serif;backgro
 /* ACTIVE PRESS */
 .big-toggle:active{transform:scale(.98)}
 </style>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
 </head>
 <body>
 
@@ -925,48 +925,72 @@ init();
 var _tarjetaQRGenerado = false;
 
 function abrirTarjeta() {
-  var overlay = document.getElementById('tarjeta-overlay');
-  if (!overlay) return;
-  overlay.style.display = 'flex';
-  document.body.style.overflow = 'hidden';
-  // Llenar datos del conductor
-  var nombre = document.getElementById('profile-name')?.textContent || '—';
-  var tipo   = document.getElementById('profile-cat')?.textContent || '—';
-  var placa  = document.getElementById('disp-placa')?.textContent || '—';
-  var tel    = '';
-  // Buscar teléfono en el DOM
-  var telEl  = document.querySelector('[id*="tel"], [data-tel]');
-  document.getElementById('tc-nombre').textContent = nombre;
-  document.getElementById('tc-tipo').textContent   = tipo;
-  document.getElementById('tc-placa').textContent  = placa;
-  // Foto conductor
-  var fotoImg = document.getElementById('foto-conductor-img');
-  if (fotoImg && fotoImg.src && fotoImg.style.display !== 'none') {
-    document.getElementById('tc-foto-img').src = fotoImg.src;
-    document.getElementById('tc-foto-img').style.display = 'block';
-    document.getElementById('tc-foto-emoji').style.display = 'none';
-  }
-  // Ruta según municipio del conductor
-  var munEl = document.getElementById('profile-zona');
-  var munTxt = munEl ? munEl.textContent : '';
-  var ruta = munTxt.toLowerCase().includes('chaparral') ? '☕ Ruta del Café y la Paz · Chaparral' : '🥭 Ruta del Mangostino · Mariquita';
-  document.getElementById('tc-ruta-label').textContent = ruta;
-  // Generar QR con URL del panel del conductor
-  if (!_tarjetaQRGenerado) {
-    var qrUrl = window.location.href;
-    var qrEl  = document.getElementById('tc-qr');
-    if (qrEl && typeof QRCode !== 'undefined') {
-      qrEl.innerHTML = '';
-      new QRCode(qrEl, {
-        text:          qrUrl,
-        width:         68,
-        height:        68,
-        colorDark:     '#1C1208',
-        colorLight:    '#ffffff',
-        correctLevel:  QRCode.CorrectLevel.M
-      });
-      _tarjetaQRGenerado = true;
+  try {
+    var overlay = document.getElementById('tarjeta-overlay');
+    if (!overlay) { alert('Error: no se encontró el modal'); return; }
+    // Mostrar overlay
+    overlay.style.cssText = 'display:flex!important;position:fixed;top:0;left:0;right:0;bottom:0;width:100vw;height:100vh;background:rgba(0,0,0,.88);z-index:99999;align-items:flex-end;justify-content:center;backdrop-filter:blur(6px)';
+    document.body.style.overflow = 'hidden';
+
+    // Llenar datos desde el DOM
+    var nombre = (document.getElementById('profile-name') || {}).textContent || '—';
+    var tipo   = (document.getElementById('profile-cat') || {}).textContent || '—';
+    var placa  = (document.getElementById('disp-placa') || {}).textContent || '—';
+    var tel    = (document.getElementById('disp-tel') || {}).textContent || '';
+
+    var elNombre = document.getElementById('tc-nombre');
+    var elTipo   = document.getElementById('tc-tipo');
+    var elPlaca  = document.getElementById('tc-placa');
+    var elTel    = document.getElementById('tc-tel');
+    if (elNombre) elNombre.textContent = nombre;
+    if (elTipo)   elTipo.textContent   = tipo;
+    if (elPlaca)  elPlaca.textContent  = placa;
+    if (elTel)    elTel.textContent    = tel !== '— — —' ? '📞 ' + tel : '';
+
+    // Foto conductor
+    var fotoImg = document.getElementById('foto-conductor-img');
+    var tcImg   = document.getElementById('tc-foto-img');
+    var tcEmoji = document.getElementById('tc-foto-emoji');
+    if (fotoImg && tcImg && fotoImg.src && fotoImg.src !== window.location.href && fotoImg.style.display !== 'none') {
+      tcImg.src = fotoImg.src;
+      tcImg.style.display = 'block';
+      if (tcEmoji) tcEmoji.style.display = 'none';
     }
+
+    // Ruta según municipio
+    var munEl  = document.getElementById('profile-zona');
+    var munTxt = munEl ? munEl.textContent : '';
+    var ruta   = munTxt.toLowerCase().includes('chaparral') ? '☕ Ruta del Café y la Paz · Chaparral' : '🥭 Ruta del Mangostino · Mariquita';
+    var elRuta = document.getElementById('tc-ruta-label');
+    if (elRuta) elRuta.textContent = ruta;
+
+    // Generar QR
+    if (!_tarjetaQRGenerado) {
+      var qrUrl = window.location.href;
+      var qrEl  = document.getElementById('tc-qr');
+      if (qrEl) {
+        qrEl.innerHTML = '';
+        if (typeof QRCode !== 'undefined') {
+          // qrcode.js (vieja API)
+          try {
+            new QRCode(qrEl, { text: qrUrl, width: 68, height: 68, colorDark: '#1C1208', colorLight: '#ffffff' });
+            _tarjetaQRGenerado = true;
+          } catch(e2) {}
+        } else if (typeof qrcode !== 'undefined') {
+          // nueva API
+          qrcode.toCanvas(document.createElement('canvas'), qrUrl).then(function(cv){
+            cv.style.cssText = 'width:68px;height:68px';
+            qrEl.appendChild(cv);
+            _tarjetaQRGenerado = true;
+          }).catch(function(){});
+        } else {
+          // Fallback: mostrar URL
+          qrEl.innerHTML = '<div style="font-size:8px;word-break:break-all;color:#666;text-align:center">'+qrUrl+'</div>';
+        }
+      }
+    }
+  } catch(err) {
+    console.error('abrirTarjeta error:', err);
   }
 }
 

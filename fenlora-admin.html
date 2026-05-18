@@ -4116,10 +4116,22 @@ async function cargarConductores() {
   var sub   = document.getElementById('cond-sub');
   if (tbody) tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--text3);padding:32px">Cargando...</td></tr>';
   try {
-    var cats = TRANS_CATS_ADM.join(',');
-    var res = await fetch(SUPA_URL_ADM + '/rest/v1/businesses?category=in.(' + cats + ')&select=id,name,category,phone,is_active,disponible,addons&order=name', {
-      headers: { 'apikey': SUPA_KEY_ADM, 'Authorization': 'Bearer ' + SUPA_KEY_ADM }
+    // PostgREST sintaxis correcta para IN
+    var cats = TRANS_CATS_ADM.map(function(c){ return '"' + c + '"'; }).join(',');
+    var url = SUPA_URL_ADM + '/rest/v1/businesses?select=id,name,category,phone,is_active,disponible,addons&order=name&category=in.(' + TRANS_CATS_ADM.join(',') + ')';
+    console.log('Fetching:', url);
+    var res = await fetch(url, {
+      headers: { 
+        'apikey': SUPA_KEY_ADM, 
+        'Authorization': 'Bearer ' + SUPA_KEY_ADM
+      }
     });
+    console.log('Status:', res.status);
+    if (!res.ok) {
+      var errTxt = await res.text();
+      console.error('Error Supabase:', errTxt);
+      throw new Error('HTTP ' + res.status);
+    }
     var data = await res.json();
     todosLosConductores = Array.isArray(data) ? data : [];
     if (sub) sub.textContent = todosLosConductores.length + ' conductores registrados';

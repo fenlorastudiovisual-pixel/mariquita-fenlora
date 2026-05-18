@@ -371,6 +371,9 @@ tr:hover td{background:var(--bg3)}
       <div class="nav-item active" onclick="showModule('dashboard',this)">
         <span class="ni">📊</span> Dashboard
       </div>
+      <div class="nav-item" onclick="showModule('conductores',this)">
+        <span class="ni">🏍️</span><span>Conductores</span>
+      </div>
       <div class="nav-item" onclick="showModule('clientes',this)">
         <span class="ni">🏪</span> Clientes
         <span class="nav-badge">71</span>
@@ -634,6 +637,42 @@ tr:hover td{background:var(--bg3)}
     </div>
 
     <!-- ══════════════ CLIENTES ══════════════ -->
+    <!-- CONDUCTORES -->
+    <div class="module" id="mod-conductores">
+      <div class="table-card">
+        <div class="table-head">
+          <div>
+            <div class="table-title">🏍️ Conductores registrados</div>
+            <div class="table-sub" id="cond-sub">Cargando desde Supabase...</div>
+          </div>
+          <div class="table-actions">
+            <input class="search-input" id="cond-search" placeholder="🔍 Buscar conductor..." oninput="filtrarConductores()">
+            <select id="cond-cat" style="background:var(--bg3);border:1px solid var(--border);border-radius:7px;padding:6px 10px;color:var(--text2);font-size:12px;outline:none" onchange="filtrarConductores()">
+              <option value="">Todos los tipos</option>
+              <option value="moto">🏍️ Mototransporte</option>
+              <option value="taxi">🚕 Taxi</option>
+              <option value="chiva">🚌 Chiva</option>
+              <option value="alqmoto">🏍️ Alq. moto</option>
+              <option value="alqbici">🚲 Alq. bici</option>
+              <option value="vereda">🚐 Vereda</option>
+              <option value="fletero">🚚 Fletero</option>
+            </select>
+            <button class="btn" onclick="cargarConductores()">↻ Actualizar</button>
+          </div>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>Conductor</th><th>Tipo</th><th>Placa</th><th>Teléfono</th><th>Estado</th><th>Link panel</th><th>Enviar</th>
+            </tr>
+          </thead>
+          <tbody id="cond-tbody">
+            <tr><td colspan="7" style="text-align:center;color:var(--text3);padding:32px">Cargando conductores...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
     <div class="module" id="mod-clientes">
       <div class="table-card">
         <div class="table-head">
@@ -4061,6 +4100,108 @@ document.addEventListener('DOMContentLoaded', function(){
   }
   // Si no hay sesión, la pantalla de login está visible (display:flex) → esperar login
 });
+
+
+// ── CONDUCTORES DESDE SUPABASE ──
+var TRANS_CATS_ADM = ['taxi','moto','chiva','alqmoto','alqbici','vereda','fletero'];
+var TRANS_LABEL_ADM = {taxi:'Taxi',moto:'Mototransporte',chiva:'Chiva',alqmoto:'Alq. moto',alqbici:'Alq. bici',vereda:'Vereda',fletero:'Fletero'};
+var todosLosConductores = [];
+
+async function cargarConductores() {
+  var tbody = document.getElementById('cond-tbody');
+  var sub   = document.getElementById('cond-sub');
+  if (tbody) tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--text3);padding:32px">Cargando...</td></tr>';
+  try {
+    var cats = TRANS_CATS_ADM.join(',');
+    var res = await fetch(SUPA_URL_ADM + '/rest/v1/businesses?category=in.(' + cats + ')&select=id,name,category,phone,is_active,disponible,addons&order=name', {
+      headers: { 'apikey': SUPA_KEY_ADM, 'Authorization': 'Bearer ' + SUPA_KEY_ADM }
+    });
+    var data = await res.json();
+    todosLosConductores = Array.isArray(data) ? data : [];
+    if (sub) sub.textContent = todosLosConductores.length + ' conductores registrados';
+    renderConductores(todosLosConductores);
+  } catch(e) {
+    if (tbody) tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:#E57373;padding:24px">Error al cargar conductores.</td></tr>';
+  }
+}
+
+function filtrarConductores() {
+  var q   = (document.getElementById('cond-search') ? document.getElementById('cond-search').value : '').toLowerCase();
+  var cat = document.getElementById('cond-cat') ? document.getElementById('cond-cat').value : '';
+  var filtrados = todosLosConductores.filter(function(c) {
+    return (!q || (c.name||'').toLowerCase().includes(q)) && (!cat || c.category === cat);
+  });
+  renderConductores(filtrados);
+}
+
+function renderConductores(lista) {
+  var tbody = document.getElementById('cond-tbody');
+  if (!tbody) return;
+  if (!lista.length) {
+    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--text3);padding:32px">Sin conductores registrados</td></tr>';
+    return;
+  }
+  var base = 'https://mariquita.fenloravisual.com/conductor.html?id=';
+  var rows = '';
+  for (var i = 0; i < lista.length; i++) {
+    var c = lista[i];
+    var link = base + c.id;
+    var addons = (c.addons && typeof c.addons === 'object') ? c.addons : {};
+    var placa  = addons.placa || '—';
+    var tel    = (c.phone || '').replace(/[^0-9]/g, '');
+    var dispon = c.disponible
+      ? '<span style="color:#25A864;font-weight:600;font-size:11px">Disponible</span>'
+      : '<span style="color:var(--text3);font-size:11px">Inactivo</span>';
+    var linkCell = '<div style="font-size:10px;color:var(--text3);margin-bottom:4px;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + link + '</div>'
+      + '<button data-lnk="' + link + '" onclick="copiarLinkCond(this.dataset.lnk)" style="padding:3px 8px;background:var(--bg3);border:1px solid var(--border);border-radius:6px;color:var(--text2);font-size:10px;cursor:pointer">Copiar</button>';
+    var wspCell = tel.length >= 10
+      ? '<button data-cid="' + c.id + '" data-cnm="' + encodeURIComponent(c.name||'') + '" data-tel="' + tel + '" onclick="enviarLinkConductor(this)" style="padding:5px 10px;background:rgba(37,168,100,.12);border:1px solid rgba(37,168,100,.3);border-radius:7px;color:#25A864;font-size:11px;font-weight:600;cursor:pointer;white-space:nowrap">Enviar WhatsApp</button>'
+      : '<span style="font-size:10px;color:var(--text3)">Sin teléfono</span>';
+    rows += '<tr>'
+      + '<td><span class="client-name">' + (c.name||'') + '</span>' + (!c.is_active ? '<span style="font-size:10px;color:#E57373;display:block">Pin oculto</span>' : '') + '</td>'
+      + '<td><span class="badge b-serv">' + (TRANS_LABEL_ADM[c.category]||c.category) + '</span></td>'
+      + '<td style="font-family:\'DM Mono\',monospace;font-size:12px;color:var(--gold);font-weight:700">' + placa + '</td>'
+      + '<td style="font-size:12px">' + (c.phone||'—') + '</td>'
+      + '<td>' + dispon + '</td>'
+      + '<td>' + linkCell + '</td>'
+      + '<td>' + wspCell + '</td>'
+      + '</tr>';
+  }
+  tbody.innerHTML = rows;
+}
+
+function copiarLinkCond(link) {
+  navigator.clipboard.writeText(link).then(function() {
+    showNotif('Link copiado al portapapeles');
+  }).catch(function() { prompt('Copia este link:', link); });
+}
+
+function enviarLinkConductor(btn) {
+  var id     = btn.dataset.cid;
+  var nombre = decodeURIComponent(btn.dataset.cnm);
+  var tel    = btn.dataset.tel;
+  var link   = 'https://mariquita.fenloravisual.com/conductor.html?id=' + id;
+  var msg    = 'Hola *' + nombre + '* 🏍\n\n'
+    + 'Bienvenido a *Fenlora - Ruta del Mangostino*.\n\n'
+    + 'Este es tu panel personal de conductor. Guárdalo en tu celular:\n'
+    + link + '\n\n'
+    + 'Cuando empieces a trabajar toca el boton verde → apareces en el mapa\n'
+    + 'Cuando termines tócalo de nuevo → te desconectas\n\n'
+    + 'Los turistas te verán y podrán contactarte. — Fenlora Visual Studio';
+  window.open('https://wa.me/57' + tel + '?text=' + encodeURIComponent(msg), '_blank');
+}
+
+// Cargar al abrir el módulo
+(function() {
+  var _orig = null;
+  document.addEventListener('DOMContentLoaded', function() {
+    _orig = window.showModule;
+    window.showModule = function(name, el) {
+      if (_orig) _orig(name, el);
+      if (name === 'conductores' && todosLosConductores.length === 0) cargarConductores();
+    };
+  });
+})();
 
 // ── EMERGENCIAS EN TIEMPO REAL ──
 const SUPA_URL_ADM = 'https://ikcutinvnkktfasgnanv.supabase.co';

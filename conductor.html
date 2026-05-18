@@ -35,9 +35,22 @@ html,body{height:100%;overflow-x:hidden;font-family:'DM Sans',sans-serif;backgro
 #app{display:none;min-height:100vh;background:linear-gradient(160deg,var(--dark) 0%,#2D1A05 100%)}
 
 /* HEADER */
-.hdr{padding:16px 20px 0;display:flex;align-items:center;justify-content:space-between}
-.hdr-logo{font-family:'Syne',sans-serif;font-size:13px;font-weight:700;color:var(--gold);letter-spacing:.05em}
+.hdr{padding:14px 20px 0;display:flex;align-items:center;justify-content:space-between}
+.hdr-logo{display:flex;align-items:center;gap:7px}
+.hdr-logo-text{font-family:'Syne',sans-serif;font-size:13px;font-weight:700;color:var(--gold);letter-spacing:.05em}
 .hdr-badge{font-size:10px;color:var(--text3);background:rgba(200,134,10,.1);border:1px solid var(--border);border-radius:20px;padding:3px 10px;letter-spacing:.04em}
+/* ASISTENCIA MODAL */
+.asist-overlay{position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:999;display:flex;align-items:flex-end;justify-content:center;animation:fadeInA .2s}
+.asist-sheet{background:#1a0f02;border:1px solid var(--border);border-radius:20px 20px 0 0;padding:24px 20px 40px;width:100%;max-width:480px}
+.asist-title{font-family:'Syne',sans-serif;font-size:15px;font-weight:700;color:var(--gold);margin-bottom:4px}
+.asist-sub{font-size:11px;color:var(--text3);margin-bottom:18px}
+.asist-opt{display:flex;align-items:center;gap:12px;padding:13px 14px;background:rgba(200,134,10,.06);border:1px solid var(--border);border-radius:12px;margin-bottom:10px;cursor:pointer;transition:all .2s}
+.asist-opt:active{background:rgba(200,134,10,.14);border-color:var(--gold)}
+.asist-opt-ico{font-size:20px;flex-shrink:0}
+.asist-opt-lbl{font-size:13px;font-weight:600;color:var(--cream);display:block}
+.asist-opt-desc{font-size:10px;color:var(--text3);margin-top:1px;display:block}
+.asist-cancel{width:100%;padding:12px;background:transparent;border:1px solid var(--border);border-radius:12px;color:var(--text3);font-size:13px;font-family:'DM Sans',sans-serif;cursor:pointer;margin-top:4px}
+@keyframes fadeInA{from{opacity:0}to{opacity:1}}
 
 /* PROFILE CARD */
 .profile-card{margin:20px 20px 0;background:rgba(253,246,236,.04);border:1px solid var(--border);border-radius:20px;padding:24px;position:relative;overflow:hidden}
@@ -236,8 +249,65 @@ html,body{height:100%;overflow-x:hidden;font-family:'DM Sans',sans-serif;backgro
 <!-- APP -->
 <div id="app">
   <div class="hdr">
-    <div class="hdr-logo">FENLORA</div>
-    <div class="hdr-badge">Panel conductor</div>
+    <div class="hdr-logo">
+      <!-- Obturador Fenlora SVG -->
+      <svg width="26" height="26" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="50" cy="50" r="48" fill="none" stroke="rgba(200,134,10,.25)" stroke-width="1.5"/>
+        <circle cx="50" cy="50" r="10" fill="#C8860A"/>
+        <g opacity="0.9">
+          <path d="M50 40 L44 18 Q50 14 58 16 Z" fill="url(#g1)"/>
+          <path d="M60 45 L82 39 Q86 45 84 53 Z" fill="url(#g2)"/>
+          <path d="M56 56 L72 74 Q67 80 60 79 Z" fill="url(#g3)"/>
+          <path d="M44 58 L28 76 Q22 71 23 63 Z" fill="url(#g4)"/>
+          <path d="M38 50 L16 54 Q13 47 17 40 Z" fill="url(#g5)"/>
+          <path d="M42 42 L34 20 Q41 15 48 17 Z" fill="url(#g6)"/>
+        </g>
+        <circle cx="50" cy="50" r="8" fill="#1a0f02"/>
+        <circle cx="50" cy="50" r="5" fill="#C8860A" opacity=".8"/>
+        <defs>
+          <linearGradient id="g1" x1="44" y1="14" x2="58" y2="40" gradientUnits="userSpaceOnUse"><stop stop-color="#FFD700"/><stop offset="1" stop-color="#C8860A"/></linearGradient>
+          <linearGradient id="g2" x1="82" y1="39" x2="60" y2="53" gradientUnits="userSpaceOnUse"><stop stop-color="#FFB300"/><stop offset="1" stop-color="#E65C00"/></linearGradient>
+          <linearGradient id="g3" x1="72" y1="74" x2="56" y2="56" gradientUnits="userSpaceOnUse"><stop stop-color="#C8860A"/><stop offset="1" stop-color="#8B4A00"/></linearGradient>
+          <linearGradient id="g4" x1="28" y1="76" x2="44" y2="58" gradientUnits="userSpaceOnUse"><stop stop-color="#9B59B6"/><stop offset="1" stop-color="#C8860A"/></linearGradient>
+          <linearGradient id="g5" x1="16" y1="54" x2="38" y2="50" gradientUnits="userSpaceOnUse"><stop stop-color="#4A90D9"/><stop offset="1" stop-color="#9B59B6"/></linearGradient>
+          <linearGradient id="g6" x1="34" y1="20" x2="48" y2="42" gradientUnits="userSpaceOnUse"><stop stop-color="#FFD700"/><stop offset="1" stop-color="#FFB300"/></linearGradient>
+        </defs>
+      </svg>
+      <span class="hdr-logo-text">FENLORA</span>
+    </div>
+    <div style="display:flex;align-items:center;gap:8px">
+      <div class="hdr-badge">Panel conductor</div>
+      <button onclick="abrirAsistencia()" style="width:32px;height:32px;border-radius:50%;background:rgba(200,134,10,.12);border:1px solid var(--border);color:var(--gold);font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center" title="Asistencia Fenlora">🆘</button>
+    </div>
+  </div>
+
+  <!-- MODAL ASISTENCIA -->
+  <div id="asist-overlay" class="asist-overlay" style="display:none" onclick="if(event.target===this)cerrarAsistencia()">
+    <div class="asist-sheet">
+      <div class="asist-title">🆘 Asistencia Fenlora</div>
+      <div class="asist-sub">¿Qué necesitas reportar? Te conectamos directamente con el equipo.</div>
+      <div class="asist-opt" onclick="enviarAsistencia('problema_tecnico')">
+        <div class="asist-opt-ico">⚙️</div>
+        <div><span class="asist-opt-lbl">Problema técnico</span><span class="asist-opt-desc">La app no funciona, el mapa no me muestra, error en el sistema</span></div>
+      </div>
+      <div class="asist-opt" onclick="enviarAsistencia('situacion_cliente')">
+        <div class="asist-opt-ico">👤</div>
+        <div><span class="asist-opt-lbl">Situación con un cliente</span><span class="asist-opt-desc">Inconveniente, conflicto o comportamiento irregular de un turista</span></div>
+      </div>
+      <div class="asist-opt" onclick="enviarAsistencia('emergencia')">
+        <div class="asist-opt-ico">🚨</div>
+        <div><span class="asist-opt-lbl">Emergencia</span><span class="asist-opt-desc">Accidente, seguridad o situación urgente que requiere atención inmediata</span></div>
+      </div>
+      <div class="asist-opt" onclick="enviarAsistencia('actualizar_datos')">
+        <div class="asist-opt-ico">📋</div>
+        <div><span class="asist-opt-lbl">Actualizar mis datos</span><span class="asist-opt-desc">Cambio de placa, vehículo, horario o información de contacto</span></div>
+      </div>
+      <div class="asist-opt" onclick="enviarAsistencia('sugerencia')">
+        <div class="asist-opt-ico">💡</div>
+        <div><span class="asist-opt-lbl">Sugerencia o mejora</span><span class="asist-opt-desc">Tengo una idea para mejorar el servicio Fenlora</span></div>
+      </div>
+      <button class="asist-cancel" onclick="cerrarAsistencia()">Cancelar</button>
+    </div>
   </div>
 
   <!-- TARJETA DE IDENTIFICACIÓN -->
@@ -618,6 +688,29 @@ function suscribirCambios() {
         }
       }
     ).subscribe();
+}
+
+// ── ASISTENCIA FENLORA ──
+function abrirAsistencia() {
+  document.getElementById('asist-overlay').style.display = 'flex';
+}
+function cerrarAsistencia() {
+  document.getElementById('asist-overlay').style.display = 'none';
+}
+function enviarAsistencia(tipo) {
+  const conductor = document.getElementById('disp-nombre')?.textContent || 'Conductor';
+  const id = conductorId || 'sin-id';
+  const hora = new Date().toLocaleString('es-CO', {timeZone:'America/Bogota'});
+  const mensajes = {
+    problema_tecnico: `🔧 *REPORTE TÉCNICO - Fenlora*\n\n*Conductor:* ${conductor}\n*ID:* ${id}\n*Hora:* ${hora}\n\nEstoy presentando un problema técnico con la app o el mapa. Por favor ayúdenme.`,
+    situacion_cliente: `👤 *SITUACIÓN CON CLIENTE - Fenlora*\n\n*Conductor:* ${conductor}\n*ID:* ${id}\n*Hora:* ${hora}\n\nNecesito reportar un inconveniente o comportamiento irregular con un turista/cliente.`,
+    emergencia: `🚨 *EMERGENCIA - Fenlora*\n\n*Conductor:* ${conductor}\n*ID:* ${id}\n*Hora:* ${hora}\n\n⚠️ ATENCIÓN URGENTE REQUERIDA. Estoy reportando una emergencia, accidente o situación de seguridad.`,
+    actualizar_datos: `📋 *ACTUALIZACIÓN DE DATOS - Fenlora*\n\n*Conductor:* ${conductor}\n*ID:* ${id}\n*Hora:* ${hora}\n\nNecesito actualizar mi información (placa, vehículo, horario o contacto).`,
+    sugerencia: `💡 *SUGERENCIA - Fenlora*\n\n*Conductor:* ${conductor}\n*ID:* ${id}\n*Hora:* ${hora}\n\nTengo una sugerencia para mejorar el servicio:`
+  };
+  const msg = encodeURIComponent(mensajes[tipo] || 'Hola Fenlora, necesito asistencia.');
+  cerrarAsistencia();
+  window.open(`https://wa.me/573112746813?text=${msg}`, '_blank');
 }
 
 function showError() {

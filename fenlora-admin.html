@@ -376,22 +376,22 @@ tr:hover td{background:var(--bg3)}
       </div>
       <div class="nav-item" onclick="showModule('clientes',this)">
         <span class="ni">🏪</span> Clientes
-        <span class="nav-badge">71</span>
+        <span class="nav-badge" id="badge-clientes">0</span>
       </div>
       <div class="nav-item" onclick="showModule('renovaciones',this)">
         <span class="ni">🔄</span> Renovaciones
-        <span class="nav-badge gold">8</span>
+        <span class="nav-badge gold" id="badge-renov">0</span>
       </div>
     </div>
     <div class="nav-section">
       <div class="nav-label">Comunicación</div>
       <div class="nav-item" onclick="showModule('alertas',this)">
         <span class="ni">🔔</span> Alertas y mensajes
-        <span class="nav-badge">3</span>
+        <span class="nav-badge" id="badge-alertas">0</span>
       </div>
       <div class="nav-item" onclick="showModule('cotizaciones',this)">
         <span class="ni">📋</span> Cotizaciones
-        <span class="nav-badge">5</span>
+        <span class="nav-badge" id="badge-cotiz">0</span>
       </div>
     </div>
     <div class="nav-section">
@@ -419,7 +419,7 @@ tr:hover td{background:var(--bg3)}
       </div>
       <div class="nav-item" onclick="showModule('resenas',this)">
         <span class="ni">⭐</span> Reseñas
-        <span class="nav-badge" id="badge-resenas">12</span>
+        <span class="nav-badge" id="badge-resenas">0</span>
       </div>
       <div class="nav-item" onclick="showModule('traducciones',this)">
         <span class="ni">🌍</span> Traducciones EN
@@ -433,9 +433,7 @@ tr:hover td{background:var(--bg3)}
     </div>
     <div class="nav-section">
       <div class="nav-label">Finanzas</div>
-      <div class="nav-item" onclick="showModule('vendedores',this)">
-        <span class="ni">🤝</span> Red de vendedores
-      </div>
+      
       <div class="nav-item" onclick="showModule('reportes',this)">
         <span class="ni">📈</span> Reportes
       </div>
@@ -476,7 +474,7 @@ tr:hover td{background:var(--bg3)}
       <div class="metrics-grid">
         <div class="metric-card">
           <div class="metric-label">🏪 Clientes activos</div>
-          <div class="metric-val">71</div>
+          <div class="metric-val" id="dash-total-clientes">0</div>
           <div class="metric-sub">De 350 negocios potenciales</div>
           <div class="metric-delta delta-up">▲ +8 este mes</div>
         </div>
@@ -512,7 +510,7 @@ tr:hover td{background:var(--bg3)}
             <div class="renewal-item">
               <div class="renewal-days" style="color:#E57373">2 días</div>
               <div>
-                <div class="renewal-name">Terrakota Heritage House</div>
+                <div class="renewal-name">—</div>
                 <div class="renewal-plan">Plan Premium</div>
               </div>
               <div class="renewal-val">$329.900</div>
@@ -521,7 +519,7 @@ tr:hover td{background:var(--bg3)}
             <div class="renewal-item">
               <div class="renewal-days" style="color:#E09060">5 días</div>
               <div>
-                <div class="renewal-name">Mostachos Bar Gourmet</div>
+                <div class="renewal-name">—</div>
                 <div class="renewal-plan">Plan Pro</div>
               </div>
               <div class="renewal-val">$179.900</div>
@@ -530,7 +528,7 @@ tr:hover td{background:var(--bg3)}
             <div class="renewal-item">
               <div class="renewal-days" style="color:#4CAF82">9 días</div>
               <div>
-                <div class="renewal-name">Selvatik Rutas</div>
+                <div class="renewal-name">—</div>
                 <div class="renewal-plan">Plan Pro</div>
               </div>
               <div class="renewal-val">$179.900</div>
@@ -539,7 +537,7 @@ tr:hover td{background:var(--bg3)}
             <div class="renewal-item">
               <div class="renewal-days" style="color:#4CAF82">12 días</div>
               <div>
-                <div class="renewal-name">Finca Ecoturística Brabante</div>
+                <div class="renewal-name">—</div>
                 <div class="renewal-plan">Plan Básico</div>
               </div>
               <div class="renewal-val">$89.900</div>
@@ -565,7 +563,7 @@ tr:hover td{background:var(--bg3)}
             <div class="alert-log-item">
               <div class="alert-dot" style="background:var(--gold)"></div>
               <div>
-                <div class="alert-log-text">Balneario Villa del Río activó descuento 15%</div>
+<div class="alert-log-text">Sin actividad reciente</div>
                 <div class="alert-log-meta">Hace 34 min</div>
               </div>
             </div>
@@ -579,7 +577,7 @@ tr:hover td{background:var(--bg3)}
             <div class="alert-log-item">
               <div class="alert-dot" style="background:#4CAF82"></div>
               <div>
-                <div class="alert-log-text">Nuevo cliente: Santa Lucía Gastro Bar (Plan Pro)</div>
+<div class="alert-log-text">—</div>
                 <div class="alert-log-meta">Hoy 9:14am</div>
               </div>
             </div>
@@ -616,8 +614,7 @@ tr:hover td{background:var(--bg3)}
         <div class="panel-card">
           <div class="panel-hdr"><div class="panel-title">Top negocios (vistas)</div></div>
           <div class="panel-body">
-            <div class="stat-row"><div class="sl">Terrakota Heritage</div><div class="sv">482</div></div>
-            <div class="stat-row"><div class="sl">Casa Lumka Spa</div><div class="sv">361</div></div>
+<div class="stat-row"><div class="sl" style="color:var(--text3)">Sin datos aún</div><div class="sv">—</div></div>
             <div class="stat-row"><div class="sl">Cataratas de Medina</div><div class="sv">298</div></div>
             <div class="stat-row"><div class="sl">Finca Brabante</div><div class="sv">241</div></div>
             <div class="stat-row"><div class="sl">Otto Sabor y Café</div><div class="sv">187</div></div>
@@ -767,14 +764,7 @@ tr:hover td{background:var(--bg3)}
         </div>
         <table>
           <thead><tr><th>Negocio</th><th>Plan</th><th>Valor</th><th>Vence</th><th>Estado</th><th>Acción</th></tr></thead>
-          <tbody>
-            <tr><td><span class="client-name">Terrakota Heritage House</span><span class="client-address">Hotel · Centro</span></td><td><span class="badge b-premium">Premium</span></td><td style="font-family:'DM Mono',monospace;color:var(--gold)">$329.900</td><td style="color:#E57373;font-family:'DM Mono',monospace">2 días</td><td><span class="badge b-vence">Urgente</span></td><td><button class="btn-sm gold" onclick="abrirCobro(1)">💳 Cobrar + Factura</button></td></tr>
-            <tr><td><span class="client-name">Casa Lumka Hotel Spa</span><span class="client-address">Hotel · La Concordia</span></td><td><span class="badge b-premium">Premium</span></td><td style="font-family:'DM Mono',monospace;color:var(--gold)">$329.900</td><td style="color:#E57373;font-family:'DM Mono',monospace">-3 días</td><td><span class="badge b-mora">En mora</span></td><td><button class="btn-sm" style="color:#E57373;border-color:var(--red-dim)" onclick="showNotif('Alerta de suspensión enviada ✓')">⚠️ Suspender</button></td></tr>
-            <tr><td><span class="client-name">Mostachos Bar Gourmet</span><span class="client-address">Bar · Centro</span></td><td><span class="badge b-pro">Pro</span></td><td style="font-family:'DM Mono',monospace;color:var(--gold)">$179.900</td><td style="color:#E09060;font-family:'DM Mono',monospace">5 días</td><td><span class="badge b-vence">Por vencer</span></td><td><button class="btn-sm gold" onclick="showNotif('Recordatorio enviado a Mostachos ✓')">Recordar</button></td></tr>
-            <tr><td><span class="client-name">Selvatik Rutas</span><span class="client-address">Agencia · Centro</span></td><td><span class="badge b-pro">Pro</span></td><td style="font-family:'DM Mono',monospace;color:var(--gold)">$179.900</td><td style="color:#4CAF82;font-family:'DM Mono',monospace">9 días</td><td><span class="badge b-active">Al día</span></td><td><button class="btn-sm" onclick="showNotif('Recordatorio enviado ✓')">Recordar</button></td></tr>
-            <tr><td><span class="client-name">Finca Ecoturística Brabante</span><span class="client-address">Finca · El Caucho</span></td><td><span class="badge b-basic">Básico</span></td><td style="font-family:'DM Mono',monospace;color:var(--gold)">$89.900</td><td style="color:#4CAF82;font-family:'DM Mono',monospace">12 días</td><td><span class="badge b-active">Al día</span></td><td><button class="btn-sm" onclick="showNotif('Recordatorio enviado ✓')">Recordar</button></td></tr>
-            <tr><td><span class="client-name">Balneario Villa del Río</span><span class="client-address">Restaurante · Las Lomas</span></td><td><span class="badge b-pro">Pro</span></td><td style="font-family:'DM Mono',monospace;color:var(--gold)">$179.900</td><td style="color:#E57373;font-family:'DM Mono',monospace">-8 días</td><td><span class="badge b-mora">En mora</span></td><td><button class="btn-sm" style="color:#E57373;border-color:var(--red-dim)" onclick="showNotif('PIN suspendido del mapa ✓')">Suspender PIN</button></td></tr>
-          </tbody>
+          <tbody id="renov-tbody"><tr><td colspan="6" style="text-align:center;color:var(--text3);padding:32px">Sin renovaciones pendientes — los negocios se agregarán automáticamente</td></tr></tbody>
         </table>
       </div>
     </div>
@@ -838,7 +828,7 @@ tr:hover td{background:var(--bg3)}
               </div>
               <label>Destinatarios</label>
               <select>
-                <option>Todos los suscriptores (71)</option>
+                <option>Todos los negocios</option>
                 <option>Solo hoteles (12)</option>
                 <option>Solo restaurantes y bares (22)</option>
                 <option>Solo fincas (7)</option>
@@ -867,14 +857,14 @@ tr:hover td{background:var(--bg3)}
               <div class="alert-dot" style="background:#E57373"></div>
               <div>
                 <div class="alert-log-text">🚨 <strong>Fraude</strong> — Transferencias falsas número 312-xxx</div>
-                <div class="alert-log-meta">Hoy 10:32am · 71 enviados · 68 entregados</div>
+                <div class="alert-log-meta">Hoy · 0 enviados</div>
               </div>
             </div>
             <div class="alert-log-item">
               <div class="alert-dot" style="background:#4CAF82"></div>
               <div>
                 <div class="alert-log-text">⭐ <strong>Oportunidad</strong> — Puente festivo 18–20 mayo: activen descuentos</div>
-                <div class="alert-log-meta">15 may · 71 enviados · Tasa apertura: 84%</div>
+                <div class="alert-log-meta">— · 0 enviados</div>
               </div>
             </div>
             <div class="alert-log-item">
@@ -895,7 +885,7 @@ tr:hover td{background:var(--bg3)}
               <div class="alert-dot" style="background:#E57373"></div>
               <div>
                 <div class="alert-log-text">🚨 <strong>Fraude</strong> — Billetes falsos en circulación zona centro</div>
-                <div class="alert-log-meta">28 abr · 71 enviados · Urgente</div>
+                <div class="alert-log-meta">— · 0 enviados</div>
               </div>
             </div>
           </div>
@@ -933,7 +923,7 @@ tr:hover td{background:var(--bg3)}
         <div class="cotiz-card">
           <div class="cotiz-header"><div class="cotiz-from">María Rodríguez · Bogotá</div><div class="cotiz-time">Hace 12 min</div></div>
           <div class="cotiz-msg">"Hola, viajamos 4 personas el puente. Necesitamos hospedaje para 2 noches con desayuno incluido. ¿Tienen disponibilidad 17–19 mayo?"</div>
-          <div class="cotiz-negocios">Enviada a: <strong>Terrakota Heritage · Casa Lumka · Hotel Los Mangostinos</strong></div>
+          <div class="cotiz-negocios">Sin destinatarios aún</div>
           <div style="display:flex;gap:6px">
             <span class="badge b-vence">⏳ Sin respuesta</span>
             <button class="btn-sm gold" onclick="showNotif('Notificación enviada a los 3 hoteles ✓')">Notificar negocios</button>
@@ -943,7 +933,7 @@ tr:hover td{background:var(--bg3)}
         <div class="cotiz-card">
           <div class="cotiz-header"><div class="cotiz-from">Carlos Mendoza · Ibagué</div><div class="cotiz-time">Hace 1 hora</div></div>
           <div class="cotiz-msg">"Buscamos almuerzo típico tolimense para grupo de 15 personas el sábado. ¿Qué opciones hay? ¿Manejan menú ejecutivo?"</div>
-          <div class="cotiz-negocios">Enviada a: <strong>El Gran Ranchón · Balneario Villa del Río · La Enramada BBQ</strong></div>
+          <div class="cotiz-negocios">Sin destinatarios aún</div>
           <div style="display:flex;gap:6px">
             <span class="badge b-active">✅ 2 respondieron</span>
             <button class="btn-sm" onclick="showNotif('Ver respuestas')">Ver respuestas</button>
@@ -952,7 +942,7 @@ tr:hover td{background:var(--bg3)}
         <div class="cotiz-card">
           <div class="cotiz-header"><div class="cotiz-from">Turista anónimo · Medellín</div><div class="cotiz-time">Hace 3 horas</div></div>
           <div class="cotiz-msg">"¿Cuánto cuesta el tour de mangostino? ¿Se puede ir con niños? Somos 6 adultos y 2 niños."</div>
-          <div class="cotiz-negocios">Enviada a: <strong>Selvatik Rutas · San Senderismo · Joema Tours</strong></div>
+          <div class="cotiz-negocios">Sin destinatarios aún</div>
           <div style="display:flex;gap:6px">
             <span class="badge b-active">✅ 3 respondieron</span>
             <button class="btn-sm" onclick="showNotif('Ver respuestas')">Ver respuestas</button>
@@ -961,7 +951,7 @@ tr:hover td{background:var(--bg3)}
         <div class="cotiz-card">
           <div class="cotiz-header"><div class="cotiz-from">Laura Gómez · Cali</div><div class="cotiz-time">Ayer 6:45pm</div></div>
           <div class="cotiz-msg">"¿Tienen disponibilidad de glamping para este fin de semana? ¿Qué incluye? ¿Hay WiFi?"</div>
-          <div class="cotiz-negocios">Enviada a: <strong>Eco Glamping Shalom · Lote Guacamayas · Casa Campestre La Linda</strong></div>
+          <div class="cotiz-negocios">Sin destinatarios aún</div>
           <div style="display:flex;gap:6px">
             <span class="badge b-active">✅ 1 respondió</span>
             <button class="btn-sm" onclick="showNotif('Ver respuestas')">Ver respuestas</button>
@@ -987,7 +977,7 @@ tr:hover td{background:var(--bg3)}
 
         <div class="panel-card">
           <div class="panel-hdr">
-            <div class="panel-title" id="menu-client-title">El Gran Ranchón · Editor de menú</div>
+            <div class="panel-title" id="menu-client-title">Selecciona un negocio</div>
             <button class="btn-sm gold" style="margin-left:auto" onclick="guardarMenu()">💾 Guardar cambios</button>
           </div>
           <div class="panel-body" style="padding:8px 18px">
@@ -1124,7 +1114,7 @@ tr:hover td{background:var(--bg3)}
               <button onclick="this.closest('.discount-row').remove();showNotif('Descuento eliminado')" style="background:transparent;border:none;color:var(--red);cursor:pointer;font-size:14px;padding:0 4px" title="Eliminar">✕</button>
             </div>
             <div class="discount-row" style="position:relative">
-              <div><div class="discount-name">Terrakota Heritage</div><div class="discount-meta">Sin código · Ilimitado · Vence 25 mayo</div></div>
+<div><div class="discount-name" style="color:var(--text3)">Sin descuentos activos</div></div>
               <div class="discount-pct">15%</div>
               <div class="toggle on" onclick="this.classList.toggle('on')"></div>
               <button onclick="this.closest('.discount-row').remove();showNotif('Descuento eliminado')" style="background:transparent;border:none;color:var(--red);cursor:pointer;font-size:14px;padding:0 4px" title="Eliminar">✕</button>
@@ -1270,6 +1260,13 @@ tr:hover td{background:var(--bg3)}
 
     <!-- ══════════════ EVENTOS ══════════════ -->
     <div class="module" id="mod-eventos">
+      <div style="display:flex;gap:8px;margin-bottom:16px;align-items:center;flex-wrap:wrap">
+        <select id="eventos-municipio" onchange="filtrarEventos()" style="background:var(--bg3);border:1px solid var(--border);border-radius:7px;padding:6px 10px;color:var(--text2);font-size:12px;outline:none">
+          <option value="">Todos los municipios</option>
+          <option value="mariquita">🥭 Mariquita</option>
+          <option value="chaparral">☕ Chaparral</option>
+        </select>
+      </div>
       <div class="two-col">
         <div class="panel-card">
           <div class="panel-hdr">
@@ -1550,6 +1547,13 @@ tr:hover td{background:var(--bg3)}
 
         <!-- ══════════════ REPORTES ══════════════ -->
     <div class="module" id="mod-reportes">
+      <div style="display:flex;gap:8px;margin-bottom:16px;align-items:center;flex-wrap:wrap">
+        <select id="reportes-municipio" onchange="filtrarReportes()" style="background:var(--bg3);border:1px solid var(--border);border-radius:7px;padding:6px 10px;color:var(--text2);font-size:12px;outline:none">
+          <option value="">Todos los municipios</option>
+          <option value="mariquita">🥭 Mariquita</option>
+          <option value="chaparral">☕ Chaparral</option>
+        </select>
+      </div>
 
       <!-- TABS: Mis finanzas | Reportes para clientes -->
       <div style="display:flex;gap:0;margin-bottom:20px;border-bottom:1px solid var(--border)">
@@ -1628,6 +1632,14 @@ tr:hover td{background:var(--bg3)}
 
         <!-- ══════════════ RUTAS TEMÁTICAS ══════════════ -->
     <div class="module" id="mod-rutas">
+      <!-- Filtro municipio rutas -->
+      <div style="display:flex;gap:8px;margin-bottom:16px;align-items:center;flex-wrap:wrap">
+        <select id="rutas-municipio" onchange="filtrarRutas()" style="background:var(--bg3);border:1px solid var(--border);border-radius:7px;padding:6px 10px;color:var(--text2);font-size:12px;outline:none">
+          <option value="">Todos los municipios</option>
+          <option value="mariquita">🥭 Mariquita</option>
+          <option value="chaparral">☕ Chaparral</option>
+        </select>
+      </div>
       <div class="two-col">
         <!-- Lista de rutas -->
         <div class="panel-card">
@@ -1637,48 +1649,79 @@ tr:hover td{background:var(--bg3)}
             <button class="btn primary" style="margin-left:auto;padding:6px 12px;font-size:11px" onclick="openNewRoute()">+ Nueva ruta</button>
           </div>
           <div class="panel-body" style="padding:8px 18px" id="rutas-list">
-            <!-- RUTAS PRE-CARGADAS (el JS las actualiza al editar) -->
-            <div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)">
+            <!-- 🥭 MARIQUITA -->
+            <div style="font-size:9px;font-weight:700;color:var(--gold);letter-spacing:.1em;text-transform:uppercase;padding:8px 0 4px">🥭 Mariquita</div>
+            <div data-municipio="mariquita" style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)">
               <div style="width:48px;height:48px;border-radius:8px;overflow:hidden;flex-shrink:0"><img src="https://images.unsplash.com/photo-1416879595882-3373a0480b5b?w=80&q=60" style="width:100%;height:100%;object-fit:cover"></div>
               <div style="flex:1"><div style="font-size:13px;font-weight:500;color:var(--text)">🍇 Ruta del Mangostino</div><div style="font-size:11px;color:var(--text3)">5 paradas · Medio día · 4–5 h</div></div>
               <div class="toggle-track on" onclick="toggleRutaActiva('r1',this)"><div class="toggle-knob"></div></div>
               <button class="btn-sm gold" onclick="editRuta('r1')">Editar</button>
               <button class="btn-sm" onclick="deleteRuta('r1')" style="color:var(--red)">🗑️</button>
             </div>
-            <div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)">
+            <div data-municipio="mariquita" style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)">
               <div style="width:48px;height:48px;border-radius:8px;overflow:hidden;flex-shrink:0"><img src="https://images.unsplash.com/photo-1524492412937-b28074a47d70?w=80&q=60" style="width:100%;height:100%;object-fit:cover"></div>
               <div style="flex:1"><div style="font-size:13px;font-weight:500;color:var(--text)">🏛️ Ruta Colonial</div><div style="font-size:11px;color:var(--text3)">4 paradas · 2 horas · Caminata</div></div>
               <div class="toggle-track on" onclick="toggleRutaActiva('r2',this)"><div class="toggle-knob"></div></div>
               <button class="btn-sm gold" onclick="editRuta('r2')">Editar</button>
               <button class="btn-sm" onclick="deleteRuta('r2')" style="color:var(--red)">🗑️</button>
             </div>
-            <div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)">
+            <div data-municipio="mariquita" style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)">
               <div style="width:48px;height:48px;border-radius:8px;overflow:hidden;flex-shrink:0"><img src="https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=80&q=60" style="width:100%;height:100%;object-fit:cover"></div>
               <div style="flex:1"><div style="font-size:13px;font-weight:500;color:var(--text)">🍽️ Ruta del Sabor</div><div style="font-size:11px;color:var(--text3)">5 paradas · Todo el día</div></div>
               <div class="toggle-track on" onclick="toggleRutaActiva('r3',this)"><div class="toggle-knob"></div></div>
               <button class="btn-sm gold" onclick="editRuta('r3')">Editar</button>
               <button class="btn-sm" onclick="deleteRuta('r3')" style="color:var(--red)">🗑️</button>
             </div>
-            <div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)">
+            <div data-municipio="mariquita" style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)">
               <div style="width:48px;height:48px;border-radius:8px;overflow:hidden;flex-shrink:0"><img src="https://images.unsplash.com/photo-1564419320461-6870880221ad?w=80&q=60" style="width:100%;height:100%;object-fit:cover"></div>
               <div style="flex:1"><div style="font-size:13px;font-weight:500;color:var(--text)">🌿 Ruta de Naturaleza</div><div style="font-size:11px;color:var(--text3)">4 paradas · Día completo</div></div>
               <div class="toggle-track on" onclick="toggleRutaActiva('r4',this)"><div class="toggle-knob"></div></div>
               <button class="btn-sm gold" onclick="editRuta('r4')">Editar</button>
               <button class="btn-sm" onclick="deleteRuta('r4')" style="color:var(--red)">🗑️</button>
             </div>
-            <div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)">
+            <div data-municipio="mariquita" style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)">
               <div style="width:48px;height:48px;border-radius:8px;overflow:hidden;flex-shrink:0"><img src="https://images.unsplash.com/photo-1471506480208-91b3a4cc78be?w=80&q=60" style="width:100%;height:100%;object-fit:cover"></div>
               <div style="flex:1"><div style="font-size:13px;font-weight:500;color:var(--text)">🚴 Ruta del Cicloturismo</div><div style="font-size:11px;color:var(--text3)">3 paradas · Medio día</div></div>
               <div class="toggle-track on" onclick="toggleRutaActiva('r5',this)"><div class="toggle-knob"></div></div>
               <button class="btn-sm gold" onclick="editRuta('r5')">Editar</button>
               <button class="btn-sm" onclick="deleteRuta('r5')" style="color:var(--red)">🗑️</button>
             </div>
-            <div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)">
+            <div data-municipio="mariquita" style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)">
               <div style="width:48px;height:48px;border-radius:8px;overflow:hidden;flex-shrink:0"><img src="https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=80&q=60" style="width:100%;height:100%;object-fit:cover"></div>
               <div style="flex:1"><div style="font-size:13px;font-weight:500;color:var(--text)">🚵 Reto Mariquita/Letras</div><div style="font-size:11px;color:var(--text3)">4 paradas · Día completo · Ciclismo</div></div>
               <div class="toggle-track on" onclick="toggleRutaActiva('r6',this)"><div class="toggle-knob"></div></div>
               <button class="btn-sm gold" onclick="editRuta('r6')">Editar</button>
               <button class="btn-sm" onclick="deleteRuta('r6')" style="color:var(--red)">🗑️</button>
+            </div>
+            <!-- ☕ CHAPARRAL -->
+            <div style="font-size:9px;font-weight:700;color:var(--gold);letter-spacing:.1em;text-transform:uppercase;padding:12px 0 4px">☕ Chaparral</div>
+            <div data-municipio="chaparral" style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)">
+              <div style="width:48px;height:48px;border-radius:8px;overflow:hidden;background:rgba(200,134,10,.1);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:22px">☕</div>
+              <div style="flex:1"><div style="font-size:13px;font-weight:500;color:var(--text)">☕ Ruta del Café de Origen</div><div style="font-size:11px;color:var(--text3)">Fincas cafeteras · Degustación · Medio día</div></div>
+              <div class="toggle-track on" onclick="toggleRutaActiva('rc1',this)"><div class="toggle-knob"></div></div>
+              <button class="btn-sm gold" onclick="editRuta('rc1')">Editar</button>
+              <button class="btn-sm" onclick="deleteRuta('rc1')" style="color:var(--red)">🗑️</button>
+            </div>
+            <div data-municipio="chaparral" style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)">
+              <div style="width:48px;height:48px;border-radius:8px;overflow:hidden;background:rgba(200,134,10,.1);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:22px">🕊️</div>
+              <div style="flex:1"><div style="font-size:13px;font-weight:500;color:var(--text)">🕊️ Ruta de la Memoria y la Paz</div><div style="font-size:11px;color:var(--text3)">Sitios históricos · Postconflicto · 3 h</div></div>
+              <div class="toggle-track on" onclick="toggleRutaActiva('rc2',this)"><div class="toggle-knob"></div></div>
+              <button class="btn-sm gold" onclick="editRuta('rc2')">Editar</button>
+              <button class="btn-sm" onclick="deleteRuta('rc2')" style="color:var(--red)">🗑️</button>
+            </div>
+            <div data-municipio="chaparral" style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)">
+              <div style="width:48px;height:48px;border-radius:8px;overflow:hidden;background:rgba(200,134,10,.1);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:22px">🌊</div>
+              <div style="flex:1"><div style="font-size:13px;font-weight:500;color:var(--text)">🌊 Ruta del Río Saldaña</div><div style="font-size:11px;color:var(--text3)">Pesca · Naturaleza · Día completo</div></div>
+              <div class="toggle-track on" onclick="toggleRutaActiva('rc3',this)"><div class="toggle-knob"></div></div>
+              <button class="btn-sm gold" onclick="editRuta('rc3')">Editar</button>
+              <button class="btn-sm" onclick="deleteRuta('rc3')" style="color:var(--red)">🗑️</button>
+            </div>
+            <div data-municipio="chaparral" style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)">
+              <div style="width:48px;height:48px;border-radius:8px;overflow:hidden;background:rgba(200,134,10,.1);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:22px">🏔️</div>
+              <div style="flex:1"><div style="font-size:13px;font-weight:500;color:var(--text)">🏔️ Ruta de la Cordillera</div><div style="font-size:11px;color:var(--text3)">Senderismo · Cascadas · Día completo</div></div>
+              <div class="toggle-track on" onclick="toggleRutaActiva('rc4',this)"><div class="toggle-knob"></div></div>
+              <button class="btn-sm gold" onclick="editRuta('rc4')">Editar</button>
+              <button class="btn-sm" onclick="deleteRuta('rc4')" style="color:var(--red)">🗑️</button>
             </div>
             <button class="btn" style="width:100%;justify-content:center;margin-top:10px" onclick="openNewRoute()">+ Nueva ruta</button>
           </div>
@@ -1698,6 +1741,13 @@ tr:hover td{background:var(--bg3)}
 
     <!-- ══════════════ RESEÑAS ══════════════ -->
     <div class="module" id="mod-resenas">
+      <div style="display:flex;gap:8px;margin-bottom:16px;align-items:center;flex-wrap:wrap">
+        <select id="resenas-municipio" onchange="filtrarResenas()" style="background:var(--bg3);border:1px solid var(--border);border-radius:7px;padding:6px 10px;color:var(--text2);font-size:12px;outline:none">
+          <option value="">Todos los municipios</option>
+          <option value="mariquita">🥭 Mariquita</option>
+          <option value="chaparral">☕ Chaparral</option>
+        </select>
+      </div>
       <div class="metrics-grid" style="grid-template-columns:repeat(4,1fr)">
         <div class="metric-card"><div class="metric-label">⭐ Reseñas totales</div><div class="metric-val">47</div><div class="metric-sub">Acumuladas</div></div>
         <div class="metric-card"><div class="metric-label">🌟 Promedio global</div><div class="metric-val">4.6</div><div class="metric-sub">De 5 estrellas</div></div>
@@ -1815,6 +1865,13 @@ tr:hover td{background:var(--bg3)}
 
     <!-- ══════════════ CLIMA Y ALERTAS ══════════════ -->
     <div class="module" id="mod-clima">
+      <div style="display:flex;gap:8px;margin-bottom:16px;align-items:center;flex-wrap:wrap">
+        <select id="clima-municipio-admin" onchange="cambiarClimaAdmin()" style="background:var(--bg3);border:1px solid var(--border);border-radius:7px;padding:6px 10px;color:var(--text2);font-size:12px;outline:none">
+          <option value="mariquita">🥭 Mariquita</option>
+          <option value="chaparral">☕ Chaparral</option>
+        </select>
+        <span id="clima-admin-label" style="font-size:12px;color:var(--text3)">Selecciona municipio para ver alertas de clima</span>
+      </div>
       <div class="two-col">
         <div class="panel-card">
           <div class="panel-hdr">
@@ -2067,6 +2124,8 @@ function goPage(p){
   renderClients();
   // Cargar municipios reales desde Supabase
   cargarClientesSupabase();
+  // Actualizar badges
+  actualizarBadges();
   document.getElementById('mod-clientes')?.scrollIntoView({block:'start', behavior:'smooth'});
 }
 
@@ -4259,6 +4318,67 @@ function enviarLinkConductor(btn) {
     };
   });
 })();
+
+// ── FILTROS MUNICIPIO — RUTAS, EVENTOS, RESEÑAS, CLIMA, REPORTES ──
+function filtrarRutas() {
+  var mun = document.getElementById('rutas-municipio')?.value || '';
+  document.querySelectorAll('#mod-rutas [data-municipio]').forEach(function(el) {
+    el.style.display = (!mun || el.dataset.municipio === mun) ? '' : 'none';
+  });
+}
+function filtrarEventos() {
+  var mun = document.getElementById('eventos-municipio')?.value || '';
+  document.querySelectorAll('#mod-eventos [data-municipio]').forEach(function(el) {
+    el.style.display = (!mun || el.dataset.municipio === mun) ? '' : 'none';
+  });
+}
+function filtrarResenas() {
+  var mun = document.getElementById('resenas-municipio')?.value || '';
+  document.querySelectorAll('#mod-resenas [data-municipio]').forEach(function(el) {
+    el.style.display = (!mun || el.dataset.municipio === mun) ? '' : 'none';
+  });
+}
+function cambiarClimaAdmin() {
+  var mun = document.getElementById('clima-municipio-admin')?.value || 'mariquita';
+  var cfg = {mariquita:{nombre:'Mariquita',lat:5.2012,lng:-74.9030},chaparral:{nombre:'Chaparral',lat:3.7254,lng:-75.4865}};
+  var m = cfg[mun] || cfg.mariquita;
+  document.getElementById('clima-admin-label').textContent = 'Cargando clima de ' + m.nombre + '...';
+  fetch('https://api.open-meteo.com/v1/forecast?latitude='+m.lat+'&longitude='+m.lng+'&current=temperature_2m,weathercode,relative_humidity_2m,precipitation&timezone=America/Bogota')
+    .then(function(r){return r.json();})
+    .then(function(data){
+      var cur = data.current;
+      var temp = Math.round(cur.temperature_2m);
+      var hum = cur.relative_humidity_2m;
+      document.getElementById('clima-admin-label').textContent = m.nombre+': '+temp+'°C · '+hum+'% humedad';
+    }).catch(function(){ document.getElementById('clima-admin-label').textContent = 'Error al cargar clima'; });
+}
+function filtrarReportes() {
+  var mun = document.getElementById('reportes-municipio')?.value || '';
+  document.querySelectorAll('#mod-reportes [data-municipio]').forEach(function(el) {
+    el.style.display = (!mun || el.dataset.municipio === mun) ? '' : 'none';
+  });
+}
+
+// ── ACTUALIZAR BADGES DINÁMICAMENTE ──
+function actualizarBadges() {
+  // badge clientes — contar desde CLIENTS
+  var bc = document.getElementById('badge-clientes');
+  if (bc) bc.textContent = CLIENTS.length > 0 ? CLIENTS.length : '0';
+  // badge renovaciones — contar vencidos o por vencer
+  var br = document.getElementById('badge-renov');
+  if (br) {
+    var urgentes = CLIENTS.filter(function(c){ return c.estado === 'mora' || c.estado === 'vence'; }).length;
+    br.textContent = urgentes > 0 ? urgentes : '0';
+    br.style.display = urgentes > 0 ? '' : 'none';
+  }
+  // badge alertas — siempre 0 hasta que haya emergencias
+  var ba = document.getElementById('badge-alertas');
+  if (ba) { ba.textContent = '0'; ba.style.display = 'none'; }
+  var bcot = document.getElementById('badge-cotiz');
+  if (bcot) { bcot.textContent = '0'; bcot.style.display = 'none'; }
+  var bres = document.getElementById('badge-resenas');
+  if (bres) { bres.textContent = '0'; bres.style.display = 'none'; }
+}
 
 // ── EMERGENCIAS EN TIEMPO REAL ──
 

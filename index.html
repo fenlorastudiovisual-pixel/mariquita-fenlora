@@ -657,6 +657,10 @@ function applyLang(){
 
 // ── SELECTOR DE MUNICIPIO ──
 var municipioActual = 'mariquita';
+var MUNICIPIOS_CONFIG = {
+  mariquita: { lat: 5.2012,  lng: -74.9030, nombre: 'Mariquita',  tz: 'America/Bogota' },
+  chaparral: { lat: 3.7254,  lng: -75.4865, nombre: 'Chaparral',  tz: 'America/Bogota' },
+};
 
 function toggleMunDropdown() {
   var dd = document.getElementById('mun-dropdown');
@@ -690,6 +694,8 @@ function seleccionarMunicipio(e, slug, nombre, ruta, coords, zoom) {
   map.flyTo(coords, zoom, {duration: 1.2});
   // Recargar puntos del municipio
   cargarPuntosDesdeSupabase();
+  // Actualizar clima del municipio
+  fetchClima();
 }
 
 function toggleLang(){
@@ -1881,7 +1887,9 @@ const WMO_LABELS={es:{0:'Despejado',1:'Mayormente despejado',2:'Parcialmente nub
 
 async function fetchClima(){
   try{
-    const res=await fetch('https://api.open-meteo.com/v1/forecast?latitude=5.2012&longitude=-74.9030&current=temperature_2m,weathercode,relative_humidity_2m,precipitation&timezone=America/Bogota');
+    const mun = MUNICIPIOS_CONFIG[municipioActual] || MUNICIPIOS_CONFIG.mariquita;
+    const url = 'https://api.open-meteo.com/v1/forecast?latitude='+mun.lat+'&longitude='+mun.lng+'&current=temperature_2m,weathercode,relative_humidity_2m,precipitation&timezone='+mun.tz;
+    const res=await fetch(url);
     const data=await res.json();
     const cur=data.current;
     const code=cur.weathercode;
@@ -1891,10 +1899,11 @@ async function fetchClima(){
     const hum=cur.relative_humidity_2m;
     const prec=cur.precipitation;
     document.getElementById('clima-icon').textContent=icon;
-    document.getElementById('clima-temp').textContent=temp+'°C';
-    document.getElementById('clima-detail').textContent=`${label} · ${hum}% hum`;
-    // Alerta
+    document.getElementById('clima-temp').textContent=temp+'°C · '+mun.nombre;
+    document.getElementById('clima-detail').textContent=label+' · '+hum+'% hum';
+    // Alerta lluvia
     if(prec>=5&&(code>=61&&code<=99)){
+      document.getElementById('clima-alerta-msg').textContent='⚠️ Lluvia intensa en '+mun.nombre+' — Precaución al visitar zonas de ríos y cascadas';
       document.getElementById('clima-alerta').classList.add('show');
     }
   } catch(e){}

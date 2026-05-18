@@ -332,6 +332,10 @@ html,body{width:100%;height:100%;overflow:hidden;font-family:DM Sans,sans-serif;
     justify-content:flex-start;-webkit-overflow-scrolling:touch}
   .fb{padding:4px 8px;font-size:9.5px}
   #btn-rutas,#btn-lang,#fen-btn{flex-shrink:0}
+  #mun-selector{order:1;padding:3px 8px;font-size:10px}
+  #mun-selector span{font-size:10px}
+  #mun-dropdown{left:0;min-width:200px}
+  .brand h1{font-size:12px}
   /* El buscador: solo el icono en row 1 del header */
   #search-wrap{position:static;order:2;margin-left:auto;display:flex;align-items:center}
   #search-icon{backdrop-filter:none;background:rgba(255,255,255,.08);width:32px;height:32px;font-size:14px}
@@ -696,7 +700,16 @@ function seleccionarMunicipio(e, slug, nombre, ruta, coords, zoom) {
   var cfg = MUNICIPIOS_CONFIG[slug] || MUNICIPIOS_CONFIG.mariquita;
   var h1 = document.querySelector('.brand h1');
   if (h1) {
-    h1.childNodes[0].textContent = cfg.ruta + ' ';
+    // Actualizar texto principal (primer nodo de texto)
+    var found = false;
+    for (var i = 0; i < h1.childNodes.length; i++) {
+      if (h1.childNodes[i].nodeType === 3) { // nodo de texto
+        h1.childNodes[i].textContent = cfg.ruta + ' ';
+        found = true;
+        break;
+      }
+    }
+    if (!found) h1.childNodes[0].textContent = cfg.ruta + ' ';
     var spanSub = h1.querySelector('span');
     if (spanSub) spanSub.textContent = cfg.sub;
   }

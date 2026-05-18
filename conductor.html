@@ -366,6 +366,11 @@ html,body{height:100%;overflow-x:hidden;font-family:'DM Sans',sans-serif;backgro
     <div style="margin-top:10px;padding:8px 12px;background:rgba(200,134,10,.06);border-radius:8px;font-size:10px;color:var(--text3);line-height:1.5;text-align:center">
       🔒 Tus datos solo pueden ser modificados por el equipo de Fenlora por razones de seguridad.
     </div>
+
+    <!-- BOTÓN TARJETA QR -->
+    <button onclick="abrirTarjeta()" style="width:100%;margin-top:14px;padding:13px;background:linear-gradient(135deg,rgba(200,134,10,.15),rgba(200,134,10,.08));border:1px solid rgba(200,134,10,.35);border-radius:12px;color:var(--gold);font-size:13px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;display:flex;align-items:center;justify-content:center;gap:8px;letter-spacing:.01em">
+      <span style="font-size:17px">📇</span> Ver mi tarjeta + QR
+    </button>
   </div>
 
   <!-- DISPONIBILIDAD -->
@@ -441,15 +446,12 @@ html,body{height:100%;overflow-x:hidden;font-family:'DM Sans',sans-serif;backgro
     Fenlora es un directorio informativo — la contratación del servicio es directamente entre tú y el turista. Fenlora no es intermediario ni responsable de los servicios prestados.
   </div>
 
-  <!-- BOTÓN TARJETA -->
-  <button class="btn-tarjeta" onclick="abrirTarjeta()">
-    📇 Ver mi tarjeta de presentación + QR
-  </button>
-
   <div class="footer">Fenlora Visual Studio · 2026</div>
 </div>
 
 <!-- MODAL TARJETA -->
+
+
 <div id="tarjeta-overlay" style="display:none" onclick="if(event.target===this)cerrarTarjeta()">
   <div id="tarjeta-sheet">
     <div class="tarjeta-handle"></div>

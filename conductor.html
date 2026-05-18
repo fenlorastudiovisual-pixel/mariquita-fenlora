@@ -250,28 +250,24 @@ html,body{height:100%;overflow-x:hidden;font-family:'DM Sans',sans-serif;backgro
 <div id="app">
   <div class="hdr">
     <div class="hdr-logo">
-      <!-- Obturador Fenlora SVG -->
-      <svg width="26" height="26" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <circle cx="50" cy="50" r="48" fill="none" stroke="rgba(200,134,10,.25)" stroke-width="1.5"/>
-        <circle cx="50" cy="50" r="10" fill="#C8860A"/>
-        <g opacity="0.9">
-          <path d="M50 40 L44 18 Q50 14 58 16 Z" fill="url(#g1)"/>
-          <path d="M60 45 L82 39 Q86 45 84 53 Z" fill="url(#g2)"/>
-          <path d="M56 56 L72 74 Q67 80 60 79 Z" fill="url(#g3)"/>
-          <path d="M44 58 L28 76 Q22 71 23 63 Z" fill="url(#g4)"/>
-          <path d="M38 50 L16 54 Q13 47 17 40 Z" fill="url(#g5)"/>
-          <path d="M42 42 L34 20 Q41 15 48 17 Z" fill="url(#g6)"/>
-        </g>
-        <circle cx="50" cy="50" r="8" fill="#1a0f02"/>
-        <circle cx="50" cy="50" r="5" fill="#C8860A" opacity=".8"/>
+      <!-- Obturador Fenlora SVG sin fondo -->
+      <svg width="28" height="28" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
         <defs>
-          <linearGradient id="g1" x1="44" y1="14" x2="58" y2="40" gradientUnits="userSpaceOnUse"><stop stop-color="#FFD700"/><stop offset="1" stop-color="#C8860A"/></linearGradient>
-          <linearGradient id="g2" x1="82" y1="39" x2="60" y2="53" gradientUnits="userSpaceOnUse"><stop stop-color="#FFB300"/><stop offset="1" stop-color="#E65C00"/></linearGradient>
-          <linearGradient id="g3" x1="72" y1="74" x2="56" y2="56" gradientUnits="userSpaceOnUse"><stop stop-color="#C8860A"/><stop offset="1" stop-color="#8B4A00"/></linearGradient>
-          <linearGradient id="g4" x1="28" y1="76" x2="44" y2="58" gradientUnits="userSpaceOnUse"><stop stop-color="#9B59B6"/><stop offset="1" stop-color="#C8860A"/></linearGradient>
-          <linearGradient id="g5" x1="16" y1="54" x2="38" y2="50" gradientUnits="userSpaceOnUse"><stop stop-color="#4A90D9"/><stop offset="1" stop-color="#9B59B6"/></linearGradient>
-          <linearGradient id="g6" x1="34" y1="20" x2="48" y2="42" gradientUnits="userSpaceOnUse"><stop stop-color="#FFD700"/><stop offset="1" stop-color="#FFB300"/></linearGradient>
+          <linearGradient id="hg1" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#FFD700"/><stop offset="1" stop-color="#C8860A"/></linearGradient>
+          <linearGradient id="hg2" x1="1" y1="0" x2="0" y2="1"><stop stop-color="#FF8C00"/><stop offset="1" stop-color="#E65C00"/></linearGradient>
+          <linearGradient id="hg3" x1="1" y1="1" x2="0" y2="0"><stop stop-color="#9B59B6"/><stop offset="1" stop-color="#6C3483"/></linearGradient>
+          <linearGradient id="hg4" x1="0" y1="1" x2="1" y2="0"><stop stop-color="#4A90D9"/><stop offset="1" stop-color="#9B59B6"/></linearGradient>
+          <radialGradient id="hgc" cx="50%" cy="50%" r="50%"><stop stop-color="#FFD700"/><stop offset="1" stop-color="#C8860A"/></radialGradient>
         </defs>
+        <!-- Pétalos del obturador -->
+        <path d="M60 12 C50 12 42 18 40 28 L55 58 C57 54 63 54 65 58 L80 28 C78 18 70 12 60 12Z" fill="url(#hg1)" opacity=".95"/>
+        <path d="M108 60 C108 50 102 42 92 40 L62 55 C66 57 66 63 62 65 L92 80 C102 78 108 70 108 60Z" fill="url(#hg2)" opacity=".9"/>
+        <path d="M60 108 C70 108 78 102 80 92 L65 62 C63 66 57 66 55 62 L40 92 C42 102 50 108 60 108Z" fill="url(#hg3)" opacity=".95"/>
+        <path d="M12 60 C12 70 18 78 28 80 L58 65 C54 63 54 57 58 55 L28 40 C18 42 12 50 12 60Z" fill="url(#hg4)" opacity=".9"/>
+        <!-- Centro lente -->
+        <circle cx="60" cy="60" r="16" fill="#111" opacity=".7"/>
+        <circle cx="60" cy="60" r="10" fill="url(#hgc)"/>
+        <circle cx="56" cy="56" r="3" fill="white" opacity=".5"/>
       </svg>
       <span class="hdr-logo-text">FENLORA</span>
     </div>
@@ -697,20 +693,157 @@ function abrirAsistencia() {
 function cerrarAsistencia() {
   document.getElementById('asist-overlay').style.display = 'none';
 }
-function enviarAsistencia(tipo) {
+async function enviarAsistencia(tipo) {
   const conductor = document.getElementById('disp-nombre')?.textContent || 'Conductor';
   const id = conductorId || 'sin-id';
   const hora = new Date().toLocaleString('es-CO', {timeZone:'America/Bogota'});
+  cerrarAsistencia();
+
+  if (tipo === 'emergencia') {
+    // Pantalla de emergencia activa inmediata
+    mostrarPantallaEmergencia(conductor, id, hora);
+    return;
+  }
+
   const mensajes = {
-    problema_tecnico: `🔧 *REPORTE TÉCNICO - Fenlora*\n\n*Conductor:* ${conductor}\n*ID:* ${id}\n*Hora:* ${hora}\n\nEstoy presentando un problema técnico con la app o el mapa. Por favor ayúdenme.`,
-    situacion_cliente: `👤 *SITUACIÓN CON CLIENTE - Fenlora*\n\n*Conductor:* ${conductor}\n*ID:* ${id}\n*Hora:* ${hora}\n\nNecesito reportar un inconveniente o comportamiento irregular con un turista/cliente.`,
-    emergencia: `🚨 *EMERGENCIA - Fenlora*\n\n*Conductor:* ${conductor}\n*ID:* ${id}\n*Hora:* ${hora}\n\n⚠️ ATENCIÓN URGENTE REQUERIDA. Estoy reportando una emergencia, accidente o situación de seguridad.`,
-    actualizar_datos: `📋 *ACTUALIZACIÓN DE DATOS - Fenlora*\n\n*Conductor:* ${conductor}\n*ID:* ${id}\n*Hora:* ${hora}\n\nNecesito actualizar mi información (placa, vehículo, horario o contacto).`,
-    sugerencia: `💡 *SUGERENCIA - Fenlora*\n\n*Conductor:* ${conductor}\n*ID:* ${id}\n*Hora:* ${hora}\n\nTengo una sugerencia para mejorar el servicio:`
+    problema_tecnico: `🔧 *REPORTE TÉCNICO - Fenlora*
+
+*Conductor:* ${conductor}
+*ID:* ${id}
+*Hora:* ${hora}
+
+Estoy presentando un problema técnico con la app o el mapa. Por favor ayúdenme.`,
+    situacion_cliente: `👤 *SITUACIÓN CON CLIENTE - Fenlora*
+
+*Conductor:* ${conductor}
+*ID:* ${id}
+*Hora:* ${hora}
+
+Necesito reportar un inconveniente o comportamiento irregular con un turista/cliente.`,
+    actualizar_datos: `📋 *ACTUALIZACIÓN DE DATOS - Fenlora*
+
+*Conductor:* ${conductor}
+*ID:* ${id}
+*Hora:* ${hora}
+
+Necesito actualizar mi información (placa, vehículo, horario o contacto).`,
+    sugerencia: `💡 *SUGERENCIA - Fenlora*
+
+*Conductor:* ${conductor}
+*ID:* ${id}
+*Hora:* ${hora}
+
+Tengo una sugerencia para mejorar el servicio:`
   };
   const msg = encodeURIComponent(mensajes[tipo] || 'Hola Fenlora, necesito asistencia.');
-  cerrarAsistencia();
   window.open(`https://wa.me/573112746813?text=${msg}`, '_blank');
+}
+
+function mostrarPantallaEmergencia(conductor, id, hora) {
+  // Crear overlay de emergencia
+  const over = document.createElement('div');
+  over.id = 'emerg-overlay';
+  over.style.cssText = 'position:fixed;inset:0;background:#8B0000;z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px;animation:fadeInA .3s';
+  over.innerHTML = `
+    <div style="font-size:60px;margin-bottom:16px;animation:pulse-emerg 1s infinite">🚨</div>
+    <div style="font-family:Syne,sans-serif;font-size:22px;font-weight:800;color:#fff;text-align:center;margin-bottom:8px">EMERGENCIA ACTIVADA</div>
+    <div style="font-size:13px;color:rgba(255,255,255,.8);text-align:center;margin-bottom:32px">Obteniendo tu ubicación GPS...</div>
+    <div id="emerg-gps" style="font-size:11px;color:rgba(255,255,255,.6);text-align:center;margin-bottom:32px;min-height:36px"></div>
+    <button onclick="llamarEmergencias()" style="width:100%;max-width:320px;padding:18px;background:#fff;border:none;border-radius:16px;font-size:18px;font-weight:800;color:#8B0000;cursor:pointer;margin-bottom:14px">📞 Llamar al 123 ahora</button>
+    <button onclick="enviarWSPEmergencia('${conductor}','${id}','${hora}')" id="btn-wsp-emerg" style="width:100%;max-width:320px;padding:16px;background:rgba(255,255,255,.15);border:2px solid rgba(255,255,255,.4);border-radius:16px;font-size:15px;font-weight:700;color:#fff;cursor:pointer;margin-bottom:14px" disabled>💬 Notificar a Fenlora (obteniendo GPS...)</button>
+    <button onclick="cerrarEmergencia()" style="font-size:12px;color:rgba(255,255,255,.5);background:none;border:none;cursor:pointer;margin-top:8px">Cerrar (solo si fue un error)</button>
+  `;
+  document.body.appendChild(over);
+
+  // Agregar animación pulso emergencia
+  if (!document.getElementById('emerg-style')) {
+    const st = document.createElement('style');
+    st.id = 'emerg-style';
+    st.textContent = '@keyframes pulse-emerg{0%,100%{transform:scale(1)}50%{transform:scale(1.15)}}';
+    document.head.appendChild(st);
+  }
+
+  // Obtener GPS
+  if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(
+      async (pos) => {
+        const lat = pos.coords.latitude.toFixed(6);
+        const lng = pos.coords.longitude.toFixed(6);
+        const mapsUrl = `https://maps.google.com/?q=${lat},${lng}`;
+        document.getElementById('emerg-gps').innerHTML =
+          `📍 <strong style="color:#fff">Ubicación obtenida</strong><br><span style="color:rgba(255,255,255,.7)">${lat}, ${lng}</span>`;
+        // Habilitar botón WhatsApp con GPS
+        const btn = document.getElementById('btn-wsp-emerg');
+        if (btn) {
+          btn.disabled = false;
+          btn.textContent = '💬 Notificar a Fenlora con ubicación';
+          btn.dataset.lat = lat;
+          btn.dataset.lng = lng;
+          btn.dataset.maps = mapsUrl;
+        }
+        // Registrar emergencia en Supabase
+        try {
+          await _sb.from('businesses').update({
+            emergencia_activa: true,
+            emergencia_data: { conductor, hora, lat, lng, maps: mapsUrl }
+          }).eq('id', conductorId);
+        } catch(e) { console.warn('No se pudo registrar emergencia en Supabase', e); }
+      },
+      () => {
+        document.getElementById('emerg-gps').innerHTML = '⚠️ No se pudo obtener GPS. Comparte tu ubicación manualmente.';
+        const btn = document.getElementById('btn-wsp-emerg');
+        if (btn) { btn.disabled = false; btn.textContent = '💬 Notificar a Fenlora (sin GPS)'; }
+        // Registrar emergencia sin GPS
+        try {
+          _sb.from('businesses').update({
+            emergencia_activa: true,
+            emergencia_data: { conductor, hora, lat: null, lng: null }
+          }).eq('id', conductorId);
+        } catch(e) {}
+      },
+      { timeout: 8000, enableHighAccuracy: true }
+    );
+  } else {
+    document.getElementById('emerg-gps').textContent = '⚠️ GPS no disponible en este dispositivo.';
+    const btn = document.getElementById('btn-wsp-emerg');
+    if (btn) { btn.disabled = false; btn.textContent = '💬 Notificar a Fenlora'; }
+  }
+}
+
+function llamarEmergencias() {
+  window.location.href = 'tel:123';
+}
+
+function enviarWSPEmergencia(conductor, id, hora) {
+  const btn = document.getElementById('btn-wsp-emerg');
+  const lat  = btn?.dataset.lat  || '';
+  const lng  = btn?.dataset.lng  || '';
+  const maps = btn?.dataset.maps || '';
+  const gpsLinea = lat
+    ? `*Ubicación GPS:* ${lat}, ${lng}
+*Ver en mapa:* ${maps}`
+    : '*Ubicación GPS:* No disponible — contactar al conductor directamente';
+  const msg = encodeURIComponent(
+    `🚨 *EMERGENCIA ACTIVA - Fenlora*
+
+*Conductor:* ${conductor}
+*ID:* ${id}
+*Hora:* ${hora}
+
+${gpsLinea}
+
+⚠️ REQUIERE ATENCIÓN INMEDIATA`
+  );
+  window.open(`https://wa.me/573112746813?text=${msg}`, '_blank');
+}
+
+function cerrarEmergencia() {
+  const el = document.getElementById('emerg-overlay');
+  if (el) el.remove();
+  // Desactivar emergencia en Supabase
+  try {
+    _sb.from('businesses').update({ emergencia_activa: false, emergencia_data: null }).eq('id', conductorId);
+  } catch(e) {}
 }
 
 function showError() {

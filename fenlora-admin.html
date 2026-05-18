@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Fenlora Admin · Ruta del Mangostino</title>
+<title>Fenlora Admin · Rutas Fenlora Visual</title>
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Mono:wght@400;500&family=Instrument+Sans:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root {
@@ -362,7 +362,7 @@ tr:hover td{background:var(--bg3)}
         <div style="font-size:8px;color:var(--text3);letter-spacing:2px;text-transform:uppercase;margin-top:-2px">Visual Studio</div>
       </div>
     </div>
-    <div class="brand-sub">CONSOLA · RUTA DEL MANGOSTINO</div>
+    <div class="brand-sub">CONSOLA · RUTAS FENLORA VISUAL</div>
   </div>
 
   <nav class="sidebar-nav">
@@ -506,43 +506,8 @@ tr:hover td{background:var(--bg3)}
             <div class="panel-title">Próximas renovaciones</div>
             <button class="btn-sm" style="margin-left:auto" onclick="showModule('renovaciones',null)">Ver todas</button>
           </div>
-          <div class="panel-body" style="padding:8px 18px">
-            <div class="renewal-item">
-              <div class="renewal-days" style="color:#E57373">2 días</div>
-              <div>
-                <div class="renewal-name">—</div>
-                <div class="renewal-plan">Plan Premium</div>
-              </div>
-              <div class="renewal-val" data-plan="premium"></div>
-              <button class="btn-sm gold" onclick="abrirCobro(1)">💳 Cobrar</button>
-            </div>
-            <div class="renewal-item">
-              <div class="renewal-days" style="color:#E09060">5 días</div>
-              <div>
-                <div class="renewal-name">—</div>
-                <div class="renewal-plan">Plan Pro</div>
-              </div>
-              <div class="renewal-val" data-plan="pro"></div>
-              <button class="btn-sm gold" onclick="abrirCobro(8)">💳 Cobrar</button>
-            </div>
-            <div class="renewal-item">
-              <div class="renewal-days" style="color:#4CAF82">9 días</div>
-              <div>
-                <div class="renewal-name">—</div>
-                <div class="renewal-plan">Plan Pro</div>
-              </div>
-              <div class="renewal-val">$179.900</div>
-              <button class="btn-sm gold" onclick="abrirCobro(7)">💳 Cobrar</button>
-            </div>
-            <div class="renewal-item">
-              <div class="renewal-days" style="color:#4CAF82">12 días</div>
-              <div>
-                <div class="renewal-name">—</div>
-                <div class="renewal-plan">Plan Básico</div>
-              </div>
-              <div class="renewal-val" data-plan="basic"></div>
-              <button class="btn-sm gold" onclick="abrirCobro(6)">💳 Cobrar</button>
-            </div>
+          <div class="panel-body" style="padding:8px 18px" id="dash-renov-panel">
+            <div id="dash-renov-list" style="color:var(--text3);font-size:12px;padding:16px 0;text-align:center">Sin renovaciones próximas — agrega clientes para ver sus vencimientos aquí</div>
           </div>
         </div>
 
@@ -2680,7 +2645,6 @@ function saveRutasData(){localStorage.setItem('fenlora_rutas',JSON.stringify(RUT
 // MÓDULO: RESEÑAS
 // ══════════════════════════════════════════════
 const REVIEWS_ADMIN=[
-  {negocio:'Selvatik Rutas',nombre:'Turista Bogotá',rating:5,fecha:'hace 2 días',texto:'Excelente tour del mangostino. El guía muy profesional.',aprobada:false},
 ];
 function renderReviewsAdmin(){
   const el=document.getElementById('reviews-list');if(!el)return;
@@ -2712,16 +2676,9 @@ function eliminarReview(i){REVIEWS_ADMIN.splice(i,1);renderReviewsAdmin();showTo
 // MÓDULO: TRADUCCIONES
 // ══════════════════════════════════════════════
 const TRANS_POINTS=[
-  {id:56,cat:'hist',nombre:'Casa de la Expedición Botánica · Mutis',desc:'Sede de la Real Expedición Botánica de Mutis (1783–1816).',desc_en:'Headquarters of the Royal Botanical Expedition led by José Celestino Mutis (1783–1816). Thousands of species were classified here, including the mangosteen.'},
-  {id:57,cat:'hist',nombre:'La Ermita · Capilla Colonial s. XVI',desc:'Una de las capillas más antiguas de Colombia.',desc_en:'One of the oldest chapels in Colombia, built in the 16th century. Declared a National Cultural Heritage site.'},
-  {id:58,cat:'hist',nombre:'Parque Central · Busto de Mutis',desc:'El corazón de Mariquita.',desc_en:'The heart of Mariquita. Century-old mango trees and a mangosteen planted in honor of scientist José Celestino Mutis.'},
-  {id:59,cat:'hist',nombre:'Cataratas de Medina',desc:'Cascada natural de 18 metros.',desc_en:'An 18-meter natural waterfall surrounded by tropical jungle. Safe for swimming. Accessible by motorcycle or 4x4.'},
-  {id:60,cat:'hist',nombre:'Río Gualí · Balneario Natural',desc:'El río Gualí atraviesa el municipio.',desc_en:'The Gualí River flows through the municipality creating natural pools. One of the cleanest rivers in northern Tolima.'},
-  {id:62,cat:'pub',nombre:'Alcaldía Municipal de Mariquita',desc:'Sede de la administración municipal.',desc_en:'Municipal government headquarters. Home to the Culture and Tourism Secretariat.'},
-  {id:63,cat:'pub',nombre:'Estación de Policía',desc:'Policía Nacional.',desc_en:'National Police Station. Emergency line 123, available 24 hours.'},
-  {id:64,cat:'pub',nombre:'Cuerpo de Bomberos',desc:'Emergencias y rescate.',desc_en:'Volunteer Fire Department. Emergency line 119, 24 hours.'},
-  {id:65,cat:'pub',nombre:'Hospital San Sebastián',desc:'Hospital Local.',desc_en:'Local Hospital. Emergency care 24 hours, outpatient consultations and preventive medicine.'},
-  {id:71,cat:'serv',nombre:'Vivero Mutis',desc:'Vivero de árboles frutales tropicales.',desc_en:null},
+  // Solo puntos realmente en el mapa — Mariquita
+  {id:1,cat:'hist',municipio:'mariquita',nombre:'Casa de la Expedición Botánica · Mutis',desc:'Sede de la Real Expedición Botánica de Mutis (1783–1816).',desc_en:'Headquarters of the Royal Botanical Expedition led by José Celestino Mutis (1783–1816). Thousands of species were classified here, including the mangosteen.'},
+  {id:2,cat:'hist',municipio:'mariquita',nombre:'Plaza Principal de Mariquita',desc:'El corazón histórico de Mariquita.',desc_en:'The historic heart of Mariquita, surrounded by colonial architecture and century-old trees.'},
 ];
 function renderTransPoints(filter='all'){
   const el=document.getElementById('trans-list');if(!el)return;
@@ -2768,8 +2725,13 @@ async function refreshClima(){
   const humEl=document.getElementById('clima-hum-admin');
   if(!iconEl)return;
   iconEl.textContent='⏳';tempEl.textContent='--°C';labelEl.textContent='Cargando...';humEl.textContent='';
+  // Leer municipio seleccionado
+  var munSel = document.getElementById('clima-municipio-admin');
+  var mun = munSel ? munSel.value : 'mariquita';
+  var coords = {mariquita:{lat:5.2012,lng:-74.9030},chaparral:{lat:3.7254,lng:-75.4865}};
+  var co = coords[mun] || coords.mariquita;
   try{
-    const res=await fetch('https://api.open-meteo.com/v1/forecast?latitude=5.2012&longitude=-74.9030&current=temperature_2m,weathercode,relative_humidity_2m,precipitation&timezone=America/Bogota');
+    const res=await fetch('https://api.open-meteo.com/v1/forecast?latitude='+co.lat+'&longitude='+co.lng+'&current=temperature_2m,weathercode,relative_humidity_2m,precipitation&timezone=America/Bogota');
     const data=await res.json();
     const c=data.current;
     const code=c.weathercode;
@@ -4194,6 +4156,8 @@ function cambiarClimaAdmin() {
   var cfg = {mariquita:{nombre:'Mariquita',lat:5.2012,lng:-74.9030},chaparral:{nombre:'Chaparral',lat:3.7254,lng:-75.4865}};
   var m = cfg[mun] || cfg.mariquita;
   document.getElementById('clima-admin-label').textContent = 'Cargando clima de ' + m.nombre + '...';
+  // Actualizar también el widget de estado del clima
+  refreshClima();
   fetch('https://api.open-meteo.com/v1/forecast?latitude='+m.lat+'&longitude='+m.lng+'&current=temperature_2m,weathercode,relative_humidity_2m,precipitation&timezone=America/Bogota')
     .then(function(r){return r.json();})
     .then(function(data){

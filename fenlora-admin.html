@@ -1788,6 +1788,13 @@ tr:hover td{background:var(--bg3)}
 // Corre ANTES de inicializar cualquier variable — sin necesidad de localStorage.clear() manual
 // ══════════════════════════════════════════════════════════
 (function autoHeal(){
+  // Forzar recarga de rutas si no tienen municipio
+  try {
+    var rutasGuardadas = JSON.parse(localStorage.getItem('fenlora_rutas') || 'null');
+    if (rutasGuardadas && rutasGuardadas.length && !rutasGuardadas[0].municipio) {
+      localStorage.removeItem('fenlora_rutas');
+    }
+  } catch(e) { localStorage.removeItem('fenlora_rutas'); }
   ['fenlora_rutas','fenlora_intros'].forEach(function(key){
     try {
       var v = JSON.parse(localStorage.getItem(key) || 'null');
@@ -2529,12 +2536,16 @@ function showNotif(msg){
 // MÓDULO: RUTAS TEMÁTICAS
 // ══════════════════════════════════════════════
 const RUTAS_DATA = (function(){ const v=JSON.parse(localStorage.getItem('fenlora_rutas')||'null'); return (v&&v.length)?v:[
-  {id:'r1',nombre:'Ruta del Mangostino',nombre_en:'The Mangosteen Route',emoji:'🍇',activa:true,duracion:'Medio día · 4–5 h',desc:'El recorrido completo por el fruto emblema, desde su historia hasta su mesa.',bg:'https://images.unsplash.com/photo-1416879595882-3373a0480b5b?w=600&q=80',paradas:[58,13,1,34,71]},
-  {id:'r2',nombre:'Ruta Colonial',nombre_en:'Colonial Route',emoji:'🏛️',activa:true,duracion:'2 horas · Caminata',desc:'500 años de historia en el centro histórico de Mariquita.',bg:'https://images.unsplash.com/photo-1524492412937-b28074a47d70?w=600&q=80',paradas:[57,56,58,5]},
-  {id:'r3',nombre:'Ruta del Sabor',nombre_en:'Flavor Route',emoji:'🍽️',activa:true,duracion:'Todo el día',desc:'Lo mejor de la gastronomía mariquiteña de la mañana a la noche.',bg:'https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=600&q=80',paradas:[34,22,20,27,36]},
-  {id:'r4',nombre:'Ruta de Naturaleza',nombre_en:'Nature Route',emoji:'🌿',activa:true,duracion:'Día completo',desc:'Cascadas, aves exóticas y el río más limpio del norte del Tolima.',bg:'https://images.unsplash.com/photo-1564419320461-6870880221ad?w=600&q=80',paradas:[59,4,14,60]},
-  {id:'r5',nombre:'Ruta del Cicloturismo',nombre_en:'Cycling Route',emoji:'🚴',activa:true,duracion:'Medio día',desc:'La ruta favorita de ciclistas Honda–Mariquita–Manizales.',bg:'https://images.unsplash.com/photo-1471506480208-91b3a4cc78be?w=600&q=80',paradas:[47,10,21]},
-  {id:'r6',nombre:'Reto Mariquita/Letras',nombre_en:'Mariquita/Letras Challenge',emoji:'🚵',activa:true,duracion:'Día completo · Ciclismo',desc:'El reto de ciclismo de ruta más importante del norte del Tolima.',bg:'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=600&q=80',paradas:[47,10,21,13]},
+  {id:'r1',municipio:'mariquita',nombre:'Ruta del Mangostino',nombre_en:'The Mangosteen Route',emoji:'🍇',activa:true,duracion:'Medio día · 4–5 h',desc:'El recorrido completo por el fruto emblema, desde su historia hasta su mesa.',bg:'https://images.unsplash.com/photo-1416879595882-3373a0480b5b?w=600&q=80',paradas:[58,13,1,34,71]},
+  {id:'r2',municipio:'mariquita',nombre:'Ruta Colonial',nombre_en:'Colonial Route',emoji:'🏛️',activa:true,duracion:'2 horas · Caminata',desc:'500 años de historia en el centro histórico de Mariquita.',bg:'https://images.unsplash.com/photo-1524492412937-b28074a47d70?w=600&q=80',paradas:[57,56,58,5]},
+  {id:'r3',municipio:'mariquita',nombre:'Ruta del Sabor',nombre_en:'Flavor Route',emoji:'🍽️',activa:true,duracion:'Todo el día',desc:'Lo mejor de la gastronomía mariquiteña de la mañana a la noche.',bg:'https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=600&q=80',paradas:[34,22,20,27,36]},
+  {id:'r4',municipio:'mariquita',nombre:'Ruta de Naturaleza',nombre_en:'Nature Route',emoji:'🌿',activa:true,duracion:'Día completo',desc:'Cascadas, aves exóticas y el río más limpio del norte del Tolima.',bg:'https://images.unsplash.com/photo-1564419320461-6870880221ad?w=600&q=80',paradas:[59,4,14,60]},
+  {id:'r5',municipio:'mariquita',nombre:'Ruta del Cicloturismo',nombre_en:'Cycling Route',emoji:'🚴',activa:true,duracion:'Medio día',desc:'La ruta favorita de ciclistas Honda–Mariquita–Manizales.',bg:'https://images.unsplash.com/photo-1471506480208-91b3a4cc78be?w=600&q=80',paradas:[47,10,21]},
+  {id:'r6',municipio:'mariquita',nombre:'Reto Mariquita/Letras',nombre_en:'Mariquita/Letras Challenge',emoji:'🚵',activa:true,duracion:'Día completo · Ciclismo',desc:'El reto de ciclismo de ruta más importante del norte del Tolima.',bg:'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=600&q=80',paradas:[47,10,21,13]},
+  {id:'rc1',municipio:'chaparral',nombre:'Ruta del Café de Origen',nombre_en:'Coffee Origin Route',emoji:'☕',activa:true,duracion:'Medio día',desc:'Fincas cafeteras, degustación y proceso del café de origen.',bg:'https://images.unsplash.com/photo-1447933601403-0c6688de566e?w=600&q=80',paradas:[]},
+  {id:'rc2',municipio:'chaparral',nombre:'Ruta de la Memoria y la Paz',nombre_en:'Memory and Peace Route',emoji:'🕊️',activa:true,duracion:'3 horas',desc:'Sitios históricos del postconflicto y turismo de memoria en Chaparral.',bg:'https://images.unsplash.com/photo-1577563682708-4f022ec774fb?w=600&q=80',paradas:[]},
+  {id:'rc3',municipio:'chaparral',nombre:'Ruta del Río Saldaña',nombre_en:'Saldaña River Route',emoji:'🌊',activa:true,duracion:'Día completo',desc:'Pesca, naturaleza y balnearios a orillas del río Saldaña.',bg:'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=600&q=80',paradas:[]},
+  {id:'rc4',municipio:'chaparral',nombre:'Ruta de la Cordillera',nombre_en:'Mountain Route',emoji:'🏔️',activa:true,duracion:'Día completo',desc:'Senderismo, cascadas y paisajes de la cordillera Central.',bg:'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=600&q=80',paradas:[]},
 ]; })();
 const PUNTOS_PARA_RUTAS = [
   {id:1,nombre:'Terrakota Heritage'},{id:5,nombre:'Hostal Virreyes'},{id:10,nombre:'Hotel Refugio Bike'},
@@ -2551,20 +2562,33 @@ let editingRuta = null;
 function renderRutasList(){
   const el = document.getElementById('rutas-list');
   if(!el) return;
-  el.innerHTML = RUTAS_DATA.map(r=>`
-    <div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)">
-      <div style="width:48px;height:48px;border-radius:8px;overflow:hidden;flex-shrink:0;background:var(--bg3)">
-        <img src="${r.bg}" style="width:100%;height:100%;object-fit:cover" alt="" loading="lazy">
-      </div>
-      <div style="flex:1;min-width:0">
-        <div style="font-size:13px;font-weight:500;color:var(--text)">${r.emoji} ${r.nombre}</div>
-        <div style="font-size:11px;color:var(--text3)">${r.paradas.length} paradas · ${r.duracion}</div>
-      </div>
-      <div class="toggle-track ${r.activa?'on':''}" onclick="toggleRutaActiva('${r.id}',this)" style="flex-shrink:0"><div class="toggle-knob"></div></div>
-      <button class="btn-sm gold" onclick="editRuta('${r.id}')">Editar</button>
-      <button class="btn-sm" onclick="deleteRuta('${r.id}')" style="color:var(--red)">🗑️</button>
-    </div>`).join('')+
-    `<button class="btn" style="width:100%;justify-content:center;margin-top:10px" onclick="openNewRoute()">+ Nueva ruta</button>`;
+  // Agrupar por municipio
+  const municipios = ['mariquita','chaparral'];
+  const labels = {mariquita:'🥭 Mariquita', chaparral:'☕ Chaparral'};
+  let html = '';
+  municipios.forEach(function(mun) {
+    const rutas = RUTAS_DATA.filter(function(r){ return (r.municipio||'mariquita') === mun; });
+    if (!rutas.length) return;
+    html += '<div data-sec-municipio="'+mun+'" style="font-size:9px;font-weight:700;color:var(--gold);letter-spacing:.1em;text-transform:uppercase;padding:8px 0 4px">'+labels[mun]+'</div>';
+    rutas.forEach(function(r) {
+      html += '<div data-municipio="'+mun+'" style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)">'
+        + '<div style="width:48px;height:48px;border-radius:8px;overflow:hidden;flex-shrink:0;background:var(--bg3)">'
+        + '<img src="'+r.bg+'" style="width:100%;height:100%;object-fit:cover" alt="" loading="lazy"></div>'
+        + '<div style="flex:1;min-width:0">'
+        + '<div style="font-size:13px;font-weight:500;color:var(--text)">'+r.emoji+' '+r.nombre+'</div>'
+        + '<div style="font-size:11px;color:var(--text3)">'+(r.paradas.length||0)+' paradas · '+r.duracion+'</div>'
+        + '</div>'
+        + '<div class="toggle-track '+(r.activa?'on':'')+'" data-rid="'+r.id+'" onclick="toggleRutaActiva(this.dataset.rid,this)" style="flex-shrink:0"><div class="toggle-knob"></div></div>'
+        + '<button class="btn-sm gold" data-rid="'+r.id+'" onclick="editRuta(this.dataset.rid)">Editar</button>'
+        + '<button class="btn-sm" data-rid="'+r.id+'" onclick="deleteRuta(this.dataset.rid)" style="color:var(--red)">🗑️</button>'
+        + '</div>';
+    });
+  });
+  html += '<button class="btn" style="width:100%;justify-content:center;margin-top:10px" onclick="openNewRoute()">+ Nueva ruta</button>';
+  el.innerHTML = html;
+  // Aplicar filtro activo si hay uno
+  var munFiltro = document.getElementById('rutas-municipio')?.value || '';
+  if (munFiltro) filtrarRutas();
 }
 
 function toggleRutaActiva(id,el){

@@ -916,9 +916,15 @@ function abrirTarjeta() {
   var munTxt  = munEl ? munEl.textContent : '';
   var esChap  = munTxt.toLowerCase().includes('chaparral');
   var ruta    = esChap ? 'Ruta del Café y la Paz · Chaparral' : 'Ruta del Mangostino · Mariquita';
-  var url     = window.location.href;
+  var uuidParam = new URLSearchParams(window.location.search).get('id') || '';
+  var url = uuidParam
+    ? 'https://rutas.fenloravisual.com/perfil-conductor.html?id=' + uuidParam
+    : window.location.href;
   var fotoEl  = document.getElementById('foto-conductor-img');
-  var fotoSrc = (fotoEl && fotoEl.style.display!=='none' && fotoEl.src && fotoEl.src!==window.location.href) ? fotoEl.src : null;
+  var fotoSrc = null;
+  if (fotoEl && fotoEl.style.display !== 'none' && fotoEl.src && fotoEl.src !== window.location.href && !fotoEl.src.endsWith('/conductor.html')) {
+    fotoSrc = fotoEl.src;
+  }
 
   // QR
   var qr = qrcode(0,'M');

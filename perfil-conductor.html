@@ -292,7 +292,7 @@ function renderPerfil(d) {
   }
 
   // Foto conductor
-  var fotoUrl = d.addons && d.addons.foto_url ? d.addons.foto_url : null;
+  var fotoUrl = (d.addons && (d.addons.foto_conductor || d.addons.foto_url)) || null;
   if (fotoUrl) {
     var img = document.getElementById('hero-img');
     img.src = fotoUrl;
@@ -301,7 +301,7 @@ function renderPerfil(d) {
   }
 
   // Foto vehículo
-  var fotoVeh = d.addons && d.addons.foto_vehiculo_url ? d.addons.foto_vehiculo_url : null;
+  var fotoVeh = (d.addons && (d.addons.foto_vehiculo || d.addons.foto_vehiculo_url)) || null;
   var vWrap = document.getElementById('vehiculo-wrap');
   if (fotoVeh) {
     vWrap.innerHTML = '<img src="' + fotoVeh + '" alt="Vehículo" style="width:100%;height:100%;object-fit:cover">';

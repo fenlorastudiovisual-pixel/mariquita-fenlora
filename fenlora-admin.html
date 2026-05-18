@@ -2079,6 +2079,8 @@ function goPage(p){
   const totalPages = Math.max(1, Math.ceil(filteredClients.length / PAGE_SIZE));
   currentPage = Math.max(0, Math.min(p, totalPages-1));
   renderClients();
+  // Cargar municipios reales desde Supabase
+  cargarClientesSupabase();
   document.getElementById('mod-clientes')?.scrollIntoView({block:'start', behavior:'smooth'});
 }
 
@@ -4043,6 +4045,46 @@ function toggleLoginEye(){
 // ══════════════════════════════════════════════
 // INIT ADMIN — ejecuta solo tras login correcto
 // ══════════════════════════════════════════════
+// ── CARGAR CLIENTES DESDE SUPABASE ──
+async function cargarClientesSupabase() {
+  try {
+    var res = await fetch(SUPA_URL_ADM + '/rest/v1/businesses?select=id,name,category,phone,is_active,plan_fenlora,municipio,addons&is_active=eq.true&order=name&category=not.in.(taxi,moto,chiva,alqmoto,alqbici,vereda,fletero)', {
+      headers: { 'apikey': SUPA_KEY_ADM, 'Authorization': 'Bearer ' + SUPA_KEY_ADM }
+    });
+    var data = await res.json();
+    if (!Array.isArray(data) || !data.length) return;
+    // Convertir al formato CLIENTS
+    var catLabels = {hotel:'Hotel',finca:'Finca',rest:'Restaurante',bar:'Bar',agencia:'Agencia',serv:'Servicio',hist:'Histórico',pub:'Público',cafe:'Cafetería',helado:'Heladería',jugo:'Jugos',fritanga:'Fritanga',tipico:'Comida típica',airbnb:'Airbnb',licorera:'Licorera',salsamen:'Salsamentaria',tienda:'Tienda',panaderia:'Panadería',fruteria:'Frutería',disco:'Discoteca',guia:'Guía',aventura:'Aventura',pesca:'Pesca',farmacia:'Farmacia',medico:'Médico',spa:'Spa',barber:'Barbería',iglesia:'Iglesia'};
+    // Actualizar CLIENTS con datos reales de Supabase (mantener los locales como base)
+    data.forEach(function(row) {
+      var existing = CLIENTS.find(function(c){ return String(c.sbId) === String(row.id) || c.nombre === row.name; });
+      if (existing) {
+        existing.municipio = row.municipio || 'mariquita';
+        existing.sbId = row.id;
+      } else {
+        CLIENTS.push({
+          id: CLIENTS.length + 1000,
+          sbId: row.id,
+          nombre: row.name || '',
+          catLabel: catLabels[row.category] || row.category || '',
+          cat: row.category || 'serv',
+          plan: row.plan_fenlora || 'basic',
+          estado: row.is_active ? 'active' : 'inactivo',
+          dir: '',
+          tel: row.phone || '',
+          vistas: 0, wsp: 0, visPct: 0,
+          vence: '—',
+          municipio: row.municipio || 'mariquita',
+        });
+      }
+    });
+    filteredClients = [...CLIENTS];
+    renderClients(filteredClients);
+    var sub = document.querySelector('#mod-clientes .table-sub');
+    if (sub) sub.textContent = CLIENTS.length + ' negocios registrados';
+  } catch(e) { console.warn('Error cargando clientes desde Supabase:', e); }
+}
+
 function initAdmin(){
   // Fix bug: [] vacío es truthy en JS → borrar para usar defaults
   ['fenlora_rutas','fenlora_intros'].forEach(function(key){
@@ -4128,7 +4170,7 @@ async function cargarConductores() {
   try {
     // PostgREST sintaxis correcta para IN
     var cats = TRANS_CATS_ADM.map(function(c){ return '"' + c + '"'; }).join(',');
-    var url = SUPA_URL_ADM + '/rest/v1/businesses?select=id,name,category,phone,is_active,disponible,addons&order=name&category=in.(' + TRANS_CATS_ADM.join(',') + ')';
+    var url = SUPA_URL_ADM + '/rest/v1/businesses?select=id,name,category,phone,is_active,disponible,addons,docs,municipio&order=name&category=in.(' + TRANS_CATS_ADM.join(',') + ')';
     console.log('Fetching:', url);
     var res = await fetch(url, {
       headers: { 

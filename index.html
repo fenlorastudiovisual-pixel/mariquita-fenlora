@@ -291,6 +291,11 @@ html,body{width:100%;height:100%;overflow:hidden;font-family:DM Sans,sans-serif;
 @keyframes disp-pulse{0%,100%{transform:rotate(45deg) scale(1);opacity:1}50%{transform:rotate(45deg) scale(1.4);opacity:.7}}
 .mpin img{width:100%;height:100%;object-fit:cover;transform:rotate(45deg) scale(1.5)}
 .mpin .ico{transform:rotate(45deg);font-size:13px}
+/* ── PIN TRANSPORTE (círculo con anillo pulsante) ── */
+.tpin-wrap{position:relative;width:44px;height:44px;display:flex;align-items:center;justify-content:center}
+.tpin{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;border:2.5px solid rgba(255,255,255,.9);box-shadow:0 3px 14px rgba(0,0,0,.45);cursor:pointer;font-size:20px;position:relative;z-index:2}
+.tpin-ring{position:absolute;inset:-5px;border-radius:50%;border:3px solid #25A864;z-index:1;animation:ring-pulse 1.6s ease-in-out infinite;opacity:0}
+@keyframes ring-pulse{0%{transform:scale(1);opacity:.9}70%{transform:scale(1.4);opacity:0}100%{transform:scale(1.4);opacity:0}}
 /* ── TOUCH IMPROVEMENTS ── */
 .bmaps,.bwsp,.bshare,.bmenu{min-height:48px;touch-action:manipulation}
 .fb{min-height:32px;touch-action:manipulation}
@@ -917,8 +922,41 @@ let activeRoute=null, activeStopIdx=0;
 let activeGrupos=new Set(Object.keys(GRUPOS));
 let activeTrans='todos';
 
+// Emoji por categoría de transporte
+const TRANS_EMOJI = {
+  taxi:    '🚕',
+  moto:    '🏍️',
+  chiva:   '🚌',
+  alqmoto: '🏍️',
+  alqbici: '🚲',
+  vereda:  '🚐',
+  fletero: '🚚'
+};
+// Color de fondo por categoría de transporte
+const TRANS_COLOR = {
+  taxi:    '#1a5fb4',
+  moto:    '#c0392b',
+  chiva:   '#e67e22',
+  alqmoto: '#8e44ad',
+  alqbici: '#27ae60',
+  vereda:  '#2980b9',
+  fletero: '#6d4c41'
+};
+const TRANS_CATS = new Set(['taxi','moto','chiva','alqmoto','alqbici','vereda','fletero']);
+
 function makeIcon(p){
   const c=CAT[p.cat]||{color:'#888',emoji:'📍'};
+
+  // Pin especial para transporte
+  if(TRANS_CATS.has(p.cat)){
+    const emoji = TRANS_EMOJI[p.cat] || '🚗';
+    const bg    = TRANS_COLOR[p.cat] || '#555';
+    const ring  = p.disponible ? '<div class="tpin-ring"></div>' : '';
+    const html  = `<div class="tpin-wrap">${ring}<div class="tpin" style="background:${bg}">${emoji}</div></div>`;
+    return L.divIcon({className:'',html,iconSize:[44,44],iconAnchor:[22,22],popupAnchor:[0,-26]});
+  }
+
+  // Pin estándar (rombo) para el resto
   const img=p.fotos[0]?.url;
   const disponibleDot=p.disponible?'<div class="mpin-disponible"></div>':'';
   const inner=img
@@ -1165,14 +1203,43 @@ function openPanel(p){
   gal.innerHTML='';dots.innerHTML='';
 
   if(transCatsGal.includes(p.cat)){
-    // Galería de fotos normales para transporte (la tarjeta ID va en pinfo abajo)
+    const addons = p.addons || {};
+    const fotoConductor = addons.foto_conductor || '';
+    const fotoVehiculo = addons.foto_vehiculo || '';
+    const placa = addons.placa || '';
+    const vehiculoDesc = addons.vehiculo_desc || '';
+    const cedula = addons.cedula || '';
+
+    // Tarjeta de identificación visual
+    const idCard = `
+      <div style="padding:14px 16px;background:linear-gradient(135deg,rgba(200,134,10,.08),rgba(200,134,10,.04));border-bottom:1px solid rgba(200,134,10,.15)">
+        <div style="font-size:9px;color:rgba(200,134,10,.7);font-weight:700;letter-spacing:.1em;text-transform:uppercase;margin-bottom:10px">✓ Conductor verificado por Fenlora</div>
+        <div style="display:flex;gap:12px;align-items:center">
+          ${fotoConductor
+            ? `<img src="${fotoConductor}" alt="Foto conductor" style="width:64px;height:64px;border-radius:50%;object-fit:cover;border:2.5px solid var(--gold);flex-shrink:0">`
+            : `<div style="width:64px;height:64px;border-radius:50%;background:rgba(200,134,10,.1);border:2px dashed rgba(200,134,10,.3);display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0">👤</div>`}
+          <div style="flex:1;min-width:0">
+            <div style="font-size:14px;font-weight:700;color:var(--dark);margin-bottom:2px">${p.nombre}</div>
+            ${cedula ? `<div style="font-size:11px;color:#7A5C2E">C.C. •••• ${cedula.slice(-4)}</div>` : ''}
+            ${placa ? `<div style="font-size:13px;font-weight:700;color:var(--gold);letter-spacing:.08em;margin-top:2px">🚗 ${placa}</div>` : ''}
+            ${vehiculoDesc ? `<div style="font-size:11px;color:#7A5C2E">${vehiculoDesc}</div>` : ''}
+          </div>
+          ${fotoVehiculo
+            ? `<img src="${fotoVehiculo}" alt="Foto vehículo" style="width:64px;height:64px;border-radius:10px;object-fit:cover;border:1.5px solid rgba(200,134,10,.3);flex-shrink:0">`
+            : `<div style="width:64px;height:64px;border-radius:10px;background:rgba(200,134,10,.06);border:2px dashed rgba(200,134,10,.2);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0">${CAT[p.cat]?.emoji||'🚗'}</div>`}
+        </div>
+      </div>`;
+
+    // Insertar tarjeta ID como primer "slide" del panel
+    gal.innerHTML = idCard;
+    // Luego las fotos normales si hay
     p.fotos.forEach((f,i)=>{
       const sl=document.createElement('div');sl.className='gslide';
       sl.innerHTML=`<img src="${f.url}" alt="${f.cap||''}" loading="lazy"><div class="gcap">${f.cap||''}</div>`;
       gal.appendChild(sl);
       const d=document.createElement('div');
       d.className='pdot'+(i===0?' a':'');
-      d.onclick=()=>gal.scrollTo({left:i*gal.offsetWidth,behavior:'smooth'});
+      d.onclick=()=>gal.scrollTo({left:(i+1)*gal.offsetWidth,behavior:'smooth'});
       dots.appendChild(d);
     });
 
@@ -1210,39 +1277,8 @@ function openPanel(p){
             <span style="font-size:12px;font-weight:500;color:#888">No disponible en este momento</span>
            </div>`)
     : '';
-  // Tarjeta ID conductor — solo para transporte, siempre visible en pinfo
-  let idCardHtml = '';
-  if (transCats.includes(p.cat)) {
-    const addons = p.addons || {};
-    const fotoConductor = addons.foto_conductor || '';
-    const fotoVehiculo  = addons.foto_vehiculo  || '';
-    const placa         = addons.placa          || '';
-    const vehiculoDesc  = addons.vehiculo_desc  || '';
-    const cedula        = addons.cedula         || '';
-    const catEmoji      = CAT[p.cat]?.emoji || '🚗';
-    idCardHtml = `
-      <div style="margin-bottom:12px;padding:14px;background:linear-gradient(135deg,rgba(200,134,10,.08),rgba(200,134,10,.03));border:1px solid rgba(200,134,10,.2);border-radius:14px">
-        <div style="font-size:9px;color:rgba(200,134,10,.8);font-weight:700;letter-spacing:.1em;text-transform:uppercase;margin-bottom:10px">✓ Conductor verificado por Fenlora</div>
-        <div style="display:flex;gap:12px;align-items:center">
-          ${fotoConductor
-            ? `<img src="${fotoConductor}" alt="Foto conductor" style="width:72px;height:72px;border-radius:50%;object-fit:cover;border:2.5px solid #C8860A;flex-shrink:0">`
-            : `<div style="width:72px;height:72px;border-radius:50%;background:rgba(200,134,10,.1);border:2px dashed rgba(200,134,10,.3);display:flex;align-items:center;justify-content:center;font-size:28px;flex-shrink:0">👤</div>`}
-          <div style="flex:1;min-width:0">
-            <div style="font-size:15px;font-weight:700;color:#3D2B10;margin-bottom:3px">${p.nombre}</div>
-            ${cedula ? `<div style="font-size:11px;color:#7A5C2E">C.C. •••• ${cedula.slice(-4)}</div>` : ''}
-            ${placa ? `<div style="font-size:14px;font-weight:800;color:#C8860A;letter-spacing:.1em;margin-top:4px">${placa}</div>` : ''}
-            ${vehiculoDesc ? `<div style="font-size:11px;color:#7A5C2E;margin-top:2px">${vehiculoDesc}</div>` : ''}
-          </div>
-          ${fotoVehiculo
-            ? `<img src="${fotoVehiculo}" alt="Foto vehículo" style="width:72px;height:72px;border-radius:10px;object-fit:cover;border:1.5px solid rgba(200,134,10,.3);flex-shrink:0">`
-            : `<div style="width:72px;height:72px;border-radius:10px;background:rgba(200,134,10,.06);border:2px dashed rgba(200,134,10,.2);display:flex;align-items:center;justify-content:center;font-size:26px;flex-shrink:0">${catEmoji}</div>`}
-        </div>
-      </div>`;
-  }
-
   pi.innerHTML =
     dispBadge +
-    idCardHtml +
     (subShow ? '<div class="irow"><div class="ico2">📍</div><div>'+subShow+'</div></div>' : '') +
     (horShow ? '<div class="irow"><div class="ico2">🕐</div><div>'+horShow+'</div></div>' : '') +
     (p.tel ? '<div class="irow"><div class="ico2">📞</div><div><a href="tel:'+p.tel+'">'+p.tel+'</a></div></div>' : '') +

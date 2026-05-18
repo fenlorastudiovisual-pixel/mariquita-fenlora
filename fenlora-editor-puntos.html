@@ -442,6 +442,34 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Instru
         <div style="font-size:11px;color:var(--text3);margin-top:8px;line-height:1.6">
           🔒 Estos datos solo pueden ser modificados por el admin de Fenlora. El conductor no puede editarlos desde su panel.
         </div>
+
+        <!-- DOCUMENTOS -->
+        <div style="margin-top:16px;padding-top:14px;border-top:1px solid var(--border)">
+          <div class="form-section-title" style="margin-bottom:10px">📄 Documentos del conductor</div>
+          <div style="font-size:11px;color:var(--text3);margin-bottom:12px;background:var(--bg3);border-radius:8px;padding:8px 12px;border:1px solid var(--border);line-height:1.6">
+            Sube los documentos a <strong style="color:var(--gold)">imgBB.com</strong> y pega el <strong>Direct link</strong>. Solo visible para el admin — no aparece en el mapa público.
+          </div>
+          <div class="field-row col2">
+            <div class="field">
+              <label>SOAT (URL imgBB)</label>
+              <input type="url" id="f-doc-soat" placeholder="https://i.ibb.co/...">
+            </div>
+            <div class="field">
+              <label>Licencia de conducción (URL imgBB)</label>
+              <input type="url" id="f-doc-licencia" placeholder="https://i.ibb.co/...">
+            </div>
+          </div>
+          <div class="field-row col2">
+            <div class="field">
+              <label>Cédula de ciudadanía (URL imgBB)</label>
+              <input type="url" id="f-doc-cedula" placeholder="https://i.ibb.co/...">
+            </div>
+            <div class="field">
+              <label>Revisión Técnico-Mecánica (opcional)</label>
+              <input type="url" id="f-doc-rtm" placeholder="https://i.ibb.co/...">
+            </div>
+          </div>
+        </div>
       </div>
 
       <div class="form-section">
@@ -944,6 +972,12 @@ function loadEditor(p) {
     document.getElementById('f-foto-vehiculo-url').value = fv;
     previewConductorImg(fv, 'prev-vehiculo');
   }
+  // Cargar documentos
+  const docs = p.docs || {};
+  if (document.getElementById('f-doc-soat'))     document.getElementById('f-doc-soat').value     = docs.soat_url     || '';
+  if (document.getElementById('f-doc-licencia')) document.getElementById('f-doc-licencia').value = docs.licencia_url || '';
+  if (document.getElementById('f-doc-cedula'))   document.getElementById('f-doc-cedula').value   = docs.cedula_url   || '';
+  if (document.getElementById('f-doc-rtm'))      document.getElementById('f-doc-rtm').value      = docs.rtm_url      || '';
 
   // Menu toggle
   const menuTog = document.getElementById('menu-toggle');
@@ -1358,6 +1392,12 @@ async function savePoint() {
       vehiculo_desc: document.getElementById('f-vehiculo-desc')?.value.trim() || '',
       foto_conductor: document.getElementById('f-foto-conductor-url')?.value.trim() || '',
       foto_vehiculo: document.getElementById('f-foto-vehiculo-url')?.value.trim() || '',
+    };
+    selected.docs = {
+      soat_url:     document.getElementById('f-doc-soat')?.value.trim()     || '',
+      licencia_url: document.getElementById('f-doc-licencia')?.value.trim() || '',
+      cedula_url:   document.getElementById('f-doc-cedula')?.value.trim()   || '',
+      rtm_url:      document.getElementById('f-doc-rtm')?.value.trim()      || '',
     };
   }
   const lat = parseFloat(document.getElementById('f-lat').value);

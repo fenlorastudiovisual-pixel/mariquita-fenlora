@@ -157,6 +157,7 @@ html,body{height:100%;overflow-x:hidden;font-family:'DM Sans',sans-serif;backgro
 /* ACTIVE PRESS */
 .big-toggle:active{transform:scale(.98)}
 </style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 </head>
 <body>
 
@@ -440,8 +441,63 @@ html,body{height:100%;overflow-x:hidden;font-family:'DM Sans',sans-serif;backgro
     Fenlora es un directorio informativo — la contratación del servicio es directamente entre tú y el turista. Fenlora no es intermediario ni responsable de los servicios prestados.
   </div>
 
-  <div class="footer">Fenlora Visual Studio · Mariquita, Tolima · 2026</div>
+  <!-- BOTÓN TARJETA -->
+  <button class="btn-tarjeta" onclick="abrirTarjeta()">
+    📇 Ver mi tarjeta de presentación + QR
+  </button>
+
+  <div class="footer">Fenlora Visual Studio · 2026</div>
 </div>
+
+<!-- MODAL TARJETA -->
+<div id="tarjeta-overlay" style="display:none" onclick="if(event.target===this)cerrarTarjeta()">
+  <div id="tarjeta-sheet">
+    <div class="tarjeta-handle"></div>
+    <div style="padding:0 20px 12px;display:flex;align-items:center;justify-content:space-between">
+      <div style="font-size:15px;font-weight:700;color:#1C1208">📇 Mi tarjeta Fenlora</div>
+      <button onclick="cerrarTarjeta()" style="background:none;border:none;font-size:20px;color:#999;cursor:pointer">✕</button>
+    </div>
+    <!-- PREVIEW TARJETA -->
+    <div class="tarjeta-preview">
+      <div class="tc-card" id="tc-card">
+        <div class="tc-header">
+          <svg width="22" height="22" viewBox="0 0 120 120" fill="none"><defs><linearGradient id="tg1" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#FFD700"/><stop offset="1" stop-color="#C8860A"/></linearGradient><linearGradient id="tg2" x1="1" y1="0" x2="0" y2="1"><stop stop-color="#FF8C00"/><stop offset="1" stop-color="#E65C00"/></linearGradient><linearGradient id="tg3" x1="1" y1="1" x2="0" y2="0"><stop stop-color="#9B59B6"/><stop offset="1" stop-color="#6C3483"/></linearGradient><linearGradient id="tg4" x1="0" y1="1" x2="1" y2="0"><stop stop-color="#4A90D9"/><stop offset="1" stop-color="#9B59B6"/></linearGradient><radialGradient id="tgc" cx="50%" cy="50%" r="50%"><stop stop-color="#FFD700"/><stop offset="1" stop-color="#C8860A"/></radialGradient></defs><path d="M60 12 C50 12 42 18 40 28 L55 58 C57 54 63 54 65 58 L80 28 C78 18 70 12 60 12Z" fill="url(#tg1)" opacity=".95"/><path d="M108 60 C108 50 102 42 92 40 L62 55 C66 57 66 63 62 65 L92 80 C102 78 108 70 108 60Z" fill="url(#tg2)" opacity=".9"/><path d="M60 108 C70 108 78 102 80 92 L65 62 C63 66 57 66 55 62 L40 92 C42 102 50 108 60 108Z" fill="url(#tg3)" opacity=".95"/><path d="M12 60 C12 70 18 78 28 80 L58 65 C54 63 54 57 58 55 L28 40 C18 42 12 50 12 60Z" fill="url(#tg4)" opacity=".9"/><circle cx="60" cy="60" r="16" fill="#111" opacity=".7"/><circle cx="60" cy="60" r="10" fill="url(#tgc)"/><circle cx="56" cy="56" r="3" fill="white" opacity=".5"/></svg>
+          <div>
+            <div class="tc-logo-text">FENLORA</div>
+            <div class="tc-verified">✓ Conductor verificado</div>
+          </div>
+        </div>
+        <div class="tc-body">
+          <div class="tc-foto" id="tc-foto-wrap">
+            <span id="tc-foto-emoji">👤</span>
+            <img id="tc-foto-img" src="" style="display:none;width:100%;height:100%;object-fit:cover">
+          </div>
+          <div class="tc-info">
+            <div class="tc-nombre" id="tc-nombre">—</div>
+            <div class="tc-tipo" id="tc-tipo">—</div>
+            <div class="tc-placa" id="tc-placa">—</div>
+            <div class="tc-tel" id="tc-tel">—</div>
+          </div>
+          <div class="tc-qr" id="tc-qr-wrap">
+            <div id="tc-qr" style="width:68px;height:68px"></div>
+          </div>
+        </div>
+        <div class="tc-footer">
+          <div class="tc-ruta" id="tc-ruta-label">Fenlora Visual Studio · Rutas Tolima</div>
+          <div class="tc-scan">Escanea para<br>ver mi perfil</div>
+        </div>
+      </div>
+    </div>
+    <div style="padding:8px 20px 4px;font-size:11px;color:#999;text-align:center">Toca "Imprimir / Guardar" para descargarla o imprimirla</div>
+    <div class="tarjeta-actions">
+      <button class="tarjeta-btn-print" onclick="imprimirTarjeta()">🖨️ Imprimir / Guardar como imagen</button>
+      <button class="tarjeta-btn-close" onclick="cerrarTarjeta()">Cerrar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ÁREA DE IMPRESIÓN -->
+<div id="print-area"></div>
 
 <div id="toast"></div>
 
@@ -862,6 +918,70 @@ function showToast(msg) {
 }
 
 init();
+
+// ── TARJETA DE PRESENTACIÓN ──
+var _tarjetaQRGenerado = false;
+
+function abrirTarjeta() {
+  var overlay = document.getElementById('tarjeta-overlay');
+  if (!overlay) return;
+  overlay.style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+  // Llenar datos del conductor
+  var nombre = document.getElementById('profile-name')?.textContent || '—';
+  var tipo   = document.getElementById('profile-cat')?.textContent || '—';
+  var placa  = document.getElementById('disp-placa')?.textContent || '—';
+  var tel    = '';
+  // Buscar teléfono en el DOM
+  var telEl  = document.querySelector('[id*="tel"], [data-tel]');
+  document.getElementById('tc-nombre').textContent = nombre;
+  document.getElementById('tc-tipo').textContent   = tipo;
+  document.getElementById('tc-placa').textContent  = placa;
+  // Foto conductor
+  var fotoImg = document.getElementById('foto-conductor-img');
+  if (fotoImg && fotoImg.src && fotoImg.style.display !== 'none') {
+    document.getElementById('tc-foto-img').src = fotoImg.src;
+    document.getElementById('tc-foto-img').style.display = 'block';
+    document.getElementById('tc-foto-emoji').style.display = 'none';
+  }
+  // Ruta según municipio del conductor
+  var munEl = document.getElementById('profile-zona');
+  var munTxt = munEl ? munEl.textContent : '';
+  var ruta = munTxt.toLowerCase().includes('chaparral') ? '☕ Ruta del Café y la Paz · Chaparral' : '🥭 Ruta del Mangostino · Mariquita';
+  document.getElementById('tc-ruta-label').textContent = ruta;
+  // Generar QR con URL del panel del conductor
+  if (!_tarjetaQRGenerado) {
+    var qrUrl = window.location.href;
+    var qrEl  = document.getElementById('tc-qr');
+    if (qrEl && typeof QRCode !== 'undefined') {
+      qrEl.innerHTML = '';
+      new QRCode(qrEl, {
+        text:          qrUrl,
+        width:         68,
+        height:        68,
+        colorDark:     '#1C1208',
+        colorLight:    '#ffffff',
+        correctLevel:  QRCode.CorrectLevel.M
+      });
+      _tarjetaQRGenerado = true;
+    }
+  }
+}
+
+function cerrarTarjeta() {
+  document.getElementById('tarjeta-overlay').style.display = 'none';
+  document.body.style.overflow = '';
+}
+
+function imprimirTarjeta() {
+  var card = document.getElementById('tc-card');
+  if (!card) return;
+  var printArea = document.getElementById('print-area');
+  printArea.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;min-height:100vh;background:#f5f5f5"><div style="max-width:380px;width:100%;border-radius:16px;overflow:hidden;box-shadow:0 8px 32px rgba(0,0,0,.2)">' + card.outerHTML + '</div></div>';
+  printArea.style.display = 'block';
+  window.print();
+  setTimeout(function(){ printArea.style.display = 'none'; }, 1000);
+}
 </script>
 </body>
 </html>

@@ -513,7 +513,7 @@ tr:hover td{background:var(--bg3)}
                 <div class="renewal-name">—</div>
                 <div class="renewal-plan">Plan Premium</div>
               </div>
-              <div class="renewal-val">$329.900</div>
+              <div class="renewal-val" data-plan="premium"></div>
               <button class="btn-sm gold" onclick="abrirCobro(1)">💳 Cobrar</button>
             </div>
             <div class="renewal-item">
@@ -522,7 +522,7 @@ tr:hover td{background:var(--bg3)}
                 <div class="renewal-name">—</div>
                 <div class="renewal-plan">Plan Pro</div>
               </div>
-              <div class="renewal-val">$179.900</div>
+              <div class="renewal-val" data-plan="pro"></div>
               <button class="btn-sm gold" onclick="abrirCobro(8)">💳 Cobrar</button>
             </div>
             <div class="renewal-item">
@@ -540,7 +540,7 @@ tr:hover td{background:var(--bg3)}
                 <div class="renewal-name">—</div>
                 <div class="renewal-plan">Plan Básico</div>
               </div>
-              <div class="renewal-val">$89.900</div>
+              <div class="renewal-val" data-plan="basic"></div>
               <button class="btn-sm gold" onclick="abrirCobro(6)">💳 Cobrar</button>
             </div>
           </div>
@@ -691,17 +691,17 @@ tr:hover td{background:var(--bg3)}
       <div class="metrics-grid" style="grid-template-columns:repeat(3,1fr)">
         <div class="metric-card">
           <div class="metric-label">💰 Proyección mes</div>
-          <div class="metric-val">$10.7M</div>
+          <div class="metric-val" id="renov-proyeccion">$0</div>
           <div class="metric-sub">Si todos renuevan</div>
         </div>
         <div class="metric-card">
           <div class="metric-label">⚠️ En mora</div>
-          <div class="metric-val" style="color:#E57373">2</div>
+          <div class="metric-val" id="renov-mora" style="color:#E57373">0</div>
           <div class="metric-sub">Más de 5 días vencidos</div>
         </div>
         <div class="metric-card">
           <div class="metric-label">📤 Recordatorios enviados</div>
-          <div class="metric-val">18</div>
+          <div class="metric-val" id="renov-recordatorios">0</div>
           <div class="metric-sub">Este mes</div>
         </div>
       </div>
@@ -1029,6 +1029,12 @@ tr:hover td{background:var(--bg3)}
 
     <!-- ══════════════ TÓTEM ══════════════ -->
     <div class="module" id="mod-totem">
+      <div style="display:flex;gap:8px;margin-bottom:16px;align-items:center;flex-wrap:wrap">
+        <select id="totem-municipio" onchange="filtrarTotem()" style="background:var(--bg3);border:1px solid var(--border);border-radius:7px;padding:6px 10px;color:var(--text2);font-size:12px;outline:none">
+          <option value="mariquita">🥭 Mariquita — Plaza Central</option>
+          <option value="chaparral">☕ Chaparral — Parque Principal</option>
+        </select>
+      </div>
       <div class="two-col">
         <div class="panel-card">
           <div class="panel-hdr">
@@ -1140,38 +1146,57 @@ tr:hover td{background:var(--bg3)}
             <button class="btn primary" style="margin-left:6px;padding:5px 12px;font-size:11px" onclick="document.getElementById('form-evento').scrollIntoView({behavior:'smooth'})">+ Nuevo evento</button>
           </div>
           <div class="panel-body" style="padding:8px 18px" id="eventos-lista">
-            <div class="event-card" style="position:relative">
+            <div class="event-card" data-municipio="mariquita" style="position:relative">
               <button onclick="this.parentElement.remove();showNotif('Evento eliminado')" style="position:absolute;top:8px;right:8px;background:rgba(220,53,53,.15);border:none;border-radius:6px;padding:3px 8px;color:#ff8080;font-size:11px;cursor:pointer">✕</button>
-              <div class="event-date">18 – 20 MAYO 2026 · PUENTE FESTIVO</div>
+              <div class="event-date">18 – 20 MAYO 2026 · PUENTE FESTIVO · 🥭 Mariquita</div>
               <div class="event-title">Puente Ascensión</div>
               <div class="event-desc">Alta temporada de turismo. Flujo esperado: +800 visitantes al municipio. Recomendado activar descuentos coordinados entre hoteles y restaurantes.</div>
               <div class="event-tags">
                 <div class="event-tag">🏨 Hoteles</div>
                 <div class="event-tag">🍽️ Restaurantes</div>
                 <div class="event-tag">⭐ Alto impacto</div>
-                <div class="event-tag">📤 Notificado</div>
               </div>
             </div>
-            <div class="event-card" style="position:relative">
+            <div class="event-card" data-municipio="mariquita" style="position:relative">
               <button onclick="this.parentElement.remove();showNotif('Evento eliminado')" style="position:absolute;top:8px;right:8px;background:rgba(220,53,53,.15);border:none;border-radius:6px;padding:3px 8px;color:#ff8080;font-size:11px;cursor:pointer">✕</button>
-              <div class="event-date">14 – 21 JUNIO 2026 · FERIA ANUAL</div>
+              <div class="event-date">14 – 21 JUNIO 2026 · FERIA ANUAL · 🥭 Mariquita</div>
               <div class="event-title">Feria Nacional del Mangostino</div>
-              <div class="event-desc">El evento más importante del año. Vendedores, degustaciones, reinado del mangostino y grupos musicales. Toda la ciudad en modo turismo. Máxima visibilidad en el mapa.</div>
+              <div class="event-desc">El evento más importante del año. Vendedores, degustaciones, reinado del mangostino y grupos musicales. Toda la ciudad en modo turismo.</div>
               <div class="event-tags">
                 <div class="event-tag">🍇 Mangostino</div>
                 <div class="event-tag">🎪 Feria</div>
                 <div class="event-tag">🔥 Máximo impacto</div>
-                <div class="event-tag">📺 Tótem activo</div>
               </div>
             </div>
-            <div class="event-card" style="position:relative">
+            <div class="event-card" data-municipio="mariquita" style="position:relative">
               <button onclick="this.parentElement.remove();showNotif('Evento eliminado')" style="position:absolute;top:8px;right:8px;background:rgba(220,53,53,.15);border:none;border-radius:6px;padding:3px 8px;color:#ff8080;font-size:11px;cursor:pointer">✕</button>
-              <div class="event-date">15 AGOSTO 2026 · FESTIVO</div>
+              <div class="event-date">15 AGOSTO 2026 · FESTIVO · 🥭 Mariquita</div>
               <div class="event-title">Día de la Asunción — Turismo religioso</div>
-              <div class="event-desc">Peregrinaciones a La Ermita colonial. Alta afluencia de turistas del interior del país. Oportunidad para hoteles y restaurantes del centro histórico.</div>
+              <div class="event-desc">Peregrinaciones a La Ermita colonial. Alta afluencia de turistas del interior del país.</div>
               <div class="event-tags">
                 <div class="event-tag">🏛️ Histórico</div>
                 <div class="event-tag">⭐ Impacto medio</div>
+              </div>
+            </div>
+            <div class="event-card" data-municipio="chaparral" style="position:relative">
+              <button onclick="this.parentElement.remove();showNotif('Evento eliminado')" style="position:absolute;top:8px;right:8px;background:rgba(220,53,53,.15);border:none;border-radius:6px;padding:3px 8px;color:#ff8080;font-size:11px;cursor:pointer">✕</button>
+              <div class="event-date">OCTUBRE 2026 · FERIA ANUAL · ☕ Chaparral</div>
+              <div class="event-title">Feria del Café y la Paz — Chaparral</div>
+              <div class="event-desc">Celebración del café de origen y la memoria del postconflicto. Degustaciones, música, artesanías y turismo de memoria. Alta afluencia regional.</div>
+              <div class="event-tags">
+                <div class="event-tag">☕ Café</div>
+                <div class="event-tag">🕊️ Paz</div>
+                <div class="event-tag">🎪 Feria</div>
+              </div>
+            </div>
+            <div class="event-card" data-municipio="chaparral" style="position:relative">
+              <button onclick="this.parentElement.remove();showNotif('Evento eliminado')" style="position:absolute;top:8px;right:8px;background:rgba(220,53,53,.15);border:none;border-radius:6px;padding:3px 8px;color:#ff8080;font-size:11px;cursor:pointer">✕</button>
+              <div class="event-date">DICIEMBRE 2026 · FESTIVO · ☕ Chaparral</div>
+              <div class="event-title">Festival Navideño del Río Saldaña</div>
+              <div class="event-desc">Celebración navideña a orillas del río Saldaña con alumbrado, música en vivo y gastronomía local. Atrae turistas de todo el Tolima.</div>
+              <div class="event-tags">
+                <div class="event-tag">🌊 Río Saldaña</div>
+                <div class="event-tag">🎄 Navidad</div>
               </div>
             </div>
               </div>
@@ -1925,6 +1950,8 @@ function goPage(p){
   cargarClientesSupabase();
   // Actualizar badges
   actualizarBadges();
+  // Actualizar métricas renovaciones
+  actualizarMetricasRenovaciones();
   document.getElementById('mod-clientes')?.scrollIntoView({block:'start', behavior:'smooth'});
 }
 
@@ -2653,13 +2680,6 @@ function saveRutasData(){localStorage.setItem('fenlora_rutas',JSON.stringify(RUT
 // MÓDULO: RESEÑAS
 // ══════════════════════════════════════════════
 const REVIEWS_ADMIN=[
-  {negocio:'Terrakota Heritage House',nombre:'Carlos M.',rating:5,fecha:'hace 3 días',texto:'El mejor hotel de Mariquita sin duda. El desayuno típico es espectacular.',aprobada:true},
-  {negocio:'El Gran Ranchón',nombre:'Familia López',rating:5,fecha:'hace 5 días',texto:'El viudo de bocachico es lo mejor que hemos comido en el Tolima.',aprobada:true},
-  {negocio:'Cataratas de Medina',nombre:'Turista anónimo',rating:3,fecha:'hace 4 días',texto:'Bonito pero muy lleno el fin de semana. Mejor ir entre semana.',aprobada:true},
-  {negocio:'Casa Mutis',nombre:'Profesora Ana',rating:5,fecha:'hace 1 semana',texto:'Lugar histórico increíble. La guía conoce profundamente la historia.',aprobada:true},
-  {negocio:'Terrakota Heritage House',nombre:'María F.',rating:4,fecha:'hace 1 semana',texto:'Habitaciones cómodas. El patio interior es hermoso.',aprobada:true},
-  {negocio:'Cataratas de Medina',nombre:'Grupo senderismo',rating:5,fecha:'hace 1 día',texto:'Espectacular. El camino difícil pero vale completamente la pena.',aprobada:false},
-  {negocio:'El Gran Ranchón',nombre:'Andrés R.',rating:4,fecha:'hace 2 semanas',texto:'Rico pero el servicio fue lento. El jugo de mangostino vale todo.',aprobada:false},
   {negocio:'Selvatik Rutas',nombre:'Turista Bogotá',rating:5,fecha:'hace 2 días',texto:'Excelente tour del mangostino. El guía muy profesional.',aprobada:false},
 ];
 function renderReviewsAdmin(){
@@ -4119,6 +4139,33 @@ function enviarLinkConductor(btn) {
 })();
 
 // ── FILTROS MUNICIPIO — RUTAS, EVENTOS, RESEÑAS, CLIMA, REPORTES ──
+// ── TÓTEM FILTRO ──
+function filtrarTotem() {
+  var mun = document.getElementById('totem-municipio')?.value || 'mariquita';
+  var cfg = {mariquita:'🍇 Ruta del Mangostino (Fenlora)', chaparral:'☕ Ruta del Café y la Paz (Fenlora)'};
+  var introName = document.querySelector('.totem-name');
+  if (introName) introName.textContent = cfg[mun] || cfg.mariquita;
+}
+
+// ── RENOVACIONES — actualizar métricas dinámicamente desde CLIENTS ──
+function actualizarMetricasRenovaciones() {
+  var mora = CLIENTS.filter(function(c){ return c.estado === 'mora'; }).length;
+  var proyeccion = CLIENTS.reduce(function(acc, c) {
+    return acc + (planVal(c.plan) || 0);
+  }, 0);
+  var el_mora = document.getElementById('renov-mora');
+  var el_proy = document.getElementById('renov-proyeccion');
+  if (el_mora) el_mora.textContent = mora;
+  if (el_proy) el_proy.textContent = proyeccion > 0 ? '$' + Math.round(proyeccion/1000000*10)/10 + 'M' : '$0';
+  // Actualizar renewal-val con precios reales del CONFIG
+  document.querySelectorAll('[data-plan]').forEach(function(el) {
+    var plan = el.dataset.plan;
+    if (plan && CONFIG.planes[plan]) {
+      el.textContent = '$' + CONFIG.planes[plan].precio.toLocaleString('es-CO');
+    }
+  });
+}
+
 function filtrarRutas() {
   var mun = document.getElementById('rutas-municipio')?.value || '';
   // Ocultar/mostrar filas con data-municipio

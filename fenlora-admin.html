@@ -741,18 +741,16 @@ tr:hover td{background:var(--bg3)}
                 </div>
               </div>
               <label>Destinatarios</label>
-              <select>
-                <option>Todos los negocios</option>
-                <option>Solo hoteles (12)</option>
-                <option>Solo restaurantes y bares (22)</option>
-                <option>Solo fincas (7)</option>
-                <option>Solo plan Premium (9)</option>
-                <option>Plan Pro y Premium (33)</option>
+              <select id="alert-dest" style="width:100%;padding:10px 12px;background:var(--bg3);border:1px solid var(--border2);border-radius:8px;color:var(--text);font-size:12.5px;font-family:inherit;cursor:pointer">
+                <option value="todos">Todos los negocios</option>
+                <option value="hoteles">Solo hoteles y alojamiento</option>
+                <option value="restaurantes">Solo gastronomía y bares</option>
+                <option value="fincas">Solo fincas y turismo</option>
               </select>
               <label>Asunto</label>
               <input id="alert-subject" placeholder="ej. Alerta fraude: transferencias falsas circulando">
               <label>Mensaje</label>
-              <textarea id="alert-msg" rows="5" placeholder="Escribe el mensaje que recibirán los negocios por WhatsApp...">🚨 ALERTA FENLORA: Se están reportando transferencias falsas con capturas de pantalla editadas. El número que está usando el estafador es 321-555-0000. NO entregue productos sin verificar directamente con su banco. Comparta esta alerta con sus empleados.</textarea>
+              <textarea id="alert-body" rows="5" placeholder="Escribe el mensaje que recibirán los negocios por WhatsApp..."></textarea>
               <div style="display:flex;gap:8px;margin-top:4px">
                 <button class="btn primary" style="flex:1" onclick="sendAlert()">📤 Enviar por WhatsApp</button>
                 <button class="btn" onclick="showNotif('Vista previa guardada')">Vista previa</button>
@@ -2317,6 +2315,25 @@ function showModule(name,el){
 
 // ── ALERT ──
 function selectAlertType(el){document.querySelectorAll('.alert-type').forEach(a=>a.classList.remove('sel'));el.classList.add('sel')}
+function poblarPlanesEnAlerta(){
+  var sel = document.getElementById('alert-dest');
+  if(!sel) return;
+  // Mantener las primeras 4 opciones fijas
+  var fixed = Array.from(sel.options).slice(0,4);
+  sel.innerHTML = '';
+  fixed.forEach(function(o){ sel.appendChild(o); });
+  // Agregar una opción por cada plan dinámico desde CONFIG
+  Object.entries(CONFIG.planes).forEach(function(kv){
+    var key = kv[0], plan = kv[1];
+    if(plan.precio === 0) return; // omitir gratuito
+    var count = CLIENTS.filter(function(c){ return c.plan === key; }).length;
+    var opt = document.createElement('option');
+    opt.value = 'plan_' + key;
+    opt.textContent = 'Solo plan ' + plan.nombre + (count ? ' (' + count + ')' : '');
+    sel.appendChild(opt);
+  });
+}
+
 function sendAlert(){
   const subj=document.getElementById('alert-subject')?.value||'Alerta';
   showNotif('✓ Alerta "'+subj.substring(0,30)+'" enviada a '+CLIENTS.length+' negocios');
@@ -3932,6 +3949,7 @@ async function cargarClientesSupabase() {
     try { renderClients(filteredClients); } catch(e){}
     try { buildMenuClientsList(''); } catch(e){}
     try { buildDescNegocioSelect(); } catch(e){}
+    try { poblarPlanesEnAlerta(); } catch(e){}
     var sub = document.getElementById('clientes-sub') || document.querySelector('#mod-clientes .table-sub');
     if(sub) sub.textContent = CLIENTS.length + ' negocios registrados';
     console.log('[Fenlora] Clientes cargados:', CLIENTS.length);

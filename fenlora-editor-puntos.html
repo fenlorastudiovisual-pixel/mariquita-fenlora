@@ -795,6 +795,8 @@ function sbRowToPoint(row) {
     addons: row.addons || {},
     docs: row.docs || {},
     municipio: row.municipio || 'mariquita',
+    inicio: (row.addons && row.addons.fecha_inicio) || row.fecha_inicio || '',
+    vence:  (row.addons && row.addons.fecha_vencimiento) || row.fecha_vencimiento || '',
   };
 }
 
@@ -818,7 +820,10 @@ function pointToSbRow(p) {
     notas_admin: p.notas || '',
     menu: p.menu || {},
     tiene_menu: p.tiene_menu === true,
-    addons: p.addons || {},
+    addons: Object.assign({}, p.addons || {}, {
+      fecha_inicio: p.inicio || '',
+      fecha_vencimiento: p.vence || '',
+    }),
     docs: p.docs || {},
     municipio: p.municipio || 'mariquita',
     updated_at: new Date().toISOString(),

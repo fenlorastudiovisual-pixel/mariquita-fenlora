@@ -3950,6 +3950,8 @@ async function cargarClientesSupabase() {
     try { buildMenuClientsList(''); } catch(e){}
     try { buildDescNegocioSelect(); } catch(e){}
     try { poblarPlanesEnAlerta(); } catch(e){}
+    try { actualizarDashboard(); } catch(e){}
+    try { actualizarRenovaciones(); } catch(e){}
     var sub = document.getElementById('clientes-sub') || document.querySelector('#mod-clientes .table-sub');
     if(sub) sub.textContent = CLIENTS.length + ' negocios registrados';
     console.log('[Fenlora] Clientes cargados:', CLIENTS.length);
@@ -4173,6 +4175,85 @@ function actualizarMetricasRenovaciones() {
   });
 }
 
+
+function actualizarDashboard(){
+  var activos = CLIENTS.filter(function(c){ return c.estado==='active'; });
+  var ingreso  = activos.reduce(function(s,c){ return s+(CONFIG.planes[c.plan]?.precio||0); },0);
+  var hoy      = new Date();
+  var en15dias = new Date(); en15dias.setDate(en15dias.getDate()+15);
+
+  // Métricas
+  var el;
+  el=document.getElementById('dash-total-clientes'); if(el) el.textContent=activos.length||'0';
+  el=document.getElementById('dash-ingresos');       if(el) el.textContent=ingreso?'$'+ingreso.toLocaleString('es-CO'):'$0';
+  el=document.getElementById('rep-total-clientes');  if(el) el.textContent=activos.length||'0';
+
+  // Próximas renovaciones en dashboard
+  var proximos = CLIENTS.filter(function(c){
+    if(!c.vence || c.vence==='—') return false;
+    var partes = c.vence.split('-');
+    if(partes.length < 3) return false;
+    var fv = new Date(partes[0], parseInt(partes[1])-1, partes[2]);
+    return fv >= hoy && fv <= en15dias;
+  });
+  var el_renov = document.getElementById('dash-renov');
+  if(el_renov) el_renov.textContent = proximos.length||'0';
+  var lista = document.getElementById('dash-renov-list');
+  if(lista){
+    if(!proximos.length){
+      lista.innerHTML='<div style="color:var(--text3);font-size:12px;padding:16px 0;text-align:center">Sin renovaciones próximas en los próximos 15 días</div>';
+    } else {
+      lista.innerHTML = proximos.map(function(c){
+        return '<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid var(--border)">'
+          +'<div><div style="font-size:12.5px;font-weight:500;color:var(--text)">'+c.nombre+'</div>'
+          +'<div style="font-size:10.5px;color:var(--text3)">'+( CONFIG.planes[c.plan]?.nombre||c.plan)+'</div></div>'
+          +'<div style="text-align:right"><div style="font-size:12px;color:var(--gold);font-weight:500">'+c.vence+'</div>'
+          +'<div style="font-size:10.5px;color:var(--text3)">$'+(CONFIG.planes[c.plan]?.precio||0).toLocaleString('es-CO')+'</div></div>'
+          +'</div>';
+      }).join('');
+    }
+  }
+}
+
+function actualizarRenovaciones(){
+  actualizarMetricasRenovaciones();
+  var hoy = new Date();
+  var tbody = document.getElementById('renov-tbody');
+  if(!tbody) return;
+
+  var clientes_con_fecha = CLIENTS.filter(function(c){
+    return c.vence && c.vence !== '—';
+  });
+
+  if(!clientes_con_fecha.length){
+    tbody.innerHTML='<tr><td colspan="6" style="text-align:center;color:var(--text3);padding:32px">Sin renovaciones pendientes — los negocios se agregarán automáticamente</td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = clientes_con_fecha.map(function(c){
+    var partes = c.vence.split('-');
+    var fv = partes.length>=3 ? new Date(partes[0], parseInt(partes[1])-1, partes[2]) : null;
+    var diasRestantes = fv ? Math.ceil((fv-hoy)/(1000*60*60*24)) : null;
+    var estado, estadoColor;
+    if(!fv)                        { estado='Sin fecha';   estadoColor='var(--text3)'; }
+    else if(diasRestantes < 0)     { estado='Vencido';     estadoColor='#E57373'; }
+    else if(diasRestantes <= 5)    { estado='⚠ Urgente';  estadoColor='#FFB300'; }
+    else if(diasRestantes <= 15)   { estado='Por vencer';  estadoColor='#EFA030'; }
+    else                           { estado='Al día';      estadoColor='#4CAF82'; }
+    var precio = CONFIG.planes[c.plan]?.precio || 0;
+    var tel = (c.tel||'').replace(/[^0-9]/g,'');
+    if(tel && !tel.startsWith('57')) tel='57'+tel;
+    var waMsgEnc = encodeURIComponent('Hola *'+c.nombre+'* 👋\n\nTe recordamos que tu suscripción a Fenlora vence el *'+c.vence+'*.\n\nValor a renovar: *$'+precio.toLocaleString('es-CO')+'/mes*\n\nPara renovar escríbenos o realiza el pago a:\nNequi: '+((CONFIG.fenlora&&CONFIG.fenlora.tel)||'311 274 6813')+'.\n\n_Fenlora Visual Studio_');
+    return '<tr>'
+      +'<td style="font-weight:500;color:var(--text)">'+c.nombre+'</td>'
+      +'<td><span class="badge b-serv">'+(CONFIG.planes[c.plan]?.nombre||c.plan)+'</span></td>'
+      +'<td style="color:var(--gold);font-weight:500">$'+precio.toLocaleString('es-CO')+'</td>'
+      +'<td style="font-family:DM Mono,monospace;font-size:11.5px">'+c.vence+'</td>'
+      +'<td>'+(tel?'<a href="https://wa.me/'+tel+'?text='+waMsgEnc+'" target="_blank" style="padding:3px 10px;font-size:10.5px;border-radius:6px;border:1px solid rgba(37,168,100,.3);background:rgba(37,168,100,.08);color:#25A864;text-decoration:none">📤 WA</a>':'—')+'</td>'
+      +'<td>'+(tel?'<a href="https://wa.me/'+tel+'?text='+waMsgEnc+'" target="_blank" style="padding:3px 10px;font-size:10.5px;border-radius:6px;border:1px solid rgba(37,168,100,.3);background:rgba(37,168,100,.08);color:#25A864;text-decoration:none">📤 WA</a>':'—')+'</td>'
+      +'</tr>';
+  }).join('');
+}
 function filtrarRutas() {
   var mun = document.getElementById('rutas-municipio')?.value || '';
   // Ocultar/mostrar filas con data-municipio

@@ -593,7 +593,7 @@ tr:hover td{background:var(--bg3)}
         <div class="table-head">
           <div>
             <div class="table-title">Directorio de suscriptores</div>
-            <div class="table-sub">71 negocios registrados</div>
+            <div class="table-sub" id="clientes-sub">0 negocios registrados</div>
           </div>
           <div class="table-actions">
             <select id="filter-plan" style="background:var(--bg3);border:1px solid var(--border);border-radius:7px;padding:6px 10px;color:var(--text2);font-size:12px;outline:none" onchange="applyFilters()">
@@ -2275,7 +2275,7 @@ function showModule(name,el){
 function selectAlertType(el){document.querySelectorAll('.alert-type').forEach(a=>a.classList.remove('sel'));el.classList.add('sel')}
 function sendAlert(){
   const subj=document.getElementById('alert-subject')?.value||'Alerta';
-  showNotif('✓ Alerta "'+subj.substring(0,30)+'" enviada a 71 negocios vía WhatsApp');
+  showNotif('✓ Alerta "'+subj.substring(0,30)+'" enviada a '+CLIENTS.length+' negocios vía WhatsApp');
 }
 
 // ══════════════════════════════════════════════
@@ -3900,7 +3900,7 @@ async function cargarClientesSupabase() {
     try { buildMenuClientsList(''); } catch(e){}
     try { buildDescNegocioSelect(); } catch(e){}
     try { poblarSelectAlerta(); } catch(e){}
-    var sub = document.querySelector('#mod-clientes .table-sub');
+    var sub = document.getElementById('clientes-sub');
     if (sub) sub.textContent = CLIENTS.length + ' negocios registrados';
     console.log('[Fenlora] Clientes cargados desde Supabase:', CLIENTS.length);
   } catch(e) { console.warn('Error cargando clientes desde Supabase:', e); }
@@ -3948,7 +3948,7 @@ function initAdmin(){
   // Populate menu clients from CLIENTS array
   buildMenuClientsList('');
   // Render initial menu items
-  renderMenuItems(activeCat);
+  renderMenuItems(menuCurrentCat);
   // Render bad words list
   setTimeout(function(){ try{ renderPalabrasBloq(); }catch(e){} }, 300);
   // Populate descuentos negocio dropdown

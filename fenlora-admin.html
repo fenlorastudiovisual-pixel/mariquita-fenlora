@@ -3938,6 +3938,8 @@ function initAdmin(){
   }
 
   showModule('dashboard');
+  // Cargar clientes reales desde Supabase inmediatamente
+  cargarClientesSupabase();
   renderClients(CLIENTS);
   filteredClients = [...CLIENTS];
   // Inicializar listeners del modal

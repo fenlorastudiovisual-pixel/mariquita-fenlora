@@ -743,11 +743,11 @@ tr:hover td{background:var(--bg3)}
               <label>Destinatarios</label>
               <select>
                 <option>Todos los negocios</option>
-                <option>Solo hoteles (12)</option>
-                <option>Solo restaurantes y bares (22)</option>
-                <option>Solo fincas (7)</option>
-                <option>Solo plan Premium (9)</option>
-                <option>Plan Pro y Premium (33)</option>
+                <option>Solo hoteles</option>
+                <option>Solo restaurantes y bares</option>
+                <option>Solo fincas</option>
+                <option>Solo plan Premium</option>
+                <option>Plan Pro y Premium</option>
               </select>
               <label>Asunto</label>
               <input id="alert-subject" placeholder="ej. Alerta fraude: transferencias falsas circulando">
@@ -2447,16 +2447,68 @@ function nuevaCategoriaMenu(){
 }
 
 // ── GUARDAR MENÚ ──
-function guardarMenu(){
-  // Guardar promo del día junto con el menú
-  if(menuCurrentBiz){
-    if(!MENUS_ALL[menuCurrentBiz]) MENUS_ALL[menuCurrentBiz] = {};
-    var promoBig = (document.getElementById('menu-promo-big')||{}).value||'';
-    var promoSub = (document.getElementById('menu-promo-sub')||{}).value||'';
-    MENUS_ALL[menuCurrentBiz].__promo__ = {big: promoBig, sub: promoSub};
-  }
+async function guardarMenu(){
+  if(!menuCurrentBiz){ showNotif('⚠️ Selecciona un negocio primero'); return; }
+  if(!MENUS_ALL[menuCurrentBiz]) MENUS_ALL[menuCurrentBiz] = {};
+
+  // Guardar promo
+  var promoBig = (document.getElementById('menu-promo-big')||{}).value||'';
+  var promoSub = (document.getElementById('menu-promo-sub')||{}).value||'';
+  MENUS_ALL[menuCurrentBiz].__promo__ = {big: promoBig, sub: promoSub};
+
+  // Guardar en localStorage (caché local)
   localStorage.setItem('fenlora_menus', JSON.stringify(MENUS_ALL));
-  showNotif('✅ Menú guardado para '+menuCurrentBiz);
+
+  // Convertir al formato que lee el mapa: {promo:{big,sub}, cats:[], items:[{cat,name,price}]}
+  var bizData = MENUS_ALL[menuCurrentBiz] || {};
+  var cats = Object.keys(bizData).filter(function(k){ return k !== '__promo__'; });
+  var items = [];
+  cats.forEach(function(cat){
+    (bizData[cat] || []).forEach(function(it){
+      items.push({ cat: cat, name: it.nombre || it.name || '', price: it.precio || it.price || '$0', desc: it.desc || '', img: it.img || '' });
+    });
+  });
+  var menuObj = {
+    promo: { big: promoBig, sub: promoSub, badge: promoBig ? '🔥 Promo' : '' },
+    cats: cats,
+    items: items
+  };
+
+  // Buscar el sbId del negocio actual
+  var client = CLIENTS.find(function(c){ return c.nombre === menuCurrentBiz; });
+  if(!client || !client.sbId){
+    showNotif('✅ Menú guardado localmente (negocio sin UUID aún)');
+    return;
+  }
+
+  // Guardar en Supabase
+  try {
+    var res = await fetch(SUPA_URL_ADM + '/rest/v1/businesses?id=eq.' + client.sbId, {
+      method: 'PATCH',
+      headers: {
+        'apikey': SUPA_KEY_ADM,
+        'Authorization': 'Bearer ' + SUPA_KEY_ADM,
+        'Content-Type': 'application/json',
+        'Prefer': 'return=minimal'
+      },
+      body: JSON.stringify({ menu: menuObj, tiene_menu: items.length > 0 })
+    });
+    if(res.ok){
+      showNotif('✅ Menú guardado en Supabase para ' + menuCurrentBiz);
+    } else {
+      var err = await res.text();
+      // Si el error es que la columna menu no existe, intentar solo tiene_menu
+      if(err.includes('menu') && err.includes('column')){
+        showNotif('⚠️ Columna menu no existe en Supabase. Créala con: ALTER TABLE businesses ADD COLUMN menu jsonb DEFAULT \'{}\';');
+      } else {
+        showNotif('⚠️ Error al guardar: ' + res.status);
+        console.error('guardarMenu error:', err);
+      }
+    }
+  } catch(e){
+    showNotif('⚠️ Error de red: ' + e.message);
+    console.error('guardarMenu catch:', e);
+  }
 }
 
 // ── compatibilidad con funciones antiguas ──
@@ -3896,7 +3948,7 @@ async function cargarClientesSupabase() {
         dir: (row.addons && row.addons.direccion) || '',
         tel: row.phone || '',
         vistas: 0, wsp: 0, visPct: 0,
-        vence: '—',
+        vence: (row.addons && row.addons.fecha_vencimiento) || '—',
         municipio: row.municipio || 'mariquita',
         tiene_menu: row.tiene_menu || false,
         addons: row.addons || {},

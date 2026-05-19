@@ -1765,10 +1765,11 @@ const PAGE_SIZE = 25;
 function renderClients(list){
   if(list !== undefined) filteredClients = list;
   const catBadge={hotel:'b-hotel',finca:'b-finca',rest:'b-rest',bar:'b-bar',agencia:'b-agencia',serv:'b-serv',trans:'b-serv',hist:'b-agencia',pub:'b-rest'};
-  const planBadge={basic:'b-basic',pro:'b-pro',premium:'b-premium'};
+  const PLAN_KEYS = Object.keys(CONFIG.planes);
+  const planBadge = PLAN_KEYS.reduce(function(acc,k,i){ acc[k]=['b-basic','b-pro','b-premium'][i]||'b-serv'; return acc; },{});
+  const planLabel = PLAN_KEYS.reduce(function(acc,k){ acc[k]=CONFIG.planes[k].nombre||k; return acc; },{});
   const statBadge={active:'b-active',mora:'b-mora',vence:'b-vence',inactivo:'b-inactivo',pausa:'b-pausa'};
   const statLabel={active:'Al día',mora:'En mora',vence:'Por vencer',inactivo:'Inactivo',pausa:'⏸ En pausa'};
-  const planLabel={basic:'Básico',pro:'Pro',premium:'Premium'};
   const tbody=document.getElementById('client-tbody');
   if(!tbody) return;
 
@@ -1939,8 +1940,8 @@ function abrirCobro(clientId){
   if(!c) return;
   var CONFIG_PRECIOS = JSON.parse(localStorage.getItem('fenlora_config') || '{}');
   var planes = (CONFIG_PRECIOS.planes || {});
-  var precio = (planes[c.plan] || {}).precio || {basic:89900,pro:179900,premium:329900}[c.plan] || 89900;
-  var planNombre = {basic:'Básico',pro:'Pro',premium:'Premium'}[c.plan] || c.plan;
+  var precio = (planes[c.plan] || {}).precio || 89900;
+  var planNombre = CONFIG.planes[c.plan]?.nombre || c.plan;
   var factura = 'FAC-' + Date.now().toString().slice(-6);
   var overlay = document.createElement('div');
   overlay.style = 'position:fixed;inset:0;z-index:9998;background:rgba(0,0,0,.6);display:flex;align-items:center;justify-content:center;font-family:DM Sans,sans-serif';
@@ -2310,7 +2311,7 @@ function buildMenuClientsList(query){
     return '<div class="menu-client-item" onclick="selectMenuClient(this,\''+c.nombre.replace(/'/g,"\\'")+'\',\''+c.catLabel+'\')" '
       +'style="padding:8px 10px;border-radius:7px;cursor:pointer;background:'+(active?'var(--gold-dim)':'var(--bg3)')+';border:1px solid '+(active?'var(--gold-dim)':'transparent')+'">'
       +'<div style="font-size:12.5px;font-weight:500;color:'+(active?'var(--gold)':'var(--text)')+'">'+c.nombre+'</div>'
-      +'<div style="font-size:10.5px;color:var(--text3)">'+c.catLabel+' · '+c.plan+' · '+c.dir+'</div>'
+      +'<div style="font-size:10.5px;color:var(--text3)">'+c.catLabel+' · '+(CONFIG.planes[c.plan]?.nombre||c.plan)+' · '+c.dir+'</div>'
       +'</div>';
   }).join('');
   if(clients.length > 0){
@@ -3265,7 +3266,7 @@ function previewClientReport(){
     +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">'
     +'<div style="background:var(--bg4);padding:8px;border-radius:6px"><div style="font-size:10px;color:var(--text3)">Visitas</div><div style="font-size:18px;font-weight:600;color:var(--gold)">'+c.vistas+'</div></div>'
     +'<div style="background:var(--bg4);padding:8px;border-radius:6px"><div style="font-size:10px;color:var(--text3)">Clics WA</div><div style="font-size:18px;font-weight:600;color:#25D366">'+c.wsp+'</div></div>'
-    +'</div><div style="font-size:11px;color:var(--text3);margin-top:8px">Plan: '+c.plan+' · '+c.dir+'</div>';
+    +'</div><div style="font-size:11px;color:var(--text3);margin-top:8px">Plan: '+(CONFIG.planes[c.plan]?.nombre||c.plan)+' · '+c.dir+'</div>';
 }
 function enviarReporteWhatsApp(){
   var id = parseInt((document.getElementById('rep-select-client')||{}).value||0);
@@ -3339,7 +3340,7 @@ function calcularComision(v){
   var nivel = NIVELES_COMISION[v.nivel] || NIVELES_COMISION.activo;
   var clientes = clientesDeVendedor(v.id).filter(function(c){ return c.estado === 'active' || c.estado === 'vence'; });
   var mrr = clientes.reduce(function(s,c){
-    return s + ({basic:100000,pro:130000,premium:150000}[c.plan]||120000);
+    return s + (CONFIG.planes[c.plan]?.precio || 89900);
   }, 0);
   var pctMen  = (v.pctComision || nivel.pct     || 10) / 100;
   var pctVinc = (v.pctVinc    || nivel.pctVinc  || 30) / 100;
@@ -3434,12 +3435,14 @@ function selectVendedor(id){
     +(clientesList.length === 0
       ? '<div style="color:var(--text3);font-size:12px;padding:12px 0">Sin clientes asignados aún</div>'
       : clientesList.map(function(c){
-          var planColor = {basic:'var(--text3)',pro:'#4DB8BB',premium:'var(--gold)'}[c.plan]||'var(--text3)';
+          var PLAN_COLORS = ['var(--text3)','#4DB8BB','var(--gold)','#E57373'];
+    var planIdx = Object.keys(CONFIG.planes).indexOf(c.plan);
+    var planColor = PLAN_COLORS[planIdx] || 'var(--text3)';
           var estadoColor = {active:'#4CAF82',mora:'#E57373',vence:'#EF9F27',pausa:'#4DB8BB'}[c.estado]||'var(--text3)';
           return '<div style="display:flex;align-items:center;justify-content:space-between;padding:7px 0;border-bottom:.5px solid var(--border);font-size:12px">'
             +'<span style="color:var(--text)">'+c.nombre+'</span>'
             +'<div style="display:flex;gap:8px;align-items:center">'
-              +'<span style="color:'+planColor+'">'+{basic:'Básico',pro:'Pro',premium:'Premium'}[c.plan]+'</span>'
+              +'<span style="color:'+planColor+'">'+(CONFIG.planes[c.plan]?.nombre||c.plan)+'</span>'
               +'<span style="color:'+estadoColor+'">'+{active:'Al día',mora:'En mora',vence:'Por vencer',pausa:'Pausado'}[c.estado]+'</span>'
               +'<button onclick="quitarClienteDeVendedor('+c.id+','+v.id+')" style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:11px;padding:0">✕</button>'
             +'</div>'
@@ -3572,7 +3575,7 @@ function enviarLiquidacionIndividual(id){
     +'📊 Comisión mensual ('+calc.pctMen+'%): *$'+calc.comision.toLocaleString('es-CO')+'*\n'
     +(calc.comisionVinc>0?'🎉 Bono vinculación clientes nuevos ('+calc.pctVinc+'%): *$'+calc.comisionVinc.toLocaleString('es-CO')+'*\n':'')
     +'💰 *Total a recibir: $'+(calc.comision+calc.comisionVinc).toLocaleString('es-CO')+'*\n\n'
-    +(clientes.length ? '*Tus clientes activos este mes:*\n'+clientes.map(function(c){ return '• '+c.nombre+' ('+{basic:'Básico',pro:'Pro',premium:'Premium'}[c.plan]+')'; }).join('\n')+'\n\n' : '')
+    +(clientes.length ? '*Tus clientes activos este mes:*\n'+clientes.map(function(c){ return '• '+c.nombre+' ('+(CONFIG.planes[c.plan]?.nombre||c.plan)+')'; }).join('\n')+'\n\n' : '')
     +'💳 *Pago:* Lo recibirás en los próximos 5 días hábiles por Nequi.\n\n'
     +'¡Gracias por tu trabajo! — _Fenlora_ 🍇';
   var tel = v.tel.replace(/\D/g,'');

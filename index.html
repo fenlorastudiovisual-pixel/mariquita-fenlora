@@ -326,18 +326,27 @@ html,body{width:100%;height:100%;overflow:hidden;font-family:DM Sans,sans-serif;
   #fen-btn span{display:none}
   /* Header: wrap en 2 filas */
   #hdr{height:auto;min-height:52px;flex-wrap:wrap;padding:6px 10px;gap:4px}
-  .brand{flex-shrink:0}
   /* Filtros en segunda fila completa */
   #filters{order:3;width:100%;margin-left:0;padding-bottom:2px;
     justify-content:flex-start;-webkit-overflow-scrolling:touch}
   .fb{padding:4px 8px;font-size:9.5px}
   #btn-rutas,#btn-lang,#fen-btn{flex-shrink:0}
-  /* Selector dentro del brand en mobile */
-  .brand{display:flex;align-items:center;gap:6px;flex-shrink:0;max-width:58%;min-width:0}
-  .brand h1{font-size:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex-shrink:1;min-width:0}
-  #mun-selector{padding:2px 6px;font-size:9px;flex-shrink:0;white-space:nowrap;order:unset}
-  #mun-selector span{font-size:9px}
-  #mun-dropdown{left:0;min-width:190px;top:calc(100% + 6px)}
+  /* MOBILE HEADER — 2 filas limpias */
+  #hdr{padding:0;gap:0;flex-wrap:nowrap;flex-direction:column;height:auto}
+  /* Fila 1: brand + controles */
+  .brand{order:1;display:flex;align-items:center;gap:6px;padding:6px 12px;width:100%;flex-shrink:0;min-width:0;box-sizing:border-box}
+  .brand h1{font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:1;min-width:0}
+  #mun-selector{flex-shrink:0;padding:3px 8px;font-size:10px;order:unset}
+  #mun-selector span{font-size:10px}
+  #mun-dropdown{left:0;min-width:200px;top:calc(100% + 6px)}
+  #btn-rutas{order:1;flex-shrink:0;padding:4px 8px;font-size:10px}
+  #btn-lang{order:1;flex-shrink:0;padding:4px 8px;font-size:10px}
+  #fen-btn{order:1;flex-shrink:0}
+  #search-wrap{order:1;margin-left:auto;position:static;display:flex;align-items:center}
+  /* Fila 2: filtros en scroll horizontal */
+  #filters{order:2;width:100%;margin-left:0;padding:4px 8px;border-top:1px solid rgba(200,134,10,.1);justify-content:flex-start;flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+  #filters::-webkit-scrollbar{display:none}
+  .fb{padding:3px 8px;font-size:9.5px;flex-shrink:0}
   /* El buscador: solo el icono en row 1 del header */
   #search-wrap{position:static;order:2;margin-left:auto;display:flex;align-items:center}
   #search-icon{backdrop-filter:none;background:rgba(255,255,255,.08);width:32px;height:32px;font-size:14px}
@@ -410,15 +419,15 @@ html,body{width:100%;height:100%;overflow:hidden;font-family:DM Sans,sans-serif;
   </div><!-- fin brand -->
 
   <div id="filters">
-    <button class="fb on" data-g="todos"><div class="d" style="background:#888"></div><span>Todos</span></button>
-    <button class="fb on" data-g="gastronomia"><div class="d" style="background:#C0392B"></div><span>Gastronomía</span></button>
-    <button class="fb on" data-g="alojamiento"><div class="d" style="background:#1565C0"></div><span>Alojamiento</span></button>
-    <button class="fb on" data-g="transporte" id="fb-transporte"><div class="d" style="background:#D4AC0D"></div><span>Transporte ▾</span></button>
-    <button class="fb on" data-g="comercio"><div class="d" style="background:#8E44AD"></div><span>Comercio</span></button>
-    <button class="fb on" data-g="historico"><div class="d" style="background:#C8860A"></div><span>Histórico</span></button>
-    <button class="fb on" data-g="turismo"><div class="d" style="background:#D4580A"></div><span>Turismo</span></button>
-    <button class="fb on" data-g="nocturna"><div class="d" style="background:#6C3483"></div><span>Nocturna</span></button>
-    <button class="fb on" data-g="salud"><div class="d" style="background:#E74C3C"></div><span>Salud</span></button>
+    <button class="fb on" data-g="todos"><div class="d" style="background:#888"></div><span data-i18n="fb-todos">Todos</span></button>
+    <button class="fb on" data-g="gastronomia"><div class="d" style="background:#C0392B"></div><span data-i18n="fb-gastro">Gastronomía</span></button>
+    <button class="fb on" data-g="alojamiento"><div class="d" style="background:#1565C0"></div><span data-i18n="fb-aloj">Alojamiento</span></button>
+    <button class="fb on" data-g="transporte" id="fb-transporte"><div class="d" style="background:#D4AC0D"></div><span data-i18n="fb-trans">Transporte ▾</span></button>
+    <button class="fb on" data-g="comercio"><div class="d" style="background:#8E44AD"></div><span data-i18n="fb-comercio">Comercio</span></button>
+    <button class="fb on" data-g="historico"><div class="d" style="background:#C8860A"></div><span data-i18n="fb-hist">Histórico</span></button>
+    <button class="fb on" data-g="turismo"><div class="d" style="background:#D4580A"></div><span data-i18n="fb-turismo">Turismo</span></button>
+    <button class="fb on" data-g="nocturna"><div class="d" style="background:#6C3483"></div><span data-i18n="fb-nocturna">Nocturna</span></button>
+    <button class="fb on" data-g="salud"><div class="d" style="background:#E74C3C"></div><span data-i18n="fb-salud">Salud</span></button>
   </div>
   <button id="btn-rutas" onclick="toggleRoutes()">🧭 <span data-i18n="routes-btn">Rutas</span></button>
   <button id="btn-lang" onclick="toggleLang()">ES · EN</button>
@@ -623,12 +632,16 @@ const LANG_DATA = {
     'rev-title':'Califica tu visita','rev-name-ph':'Tu nombre (opcional)','rev-text-ph':'Cuéntanos tu experiencia...','rev-submit':'Publicar reseña',
     'reviews-label':'Lo que dicen los visitantes','btn-review':'✏️ Dejar una reseña',
     'no-reviews':'Sé el primero en dejar una reseña',
+    'fb-todos':'Todos','fb-gastro':'Gastronomía','fb-aloj':'Alojamiento','fb-trans':'Transporte ▾',
+    'fb-comercio':'Comercio','fb-hist':'Histórico','fb-turismo':'Turismo','fb-nocturna':'Nocturna','fb-salud':'Salud',
   },
   en: {
     'brand':'The Mangosteen Route','brand-sub':'San Sebastián de Mariquita · Colombia',
     'f-todos':'All','f-hotel':'Hotels','f-finca':'Farms','f-rest':'Restaurants',
     'f-bar':'Bars','f-agencia':'Agencies','f-trans':'Transport','f-hist':'Historic',
     'f-pub':'Offices','f-serv':'Services','routes-btn':'Routes','routes-title':'Guided routes',
+    'fb-todos':'All','fb-gastro':'Food & Drinks','fb-aloj':'Lodging','fb-trans':'Transport ▾',
+    'fb-comercio':'Commerce','fb-hist':'Historic','fb-turismo':'Tourism','fb-nocturna':'Nightlife','fb-salud':'Health',
     'exit-route':'✕ Exit route','next-stop':'Next stop →',
     'legend-title':'Legend','cat-hotel':'Hotels','cat-finca':'Farms / Agrotourism',
     'cat-rest':'Restaurants','cat-bar':'Bars / Gastropubs','cat-agencia':'Travel agencies',

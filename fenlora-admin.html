@@ -1,6 +1,14 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
+<!-- Google Analytics 4 - Fenlora -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-4J3V8YL9VB"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-4J3V8YL9VB');
+</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Fenlora Admin · Rutas Fenlora Visual</title>
@@ -473,26 +481,26 @@ tr:hover td{background:var(--bg3)}
         <div class="metric-card">
           <div class="metric-label">🏪 Clientes activos</div>
           <div class="metric-val" id="dash-total-clientes">0</div>
-          <div class="metric-sub">Negocios registrados</div>
-          <div class="metric-delta" style="color:var(--text3)">— Empezando</div>
+          <div class="metric-sub">Negocios suscritos</div>
+          <div class="metric-delta" id="dash-clientes-delta" style="color:var(--text3)">— Empezando</div>
         </div>
         <div class="metric-card">
-          <div class="metric-label">💰 Ingresos mayo</div>
-          <div class="metric-val">$0</div>
-          <div class="metric-sub">COP · Sin ingresos aún</div>
-          <div class="metric-delta" style="color:var(--text3)">— Empezando</div>
+          <div class="metric-label">💰 Ingresos proyectados</div>
+          <div class="metric-val" id="dash-ingresos">$0</div>
+          <div class="metric-sub" id="dash-ingresos-sub">Si todos renuevan este mes</div>
+          <div class="metric-delta" id="dash-ingresos-nota" style="color:var(--text3)">💡 Se registra cuando confirmas pago en Renovaciones</div>
         </div>
         <div class="metric-card">
-          <div class="metric-label">🔄 Renovaciones pendientes</div>
+          <div class="metric-label">🔄 Renovaciones próximas</div>
           <div class="metric-val" id="dash-renov">0</div>
           <div class="metric-sub">Próximos 15 días</div>
-          <div class="metric-delta" style="color:var(--text3)">— Sin pendientes</div>
+          <div class="metric-delta" id="dash-renov-delta" style="color:var(--text3)">— Sin pendientes</div>
         </div>
         <div class="metric-card">
-          <div class="metric-label">👁️ Vistas al mapa (mayo)</div>
-          <div class="metric-val">—</div>
-          <div class="metric-sub">Conectar analytics</div>
-          <div class="metric-delta" style="color:var(--text3)">— Sin datos aún</div>
+          <div class="metric-label">⚠️ En mora</div>
+          <div class="metric-val" id="dash-mora">0</div>
+          <div class="metric-sub">Más de 5 días vencidos</div>
+          <div class="metric-delta" id="dash-mora-delta" style="color:var(--text3)">— Sin mora</div>
         </div>
       </div>
 
@@ -505,7 +513,7 @@ tr:hover td{background:var(--bg3)}
             <button class="btn-sm" style="margin-left:auto" onclick="showModule('renovaciones',null)">Ver todas</button>
           </div>
           <div class="panel-body" style="padding:8px 18px" id="dash-renov-panel">
-            <div id="dash-renov-list" style="color:var(--text3);font-size:12px;padding:16px 0;text-align:center">Sin renovaciones próximas — agrega clientes para ver sus vencimientos aquí</div>
+            <div id="dash-renov-list" style="color:var(--text3);font-size:12px;padding:16px 0;text-align:center">Sin renovaciones próximas</div>
           </div>
         </div>
 
@@ -516,12 +524,17 @@ tr:hover td{background:var(--bg3)}
             <div class="panel-title">Actividad reciente</div>
           </div>
           <div class="panel-body" style="padding:8px 18px">
-            <div id="actividad-feed" style="color:var(--text3);font-size:12px;padding:16px 0;text-align:center">Sin actividad reciente</div>
+            <div id="actividad-feed"></div>
+            <div style="margin-top:8px;padding:8px 10px;background:var(--bg3);border-radius:8px;border:1px solid var(--border2)">
+              <div style="font-size:11px;color:var(--text3);margin-bottom:4px">📊 Datos de tráfico en tiempo real</div>
+              <a href="https://analytics.google.com" target="_blank" style="font-size:12px;color:var(--gold);text-decoration:none;font-weight:500">Ver Google Analytics →</a>
+              <div style="font-size:10px;color:var(--text3);margin-top:3px">Vistas, usuarios, países, dispositivos</div>
+            </div>
           </div>
         </div>
       </div>
 
-      <!-- Mix de planes -->
+      <!-- Mix de planes / Estado clientes / Reseñas recientes -->
       <div class="three-col">
         <div class="panel-card">
           <div class="panel-hdr"><div class="panel-title">Mix de planes</div></div>
@@ -530,17 +543,25 @@ tr:hover td{background:var(--bg3)}
           </div>
         </div>
         <div class="panel-card">
-          <div class="panel-hdr"><div class="panel-title">Top negocios (vistas)</div></div>
+          <div class="panel-hdr"><div class="panel-title">Estado de cartera</div></div>
           <div class="panel-body">
-<div style="color:var(--text3);font-size:12px;padding:16px 0;text-align:center">Sin datos de vistas aún</div>
+            <div id="dash-cartera-content">
+              <div class="stat-row"><div class="sl">Al día</div><div class="sv" id="dash-c-aldia">0</div></div>
+              <div class="stat-row"><div class="sl">Por vencer (≤15d)</div><div class="sv" id="dash-c-vence" style="color:#EFA030">0</div></div>
+              <div class="stat-row"><div class="sl">En mora</div><div class="sv" id="dash-c-mora" style="color:#E57373">0</div></div>
+              <div class="stat-row"><div class="sl">Pausados</div><div class="sv" id="dash-c-pausa" style="color:#4DB8BB">0</div></div>
+            </div>
           </div>
         </div>
         <div class="panel-card">
-          <div class="panel-hdr"><div class="panel-title">Cotizaciones del mes</div></div>
+          <div class="panel-hdr"><div class="panel-title">Ingresos confirmados</div></div>
           <div class="panel-body">
-<div class="stat-row"><div class="sl">Recibidas</div><div class="sv">0</div></div>
-            <div class="stat-row"><div class="sl">Respondidas</div><div class="sv">0</div></div>
-            <div class="stat-row"><div class="sl">Conversión</div><div class="sv">—</div></div>
+            <div id="dash-ingresos-conf">
+              <div class="stat-row"><div class="sl">Este mes</div><div class="sv" id="dash-ing-mes">$0</div></div>
+              <div class="stat-row"><div class="sl">Proyectado</div><div class="sv" id="dash-ing-proy" style="color:var(--gold)">$0</div></div>
+              <div class="stat-row"><div class="sl">En mora</div><div class="sv" id="dash-ing-mora" style="color:#E57373">$0</div></div>
+              <div style="font-size:10px;color:var(--text3);margin-top:8px;line-height:1.5">💡 "Confirmado" = clientes con fecha de inicio en el mes actual. "Proyectado" = todos los activos si renuevan.</div>
+            </div>
           </div>
         </div>
       </div>
@@ -4177,38 +4198,119 @@ function actualizarMetricasRenovaciones() {
 
 
 function actualizarDashboard(){
-  var activos = CLIENTS.filter(function(c){ return c.estado==='active'; });
-  var ingreso  = activos.reduce(function(s,c){ return s+(CONFIG.planes[c.plan]?.precio||0); },0);
-  var hoy      = new Date();
-  var en15dias = new Date(); en15dias.setDate(en15dias.getDate()+15);
+  var hoy = new Date();
+  var hoy_str = hoy.toISOString().slice(0,10);
+  var mes_actual = hoy.getFullYear()+'-'+(String(hoy.getMonth()+1).padStart(2,'0'));
+  var en15 = new Date(); en15.setDate(en15.getDate()+15);
 
-  // Métricas
-  var el;
-  el=document.getElementById('dash-total-clientes'); if(el) el.textContent=activos.length||'0';
-  el=document.getElementById('dash-ingresos');       if(el) el.textContent=ingreso?'$'+ingreso.toLocaleString('es-CO'):'$0';
-  el=document.getElementById('rep-total-clientes');  if(el) el.textContent=activos.length||'0';
+  var activos  = CLIENTS.filter(function(c){ return c.estado==='active'; });
+  var mora     = CLIENTS.filter(function(c){ return c.estado==='mora'; });
+  var pausa    = CLIENTS.filter(function(c){ return c.estado==='pausa'; });
 
-  // Próximas renovaciones en dashboard
+  // Proyección = suma de precios de activos
+  var proyeccion = activos.reduce(function(s,c){ return s+(CONFIG.planes[c.plan]?.precio||0); },0);
+
+  // Confirmado = clientes cuya fecha_inicio es este mes
+  var confirmado = CLIENTS.filter(function(c){
+    return c.addons && c.addons.fecha_inicio && c.addons.fecha_inicio.slice(0,7)===mes_actual;
+  }).reduce(function(s,c){ return s+(CONFIG.planes[c.plan]?.precio||0); },0);
+
+  // En mora = suma de precios de clientes en mora
+  var ingMora = mora.reduce(function(s,c){ return s+(CONFIG.planes[c.plan]?.precio||0); },0);
+
+  // Próximas renovaciones (≤15 días)
   var proximos = CLIENTS.filter(function(c){
     if(!c.vence || c.vence==='—') return false;
-    var partes = c.vence.split('-');
-    if(partes.length < 3) return false;
-    var fv = new Date(partes[0], parseInt(partes[1])-1, partes[2]);
-    return fv >= hoy && fv <= en15dias;
+    var fv = new Date(c.vence);
+    return fv >= hoy && fv <= en15;
   });
-  var el_renov = document.getElementById('dash-renov');
-  if(el_renov) el_renov.textContent = proximos.length||'0';
+
+  // Por vencer
+  var por_vencer = proximos.length;
+
+  // ── Actualizar métricas ──
+  var el;
+  el=document.getElementById('dash-total-clientes'); if(el) el.textContent=activos.length||'0';
+  el=document.getElementById('dash-ingresos');       if(el) el.textContent='$'+proyeccion.toLocaleString('es-CO');
+  el=document.getElementById('dash-ingresos-sub');   if(el) el.textContent='Proyectado si todos renuevan';
+  el=document.getElementById('dash-renov');          if(el) el.textContent=por_vencer||'0';
+  el=document.getElementById('dash-renov-delta');    if(el){ el.textContent=por_vencer?'⚠ Requieren atención':'✓ Sin urgentes'; el.style.color=por_vencer?'#EFA030':'#4CAF82'; }
+  el=document.getElementById('dash-mora');           if(el) el.textContent=mora.length||'0';
+  el=document.getElementById('dash-mora-delta');     if(el){ el.textContent=mora.length?'⚠ Contactar':'✓ Sin mora'; el.style.color=mora.length?'#E57373':'#4CAF82'; }
+
+  // Cartera
+  el=document.getElementById('dash-c-aldia');  if(el) el.textContent=activos.filter(function(c){ return !proximos.includes(c); }).length||'0';
+  el=document.getElementById('dash-c-vence');  if(el) el.textContent=por_vencer||'0';
+  el=document.getElementById('dash-c-mora');   if(el) el.textContent=mora.length||'0';
+  el=document.getElementById('dash-c-pausa');  if(el) el.textContent=pausa.length||'0';
+
+  // Ingresos
+  el=document.getElementById('dash-ing-mes');  if(el) el.textContent='$'+confirmado.toLocaleString('es-CO');
+  el=document.getElementById('dash-ing-proy'); if(el) el.textContent='$'+proyeccion.toLocaleString('es-CO');
+  el=document.getElementById('dash-ing-mora'); if(el) el.textContent='$'+ingMora.toLocaleString('es-CO');
+
+  // ── Mix de planes ──
+  var mixEl = document.getElementById('mix-planes-content');
+  if(mixEl && CLIENTS.length){
+    var byPlan = {};
+    CLIENTS.forEach(function(c){ byPlan[c.plan]=(byPlan[c.plan]||0)+1; });
+    mixEl.innerHTML = Object.entries(byPlan).map(function(kv){
+      var pct = Math.round(kv[1]/CLIENTS.length*100);
+      var planNombre = CONFIG.planes[kv[0]]?.nombre||kv[0];
+      return '<div style="margin-bottom:10px">'
+        +'<div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:3px">'
+        +'<span style="color:var(--text2)">'+planNombre+'</span>'
+        +'<span style="color:var(--gold);font-weight:500">'+kv[1]+' ('+pct+'%)</span></div>'
+        +'<div style="height:6px;background:var(--bg4);border-radius:3px">'
+        +'<div style="height:6px;background:var(--gold);border-radius:3px;width:'+pct+'%"></div></div>'
+        +'</div>';
+    }).join('');
+  } else if(mixEl) {
+    mixEl.innerHTML='<div style="color:var(--text3);font-size:12px;padding:16px 0;text-align:center">Sin clientes registrados aún</div>';
+  }
+
+  // ── Próximas renovaciones (lista) ──
   var lista = document.getElementById('dash-renov-list');
   if(lista){
     if(!proximos.length){
-      lista.innerHTML='<div style="color:var(--text3);font-size:12px;padding:16px 0;text-align:center">Sin renovaciones próximas en los próximos 15 días</div>';
+      lista.innerHTML='<div style="color:var(--text3);font-size:12px;padding:12px 0;text-align:center">✓ Sin renovaciones en los próximos 15 días</div>';
     } else {
       lista.innerHTML = proximos.map(function(c){
-        return '<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid var(--border)">'
+        var fv = new Date(c.vence);
+        var dias = Math.ceil((fv-hoy)/(1000*60*60*24));
+        var color = dias<=5?'#E57373':dias<=10?'#FFB300':'#EFA030';
+        return '<div style="display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid var(--border)">'
           +'<div><div style="font-size:12.5px;font-weight:500;color:var(--text)">'+c.nombre+'</div>'
-          +'<div style="font-size:10.5px;color:var(--text3)">'+( CONFIG.planes[c.plan]?.nombre||c.plan)+'</div></div>'
-          +'<div style="text-align:right"><div style="font-size:12px;color:var(--gold);font-weight:500">'+c.vence+'</div>'
-          +'<div style="font-size:10.5px;color:var(--text3)">$'+(CONFIG.planes[c.plan]?.precio||0).toLocaleString('es-CO')+'</div></div>'
+          +'<div style="font-size:10.5px;color:var(--text3)">'+(CONFIG.planes[c.plan]?.nombre||c.plan)+'</div></div>'
+          +'<div style="text-align:right">'
+          +'<div style="font-size:12px;color:'+color+';font-weight:500">'+dias+'d · '+c.vence+'</div>'
+          +'<div style="font-size:10.5px;color:var(--gold)">$'+(CONFIG.planes[c.plan]?.precio||0).toLocaleString('es-CO')+'</div>'
+          +'</div></div>';
+      }).join('');
+    }
+  }
+
+  // ── Actividad reciente (últimas acciones del admin) ──
+  var feed = document.getElementById('actividad-feed');
+  if(feed){
+    var actividades = [];
+    // Clientes recién agregados (fecha_inicio reciente)
+    CLIENTS.forEach(function(c){
+      if(c.addons && c.addons.fecha_inicio){
+        actividades.push({fecha: c.addons.fecha_inicio, texto:'🆕 '+c.nombre+' registrado en Fenlora', color:'#4CAF82'});
+      }
+    });
+    // Ordenar por fecha desc
+    actividades.sort(function(a,b){ return b.fecha.localeCompare(a.fecha); });
+    actividades = actividades.slice(0,5);
+    if(!actividades.length){
+      feed.innerHTML='<div style="color:var(--text3);font-size:12px;padding:16px 0;text-align:center">Sin actividad reciente</div>';
+    } else {
+      feed.innerHTML = actividades.map(function(a){
+        return '<div style="display:flex;align-items:flex-start;gap:8px;padding:7px 0;border-bottom:1px solid var(--border)">'
+          +'<div style="width:6px;height:6px;border-radius:50%;background:'+a.color+';margin-top:5px;flex-shrink:0"></div>'
+          +'<div><div style="font-size:12.5px;color:var(--text)">'+a.texto+'</div>'
+          +'<div style="font-size:10.5px;color:var(--text3)">'+a.fecha+'</div></div>'
           +'</div>';
       }).join('');
     }

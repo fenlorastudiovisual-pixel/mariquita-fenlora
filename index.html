@@ -1,6 +1,14 @@
 <!DOCTYPE html>
 <html lang="es" id="html-root">
 <head>
+<!-- Google Analytics 4 - Fenlora -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-4J3V8YL9VB"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-4J3V8YL9VB');
+</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <meta name="theme-color" content="#C8860A">
@@ -1355,6 +1363,8 @@ let currentPunto=null;
 let reviewRating=0;
 
 function openPanel(p){
+  // GA: trackear apertura de panel
+  if(typeof gtag==='function') gtag('event','view_point',{event_category:'mapa',event_label:p.nombre,point_category:p.cat,municipio:p.municipio||'mariquita'});
   currentPunto=p;
   const c=CAT[p.cat];
   const badge=document.getElementById('pbadge');
@@ -1491,24 +1501,24 @@ function openPanel(p){
   // Configuración del menú según categoría
   const isEN = currentLang === 'en';
   const menuConfig = {
-    rest:     {emoji:'🍽️', label: isEN?'View digital menu':'Ver menú digital',     color:'#C0392B', bg:'rgba(192,57,43,.15)'},
-    fritanga: {emoji:'🍖', label: isEN?'View prices':'Ver menú digital',         color:'#E74C3C', bg:'rgba(231,76,60,.15)'},
-    tipico:   {emoji:'🥘', label: isEN?'View dishes & prices':'Ver menú digital',   color:'#D44B3A', bg:'rgba(212,75,58,.15)'},
-    cafe:     {emoji:'☕', label: isEN?'View menu & prices':'Ver menú digital',        color:'#A04000', bg:'rgba(160,64,0,.15)'},
-    helado:   {emoji:'🍦', label: isEN?'View flavors & prices':'Ver menú digital', color:'#F4A460', bg:'rgba(244,164,96,.15)'},
-    jugo:     {emoji:'🥤', label: isEN?'View juices & prices':'Ver menú digital',    color:'#E67E22', bg:'rgba(230,126,34,.15)'},
-    hotel:    {emoji:'🏨', label: isEN?'View rooms & rates':'Ver menú digital', color:'#1565C0', bg:'rgba(21,101,192,.15)'},
-    finca:    {emoji:'🌿', label: isEN?'View packages & plans':'Ver menú digital', color:'#1A7A4A', bg:'rgba(26,122,74,.15)'},
-    airbnb:   {emoji:'🏠', label: isEN?'Check availability':'Ver menú digital',       color:'#FF5A5F', bg:'rgba(255,90,95,.15)'},
-    bar:      {emoji:'🍺', label: isEN?'View drinks menu':'Ver menú digital',       color:'#6C3483', bg:'rgba(108,52,131,.15)'},
-    disco:    {emoji:'🎶', label: isEN?'View events & prices':'Ver menú digital',  color:'#9B59B6', bg:'rgba(155,89,182,.15)'},
-    agencia:  {emoji:'✈️', label: isEN?'View tour packages':'Ver menú digital',  color:'#D4580A', bg:'rgba(212,88,10,.15)'},
-    licorera: {emoji:'🍾', label: isEN?'View products & prices':'Ver menú digital', color:'#8E44AD', bg:'rgba(142,68,173,.15)'},
-    salsamen: {emoji:'🥩', label: isEN?'View products & prices':'Ver menú digital', color:'#7D3C98', bg:'rgba(125,60,152,.15)'},
-    tienda:   {emoji:'🛒', label: isEN?'View products':'Ver menú digital',                 color:'#6C3483', bg:'rgba(108,52,131,.15)'},
-    spa:      {emoji:'💆', label: isEN?'View treatments & rates':'Ver menú digital', color:'#76D7C4', bg:'rgba(118,215,196,.15)'},
-    guia:     {emoji:'🧭', label: isEN?'View tours & prices':'Ver menú digital',     color:'#E67E22', bg:'rgba(230,126,34,.15)'},
-    aventura: {emoji:'🧗', label: isEN?'View plans & rates':'Ver menú digital',     color:'#CA6F1E', bg:'rgba(202,111,30,.15)'},
+    rest:     {emoji:'🍽️', label: isEN?'View menu & prices':'Ver carta y precios',     color:'#C0392B', bg:'rgba(192,57,43,.15)'},
+    fritanga: {emoji:'🍖', label: isEN?'View prices':'Ver precios del asadero',         color:'#E74C3C', bg:'rgba(231,76,60,.15)'},
+    tipico:   {emoji:'🥘', label: isEN?'View dishes & prices':'Ver platos y precios',   color:'#D44B3A', bg:'rgba(212,75,58,.15)'},
+    cafe:     {emoji:'☕', label: isEN?'View menu & prices':'Ver menú y precios',        color:'#A04000', bg:'rgba(160,64,0,.15)'},
+    helado:   {emoji:'🍦', label: isEN?'View flavors & prices':'Ver sabores y precios', color:'#F4A460', bg:'rgba(244,164,96,.15)'},
+    jugo:     {emoji:'🥤', label: isEN?'View juices & prices':'Ver jugos y precios',    color:'#E67E22', bg:'rgba(230,126,34,.15)'},
+    hotel:    {emoji:'🏨', label: isEN?'View rooms & rates':'Ver habitaciones y tarifas', color:'#1565C0', bg:'rgba(21,101,192,.15)'},
+    finca:    {emoji:'🌿', label: isEN?'View packages & plans':'Ver paquetes y planes', color:'#1A7A4A', bg:'rgba(26,122,74,.15)'},
+    airbnb:   {emoji:'🏠', label: isEN?'Check availability':'Ver disponibilidad',       color:'#FF5A5F', bg:'rgba(255,90,95,.15)'},
+    bar:      {emoji:'🍺', label: isEN?'View drinks menu':'Ver carta de bebidas',       color:'#6C3483', bg:'rgba(108,52,131,.15)'},
+    disco:    {emoji:'🎶', label: isEN?'View events & prices':'Ver eventos y precios',  color:'#9B59B6', bg:'rgba(155,89,182,.15)'},
+    agencia:  {emoji:'✈️', label: isEN?'View tour packages':'Ver paquetes turísticos',  color:'#D4580A', bg:'rgba(212,88,10,.15)'},
+    licorera: {emoji:'🍾', label: isEN?'View products & prices':'Ver productos y precios', color:'#8E44AD', bg:'rgba(142,68,173,.15)'},
+    salsamen: {emoji:'🥩', label: isEN?'View products & prices':'Ver productos y precios', color:'#7D3C98', bg:'rgba(125,60,152,.15)'},
+    tienda:   {emoji:'🛒', label: isEN?'View products':'Ver productos',                 color:'#6C3483', bg:'rgba(108,52,131,.15)'},
+    spa:      {emoji:'💆', label: isEN?'View treatments & rates':'Ver tratamientos y tarifas', color:'#76D7C4', bg:'rgba(118,215,196,.15)'},
+    guia:     {emoji:'🧭', label: isEN?'View tours & prices':'Ver tours y precios',     color:'#E67E22', bg:'rgba(230,126,34,.15)'},
+    aventura: {emoji:'🧗', label: isEN?'View plans & rates':'Ver planes y tarifas',     color:'#CA6F1E', bg:'rgba(202,111,30,.15)'},
   };
   const mc = menuConfig[p.cat] || {emoji:'📋', label:t('menu-default'), color:'var(--gold)', bg:'rgba(200,134,10,.15)'};
   const menuBtn = (p.tiene_menu)
@@ -1898,6 +1908,7 @@ function selectSearch(id){
 // MENÚ DIGITAL
 // ═══════════════════════════════════════════════
 function openMenu(){
+  if(typeof gtag==='function') gtag('event','open_menu',{event_category:'menu',event_label:currentPunto?.nombre});
   if(!currentPunto?.menu) return;
   const m=currentPunto.menu;
   const p=currentPunto;

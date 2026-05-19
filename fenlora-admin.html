@@ -3871,8 +3871,14 @@ async function cargarClientesSupabase() {
     if (!res.ok) { console.warn('Supabase clientes error:', res.status, await res.text()); return; }
     var data = await res.json();
     if (!Array.isArray(data)) { console.warn('Supabase clientes: respuesta no es array', data); return; }
-    // Filtrar transporte — esos van al módulo Conductores
-    data = data.filter(function(r){ return !TRANS_CATS.includes(r.category); });
+    // Filtrar transporte (van al módulo Conductores) y gratuitos hist/pub (no pagan)
+    var FREE_CATS = ['hist','pub'];
+    data = data.filter(function(r){
+      if (TRANS_CATS.includes(r.category)) return false;
+      if (FREE_CATS.includes(r.category)) return false;
+      if (r.plan_fenlora === 'free') return false;
+      return true;
+    });
     // Resetear CLIENTS con los datos frescos de Supabase (source of truth)
     CLIENTS.length = 0;
     data.forEach(function(row, i) {

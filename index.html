@@ -634,6 +634,20 @@ const LANG_DATA = {
     'no-reviews':'Sé el primero en dejar una reseña',
     'fb-todos':'Todos','fb-gastro':'Gastronomía','fb-aloj':'Alojamiento','fb-trans':'Transporte ▾',
     'fb-comercio':'Comercio','fb-hist':'Histórico','fb-turismo':'Turismo','fb-nocturna':'Nocturna','fb-salud':'Salud',
+    'disp-now':'Disponible ahora — toca para contactar',
+    'disp-no':'No disponible en este momento',
+    'driver-verified':'✓ Conductor registrado en Fenlora',
+    'driver-disclaimer':'ℹ️ Los datos de este conductor han sido registrados por Fenlora. La contratación del servicio es directamente entre usted y el prestador. Fenlora es un directorio informativo y no es intermediario ni responsable de los servicios prestados.',
+    'wsp-contact':'💬 Contactar ahora por WhatsApp',
+    'call-btn':'📞 Llamar:',
+    'gmaps-btn':'🗺️ Cómo llegar — Google Maps',
+    'wsp-btn':'💬 Escribir por WhatsApp',
+    'share-btn':'📤 Compartir',
+    'trans-disclaimer':'⚠️ Fenlora es un directorio informativo. La contratación del servicio es directamente entre el turista y el prestador. Fenlora no es intermediario ni responsable.',
+    'desc-no-en':'🌍 Full English description coming soon. Ask Fenlora for details.',
+    'wsp-msg-trans':'Hola {nombre}! Te vi en {ruta} de Fenlora y necesito transporte. ¿Estás disponible?',
+    'wsp-msg-biz':'Hola! Vi su negocio en {ruta} y quiero información',
+    'menu-default':'Ver menú',
   },
   en: {
     'brand':'The Mangosteen Route','brand-sub':'San Sebastián de Mariquita · Colombia',
@@ -654,6 +668,22 @@ const LANG_DATA = {
     'rev-title':'Rate your visit','rev-name-ph':'Your name (optional)','rev-text-ph':'Tell us about your experience...','rev-submit':'Post review',
     'reviews-label':'What visitors say','btn-review':'✏️ Leave a review',
     'no-reviews':'Be the first to leave a review',
+    'fb-todos':'All','fb-gastro':'Food & Drinks','fb-aloj':'Lodging','fb-trans':'Transport ▾',
+    'fb-comercio':'Commerce','fb-hist':'Historic','fb-turismo':'Tourism','fb-nocturna':'Nightlife','fb-salud':'Health',
+    'disp-now':'Available now — tap to contact',
+    'disp-no':'Not available right now',
+    'driver-verified':'✓ Driver registered with Fenlora',
+    'driver-disclaimer':'ℹ️ This driver\u2019s data has been registered by Fenlora. The service contract is directly between you and the provider. Fenlora is an informational directory and is not an intermediary or responsible for services rendered.',
+    'wsp-contact':'💬 Contact now via WhatsApp',
+    'call-btn':'📞 Call:',
+    'gmaps-btn':'🗺️ Get directions — Google Maps',
+    'wsp-btn':'💬 WhatsApp us',
+    'share-btn':'📤 Share location',
+    'trans-disclaimer':'⚠️ Fenlora is an informational directory. The service contract is directly between the tourist and the provider. Fenlora is not an intermediary or responsible.',
+    'desc-no-en':'🌍 Full English description coming soon. Ask Fenlora for details.',
+    'wsp-msg-trans':'Hi {nombre}! I saw you on Fenlora - {ruta} and need transport. Are you available?',
+    'wsp-msg-biz':'Hi! I saw your business on {ruta} (Fenlora) and would like more information',
+    'menu-default':'View menu',
   }
 };
 let currentLang = localStorage.getItem('lang') || (navigator.language?.startsWith('en') ? 'en' : 'es');
@@ -1341,7 +1371,7 @@ function openPanel(p){
       descEl.style.fontStyle = 'normal';
       descEl.style.opacity = '1';
     } else {
-      descEl.innerHTML = p.desc + `<span style="display:block;margin-top:6px;font-size:11px;color:#9A7A50;font-style:italic">🌍 Full English description coming soon. Ask Fenlora for details.</span>`;
+      descEl.innerHTML = p.desc + `<span style="display:block;margin-top:6px;font-size:11px;color:#9A7A50;font-style:italic">${t('desc-no-en')}</span>`;
     }
   } else {
     descEl.textContent = p.desc;
@@ -1409,11 +1439,11 @@ function openPanel(p){
     ? (p.disponible
         ? `<div style="display:inline-flex;align-items:center;gap:6px;padding:6px 12px;background:rgba(26,122,74,.12);border:1.5px solid rgba(37,168,100,.4);border-radius:20px;margin-bottom:10px">
             <span style="width:8px;height:8px;border-radius:50%;background:#25A864;display:inline-block;animation:disp-pulse 1.4s ease-in-out infinite;flex-shrink:0"></span>
-            <span style="font-size:12px;font-weight:600;color:#1A7A4A">Disponible ahora — toca para contactar</span>
+            <span style="font-size:12px;font-weight:600;color:#1A7A4A">${t('disp-now')}</span>
            </div>`
         : `<div style="display:inline-flex;align-items:center;gap:6px;padding:6px 12px;background:rgba(80,80,80,.08);border:1.5px solid rgba(150,150,150,.2);border-radius:20px;margin-bottom:10px">
             <span style="width:8px;height:8px;border-radius:50%;background:#888;display:inline-block;flex-shrink:0"></span>
-            <span style="font-size:12px;font-weight:500;color:#888">No disponible en este momento</span>
+            <span style="font-size:12px;font-weight:500;color:#888">${t('disp-no')}</span>
            </div>`)
     : '';
   // Tarjeta ID conductor — visible en pinfo para transporte
@@ -1428,7 +1458,7 @@ function openPanel(p){
     const catEmoji      = CAT[p.cat]?.emoji || '🚗';
     idCardHtml = `
       <div style="margin-bottom:12px;padding:14px;background:linear-gradient(135deg,rgba(200,134,10,.08),rgba(200,134,10,.03));border:1px solid rgba(200,134,10,.2);border-radius:14px">
-        <div style="font-size:9px;color:rgba(200,134,10,.8);font-weight:700;letter-spacing:.1em;text-transform:uppercase;margin-bottom:10px">✓ Conductor registrado en Fenlora</div>
+        <div style="font-size:9px;color:rgba(200,134,10,.8);font-weight:700;letter-spacing:.1em;text-transform:uppercase;margin-bottom:10px">${t('driver-verified')}</div>
         <div style="display:flex;gap:12px;align-items:center;margin-bottom:12px">
           ${fotoConductor
             ? `<img src="${fotoConductor}" alt="Foto conductor" style="width:72px;height:72px;border-radius:50%;object-fit:cover;border:2.5px solid #C8860A;flex-shrink:0">`
@@ -1444,7 +1474,7 @@ function openPanel(p){
             : `<div style="width:72px;height:72px;border-radius:10px;background:rgba(200,134,10,.06);border:2px dashed rgba(200,134,10,.2);display:flex;align-items:center;justify-content:center;font-size:26px;flex-shrink:0">${catEmoji}</div>`}
         </div>
         <div style="font-size:10px;color:#7A5C2E;line-height:1.6;padding:8px 10px;background:rgba(200,134,10,.06);border-radius:8px;border:1px solid rgba(200,134,10,.12)">
-          ℹ️ Los datos de este conductor han sido registrados por Fenlora. La contratación del servicio es directamente entre usted y el prestador. Fenlora es un directorio informativo y no es intermediario ni responsable de los servicios prestados.
+          ${t('driver-disclaimer')}
         </div>
       </div>`;
   }
@@ -1459,27 +1489,28 @@ function openPanel(p){
   // Acciones
   const acts=document.getElementById('pacts');
   // Configuración del menú según categoría
+  const isEN = currentLang === 'en';
   const menuConfig = {
-    rest:     {emoji:'🍽️', label:'Ver carta y precios',     color:'#C0392B', bg:'rgba(192,57,43,.15)'},
-    fritanga: {emoji:'🍖', label:'Ver precios del asadero', color:'#E74C3C', bg:'rgba(231,76,60,.15)'},
-    tipico:   {emoji:'🥘', label:'Ver platos y precios',    color:'#D44B3A', bg:'rgba(212,75,58,.15)'},
-    cafe:     {emoji:'☕', label:'Ver menú y precios',       color:'#A04000', bg:'rgba(160,64,0,.15)'},
-    helado:   {emoji:'🍦', label:'Ver sabores y precios',   color:'#F4A460', bg:'rgba(244,164,96,.15)'},
-    jugo:     {emoji:'🥤', label:'Ver jugos y precios',     color:'#E67E22', bg:'rgba(230,126,34,.15)'},
-    hotel:    {emoji:'🏨', label:'Ver habitaciones y tarifas', color:'#1565C0', bg:'rgba(21,101,192,.15)'},
-    finca:    {emoji:'🌿', label:'Ver paquetes y planes',   color:'#1A7A4A', bg:'rgba(26,122,74,.15)'},
-    airbnb:   {emoji:'🏠', label:'Ver disponibilidad',      color:'#FF5A5F', bg:'rgba(255,90,95,.15)'},
-    bar:      {emoji:'🍺', label:'Ver carta de bebidas',    color:'#6C3483', bg:'rgba(108,52,131,.15)'},
-    disco:    {emoji:'🎶', label:'Ver eventos y precios',   color:'#9B59B6', bg:'rgba(155,89,182,.15)'},
-    agencia:  {emoji:'✈️', label:'Ver paquetes turísticos', color:'#D4580A', bg:'rgba(212,88,10,.15)'},
-    licorera: {emoji:'🍾', label:'Ver productos y precios', color:'#8E44AD', bg:'rgba(142,68,173,.15)'},
-    salsamen: {emoji:'🥩', label:'Ver productos y precios', color:'#7D3C98', bg:'rgba(125,60,152,.15)'},
-    tienda:   {emoji:'🛒', label:'Ver productos',           color:'#6C3483', bg:'rgba(108,52,131,.15)'},
-    spa:      {emoji:'💆', label:'Ver tratamientos y tarifas', color:'#76D7C4', bg:'rgba(118,215,196,.15)'},
-    guia:     {emoji:'🧭', label:'Ver tours y precios',     color:'#E67E22', bg:'rgba(230,126,34,.15)'},
-    aventura: {emoji:'🧗', label:'Ver planes y tarifas',    color:'#CA6F1E', bg:'rgba(202,111,30,.15)'},
+    rest:     {emoji:'🍽️', label: isEN?'View menu & prices':'Ver carta y precios',     color:'#C0392B', bg:'rgba(192,57,43,.15)'},
+    fritanga: {emoji:'🍖', label: isEN?'View prices':'Ver precios del asadero',         color:'#E74C3C', bg:'rgba(231,76,60,.15)'},
+    tipico:   {emoji:'🥘', label: isEN?'View dishes & prices':'Ver platos y precios',   color:'#D44B3A', bg:'rgba(212,75,58,.15)'},
+    cafe:     {emoji:'☕', label: isEN?'View menu & prices':'Ver menú y precios',        color:'#A04000', bg:'rgba(160,64,0,.15)'},
+    helado:   {emoji:'🍦', label: isEN?'View flavors & prices':'Ver sabores y precios', color:'#F4A460', bg:'rgba(244,164,96,.15)'},
+    jugo:     {emoji:'🥤', label: isEN?'View juices & prices':'Ver jugos y precios',    color:'#E67E22', bg:'rgba(230,126,34,.15)'},
+    hotel:    {emoji:'🏨', label: isEN?'View rooms & rates':'Ver habitaciones y tarifas', color:'#1565C0', bg:'rgba(21,101,192,.15)'},
+    finca:    {emoji:'🌿', label: isEN?'View packages & plans':'Ver paquetes y planes', color:'#1A7A4A', bg:'rgba(26,122,74,.15)'},
+    airbnb:   {emoji:'🏠', label: isEN?'Check availability':'Ver disponibilidad',       color:'#FF5A5F', bg:'rgba(255,90,95,.15)'},
+    bar:      {emoji:'🍺', label: isEN?'View drinks menu':'Ver carta de bebidas',       color:'#6C3483', bg:'rgba(108,52,131,.15)'},
+    disco:    {emoji:'🎶', label: isEN?'View events & prices':'Ver eventos y precios',  color:'#9B59B6', bg:'rgba(155,89,182,.15)'},
+    agencia:  {emoji:'✈️', label: isEN?'View tour packages':'Ver paquetes turísticos',  color:'#D4580A', bg:'rgba(212,88,10,.15)'},
+    licorera: {emoji:'🍾', label: isEN?'View products & prices':'Ver productos y precios', color:'#8E44AD', bg:'rgba(142,68,173,.15)'},
+    salsamen: {emoji:'🥩', label: isEN?'View products & prices':'Ver productos y precios', color:'#7D3C98', bg:'rgba(125,60,152,.15)'},
+    tienda:   {emoji:'🛒', label: isEN?'View products':'Ver productos',                 color:'#6C3483', bg:'rgba(108,52,131,.15)'},
+    spa:      {emoji:'💆', label: isEN?'View treatments & rates':'Ver tratamientos y tarifas', color:'#76D7C4', bg:'rgba(118,215,196,.15)'},
+    guia:     {emoji:'🧭', label: isEN?'View tours & prices':'Ver tours y precios',     color:'#E67E22', bg:'rgba(230,126,34,.15)'},
+    aventura: {emoji:'🧗', label: isEN?'View plans & rates':'Ver planes y tarifas',     color:'#CA6F1E', bg:'rgba(202,111,30,.15)'},
   };
-  const mc = menuConfig[p.cat] || {emoji:'📋', label:'Ver menú', color:'var(--gold)', bg:'rgba(200,134,10,.15)'};
+  const mc = menuConfig[p.cat] || {emoji:'📋', label:t('menu-default'), color:'var(--gold)', bg:'rgba(200,134,10,.15)'};
   const menuBtn = (p.tiene_menu && p.menu && p.menu.items && p.menu.items.length > 0)
     ? `<button class="bmenu" onclick="openMenu()" style="background:${mc.bg};border-color:${mc.color};color:${mc.color}">${mc.emoji} ${mc.label}</button>`
     : '';
@@ -1488,15 +1519,15 @@ function openPanel(p){
   if (transCatsActs.includes(p.cat)) {
     // Panel especial para transporte
     const wsp = p.wsp || p.tel;
-    const wspMsg = `Hola ${p.nombre}! Te vi en la Ruta del Mangostino de Fenlora y necesito transporte. ¿Estás disponible?`;
+    const wspMsg = t('wsp-msg-trans').replace('{nombre}', p.nombre).replace('{ruta}', MUNICIPIOS_CONFIG[municipioActual]?.ruta || 'Fenlora');
     acts.innerHTML = `
       ${p.disponible && wsp
         ? `<a class="bwsp" href="https://wa.me/57${wsp.replace(/\D/g,'')}?text=${encodeURIComponent(wspMsg)}" target="_blank" style="background:rgba(37,168,100,.15);border-color:rgba(37,168,100,.5);color:#1A7A4A;font-weight:700">
-            💬 Contactar ahora por WhatsApp
+            ${t('wsp-contact')}
            </a>`
         : ''}
       ${p.tel
-        ? `<a class="bmaps" href="tel:${p.tel}" style="text-align:center">📞 Llamar: ${p.tel}</a>`
+        ? `<a class="bmaps" href="tel:${p.tel}" style="text-align:center">${t('call-btn')} ${p.tel}</a>`
         : ''}
       ${menuBtn}
     `;
@@ -1504,7 +1535,7 @@ function openPanel(p){
     // Panel normal para otros negocios
     acts.innerHTML=`
       <a class="bmaps" href="${p.gmaps}" target="_blank">🗺️ Cómo llegar — Google Maps</a>
-      ${p.wsp?`<a class="bwsp" href="https://wa.me/${p.wsp.replace(/\D/g,'')}?text=${encodeURIComponent('Hola! Vi su negocio en la Ruta del Mangostino y quiero información')}" target="_blank">💬 Escribir por WhatsApp</a>`:''}
+      ${p.wsp?`<a class="bwsp" href="https://wa.me/${p.wsp.replace(/\D/g,'')}?text=${encodeURIComponent(t('wsp-msg-biz').replace('{ruta}', MUNICIPIOS_CONFIG[municipioActual]?.ruta || 'Fenlora'))}" target="_blank">💬 Escribir por WhatsApp</a>`:''}
       <button class="bshare" onclick="sharePoint()">📤 Compartir ubicación</button>
       ${menuBtn}
     `;
@@ -1515,7 +1546,7 @@ function openPanel(p){
   if (transGrupo.includes(p.cat)) {
     prevSection.innerHTML = `
       <div style="margin:8px 0 4px;padding:10px 12px;background:rgba(200,134,10,.06);border:1px solid rgba(200,134,10,.15);border-radius:10px;font-size:10.5px;color:#7A5C2E;line-height:1.6;text-align:center">
-        ⚠️ Fenlora es un directorio informativo. La contratación del servicio es directamente entre el turista y el prestador. Fenlora no es intermediario ni responsable.
+        ${t('trans-disclaimer')}
       </div>`;
   } else {
     prevSection.innerHTML = '';

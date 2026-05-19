@@ -593,7 +593,7 @@ tr:hover td{background:var(--bg3)}
         <div class="table-head">
           <div>
             <div class="table-title">Directorio de suscriptores</div>
-            <div class="table-sub" id="clientes-sub">0 negocios registrados</div>
+            <div class="table-sub">71 negocios registrados</div>
           </div>
           <div class="table-actions">
             <select id="filter-plan" style="background:var(--bg3);border:1px solid var(--border);border-radius:7px;padding:6px 10px;color:var(--text2);font-size:12px;outline:none" onchange="applyFilters()">
@@ -743,11 +743,11 @@ tr:hover td{background:var(--bg3)}
               <label>Destinatarios</label>
               <select>
                 <option>Todos los negocios</option>
-                <option>Solo hoteles</option>
-                <option>Solo restaurantes y bares</option>
-                <option>Solo fincas</option>
-                <option>Solo plan Premium</option>
-                <option>Plan Pro y Premium</option>
+                <option>Solo hoteles (12)</option>
+                <option>Solo restaurantes y bares (22)</option>
+                <option>Solo fincas (7)</option>
+                <option>Solo plan Premium (9)</option>
+                <option>Plan Pro y Premium (33)</option>
               </select>
               <label>Asunto</label>
               <input id="alert-subject" placeholder="ej. Alerta fraude: transferencias falsas circulando">
@@ -884,7 +884,51 @@ tr:hover td{background:var(--bg3)}
 
             <!-- Items: cada uno tiene data-item-cat, se muestran/ocultan según tab activo -->
             <div id="menu-items-list">
-              <!-- Items se cargan al seleccionar negocio -->
+              <div class="menu-item-row" data-item-cat="Platos fuertes">
+                <div class="menu-item-name">Viudo de bocachico</div>
+                <input class="price-input" value="$25.000">
+                <button class="btn-sm" onclick="this.closest('.menu-item-row').remove()">🗑️</button>
+              </div>
+              <div class="menu-item-row" data-item-cat="Platos fuertes">
+                <div class="menu-item-name">Lechona tolimense</div>
+                <input class="price-input" value="$22.000">
+                <button class="btn-sm" onclick="this.closest('.menu-item-row').remove()">🗑️</button>
+              </div>
+              <div class="menu-item-row" data-item-cat="Platos fuertes">
+                <div class="menu-item-name">Churrasco a la brasa</div>
+                <input class="price-input" value="$32.000">
+                <button class="btn-sm" onclick="this.closest('.menu-item-row').remove()">🗑️</button>
+              </div>
+              <div class="menu-item-row" data-item-cat="Sopas" style="display:none">
+                <div class="menu-item-name">Sancocho de gallina</div>
+                <input class="price-input" value="$18.000">
+                <button class="btn-sm" onclick="this.closest('.menu-item-row').remove()">🗑️</button>
+              </div>
+              <div class="menu-item-row" data-item-cat="Sopas" style="display:none">
+                <div class="menu-item-name">Sopa de mondongo</div>
+                <input class="price-input" value="$16.000">
+                <button class="btn-sm" onclick="this.closest('.menu-item-row').remove()">🗑️</button>
+              </div>
+              <div class="menu-item-row" data-item-cat="Bebidas" style="display:none">
+                <div class="menu-item-name">Jugo de mangostino</div>
+                <input class="price-input" value="$6.000">
+                <button class="btn-sm" onclick="this.closest('.menu-item-row').remove()">🗑️</button>
+              </div>
+              <div class="menu-item-row" data-item-cat="Bebidas" style="display:none">
+                <div class="menu-item-name">Limonada de coco</div>
+                <input class="price-input" value="$7.000">
+                <button class="btn-sm" onclick="this.closest('.menu-item-row').remove()">🗑️</button>
+              </div>
+              <div class="menu-item-row" data-item-cat="Postres" style="display:none">
+                <div class="menu-item-name">Postre de mangostino</div>
+                <input class="price-input" value="$9.000">
+                <button class="btn-sm" onclick="this.closest('.menu-item-row').remove()">🗑️</button>
+              </div>
+              <div class="menu-item-row" data-item-cat="Postres" style="display:none">
+                <div class="menu-item-name">Tres leches</div>
+                <input class="price-input" value="$8.000">
+                <button class="btn-sm" onclick="this.closest('.menu-item-row').remove()">🗑️</button>
+              </div>
             </div>
             <button class="btn" style="width:100%;margin-top:12px;justify-content:center" onclick="addMenuItemTab()">+ Agregar ítem a esta categoría</button>
           </div>
@@ -1698,8 +1742,6 @@ tr:hover td{background:var(--bg3)}
 <div id="toast" style="position:fixed;bottom:24px;right:24px;background:var(--bg3);border:1px solid var(--border2);border-radius:10px;padding:12px 18px;font-size:13px;color:var(--text);z-index:9999;opacity:0;transition:opacity .25s;pointer-events:none;max-width:300px"></div>
 
 <script>
-const SUPA_URL_ADM = 'https://ikcutinvnkktfasgnanv.supabase.co';
-const SUPA_KEY_ADM = 'sb_publishable_G_MCq1M-a_CM77AKPocYvA_KOgmiw7h';
 // ══════════════════════════════════════════════════════════
 // 🔧 AUTO-LIMPIEZA DE DATOS CORRUPTOS (arrays vacíos)
 // Corre ANTES de inicializar cualquier variable — sin necesidad de localStorage.clear() manual
@@ -1765,11 +1807,10 @@ const PAGE_SIZE = 25;
 function renderClients(list){
   if(list !== undefined) filteredClients = list;
   const catBadge={hotel:'b-hotel',finca:'b-finca',rest:'b-rest',bar:'b-bar',agencia:'b-agencia',serv:'b-serv',trans:'b-serv',hist:'b-agencia',pub:'b-rest'};
-  const PLAN_KEYS = Object.keys(CONFIG.planes);
-  const planBadge = PLAN_KEYS.reduce(function(acc,k,i){ acc[k]=['b-basic','b-pro','b-premium'][i]||'b-serv'; return acc; },{});
-  const planLabel = PLAN_KEYS.reduce(function(acc,k){ acc[k]=CONFIG.planes[k].nombre||k; return acc; },{});
+  const planBadge={basic:'b-basic',pro:'b-pro',premium:'b-premium'};
   const statBadge={active:'b-active',mora:'b-mora',vence:'b-vence',inactivo:'b-inactivo',pausa:'b-pausa'};
   const statLabel={active:'Al día',mora:'En mora',vence:'Por vencer',inactivo:'Inactivo',pausa:'⏸ En pausa'};
+  const planLabel={basic:'Básico',pro:'Pro',premium:'Premium'};
   const tbody=document.getElementById('client-tbody');
   if(!tbody) return;
 
@@ -1940,8 +1981,8 @@ function abrirCobro(clientId){
   if(!c) return;
   var CONFIG_PRECIOS = JSON.parse(localStorage.getItem('fenlora_config') || '{}');
   var planes = (CONFIG_PRECIOS.planes || {});
-  var precio = (planes[c.plan] || {}).precio || 89900;
-  var planNombre = CONFIG.planes[c.plan]?.nombre || c.plan;
+  var precio = (planes[c.plan] || {}).precio || {basic:89900,pro:179900,premium:329900}[c.plan] || 89900;
+  var planNombre = {basic:'Básico',pro:'Pro',premium:'Premium'}[c.plan] || c.plan;
   var factura = 'FAC-' + Date.now().toString().slice(-6);
   var overlay = document.createElement('div');
   overlay.style = 'position:fixed;inset:0;z-index:9998;background:rgba(0,0,0,.6);display:flex;align-items:center;justify-content:center;font-family:DM Sans,sans-serif';
@@ -2045,31 +2086,59 @@ function openClient(id){
 }
 function closeClient(){ document.getElementById('client-modal').classList.remove('open'); }
 
-function saveClient(){
-  const modal = document.getElementById('client-modal');
-  // Find which client is being edited by matching the name shown in modal header
+async function saveClient(){
   const nombre = document.getElementById('modal-client-name').textContent;
   const c = CLIENTS.find(x => x.nombre === nombre);
-  if(c){
-    c.nombre  = document.getElementById('m-nombre').value.trim() || c.nombre;
-    c.dir     = document.getElementById('m-dir').value.trim()    || c.dir;
-    c.tel     = document.getElementById('m-tel').value.trim()    || c.tel;
-    c.email   = document.getElementById('m-email').value.trim()  || c.email;
-    c.plan    = document.getElementById('m-plan').value          || c.plan;
-    const notas = document.getElementById('m-notas');
-    if(notas) c.notas = notas.value;
-    // Save discount if filled
-    const dVal  = document.getElementById('m-desc-valor')?.value;
-    const dTipo = document.getElementById('m-desc-tipo')?.value;
-    const dCode = document.getElementById('m-desc-codigo')?.value;
-    if(dVal && parseFloat(dVal) > 0){
-      const sym = dTipo === 'pct' ? '%' : '$';
-      localStorage.setItem('fenlora_discounts_'+c.id, JSON.stringify({valor:dVal, tipo:dTipo, codigo:dCode, simbolo:sym}));
-    }
+  if(!c){ closeClient(); return; }
+
+  // Actualizar objeto local
+  c.nombre = document.getElementById('m-nombre')?.value.trim() || c.nombre;
+  c.dir    = document.getElementById('m-dir')?.value.trim()    || c.dir;
+  c.tel    = document.getElementById('m-tel')?.value.trim()    || c.tel;
+  c.email  = document.getElementById('m-email')?.value.trim()  || c.email;
+  c.plan   = document.getElementById('m-plan')?.value          || c.plan;
+  const notas     = document.getElementById('m-notas')?.value || '';
+  const fInicio   = document.getElementById('m-fecha-inicio')?.value || '';
+  const fVence    = document.getElementById('m-fecha-vence')?.value  || '';
+  if(fVence) c.vence = fVence;
+
+  // Guardar en Supabase si tiene sbId
+  if(c.sbId){
+    var addonsUpdate = Object.assign({}, c.addons || {}, {
+      direccion: c.dir,
+      email: c.email,
+      notas_fenlora: notas,
+      fecha_inicio: fInicio,
+      fecha_vencimiento: fVence,
+    });
+    try {
+      var res = await fetch(SUPA_URL_ADM + '/rest/v1/businesses?id=eq.' + c.sbId, {
+        method: 'PATCH',
+        headers: {
+          'apikey': SUPA_KEY_ADM,
+          'Authorization': 'Bearer ' + SUPA_KEY_ADM,
+          'Content-Type': 'application/json',
+          'Prefer': 'return=minimal'
+        },
+        body: JSON.stringify({
+          phone: c.tel,
+          plan_fenlora: c.plan,
+          addons: addonsUpdate,
+        })
+      });
+      if(res.ok){
+        c.addons = addonsUpdate;
+        showNotif('✅ ' + c.nombre + ' guardado en Supabase');
+      } else {
+        showNotif('⚠️ Error al guardar: ' + res.status);
+      }
+    } catch(e){ showNotif('⚠️ Error de red: ' + e.message); }
+  } else {
+    showNotif('✅ ' + c.nombre + ' actualizado (sin UUID)');
   }
   closeClient();
   renderClients(filteredClients);
-  showNotif('✅ Cliente '+(c?c.nombre:'')+ ' guardado ✓');
+  actualizarRenovaciones();
 }
 
 // ── DESCUENTOS POR CLIENTE ──
@@ -2275,8 +2344,42 @@ function showModule(name,el){
 // ── ALERT ──
 function selectAlertType(el){document.querySelectorAll('.alert-type').forEach(a=>a.classList.remove('sel'));el.classList.add('sel')}
 function sendAlert(){
-  const subj=document.getElementById('alert-subject')?.value||'Alerta';
-  showNotif('✓ Alerta "'+subj.substring(0,30)+'" enviada a '+CLIENTS.length+' negocios vía WhatsApp');
+  const subj = document.getElementById('alert-subject')?.value||'Alerta Fenlora';
+  const msg  = document.getElementById('alert-body')?.value||'';
+  const dest = document.getElementById('alert-dest')?.value||'todos';
+  if(!msg.trim()){ showNotif('⚠️ Escribe el mensaje antes de enviar'); return; }
+
+  // Filtrar destinatarios según selección
+  var targets = CLIENTS.filter(function(c){ return c.tel; });
+  if(dest === 'hoteles')      targets = targets.filter(function(c){ return c.cat==='hotel'||c.cat==='airbnb'; });
+  if(dest === 'restaurantes') targets = targets.filter(function(c){ return ['rest','bar','cafe','fritanga','tipico','helado','jugo'].includes(c.cat); });
+  if(dest === 'fincas')       targets = targets.filter(function(c){ return c.cat==='finca'; });
+  if(dest === 'premium')      targets = targets.filter(function(c){ return c.plan==='premium'; });
+  if(dest === 'pro-premium')  targets = targets.filter(function(c){ return c.plan==='premium'||c.plan==='pro'; });
+
+  if(!targets.length){ showNotif('⚠️ No hay negocios con teléfono para este filtro'); return; }
+
+  // Abrir WhatsApp para el primer destinatario (los demás se muestran en lista)
+  var tel = targets[0].tel.replace(/[^0-9]/g,'');
+  if(!tel.startsWith('57')) tel = '57' + tel;
+  var texto = encodeURIComponent('*'+subj+'*
+
+'+msg);
+  window.open('https://wa.me/'+tel+'?text='+texto,'_blank');
+
+  // Guardar en historial local
+  var hist = document.getElementById('historial-lista');
+  if(hist){
+    var tipos = {'fraude':'🚨 Fraude','renovacion':'🔄 Renovación','oportunidad':'⭐ Oportunidad','clima':'🌧️ Clima','fenlora':'📣 Fenlora','campaña':'💎 Campaña'};
+    var tipo = document.querySelector('.alert-type.sel')?.dataset?.tipo || 'fenlora';
+    var newItem = '<div style="padding:10px 0;border-bottom:1px solid var(--border)">'
+      +'<div style="font-size:12px;font-weight:500;color:var(--text)"><span style="color:var(--gold)">'+( tipos[tipo]||'📣')+' — </span>'+subj+'</div>'
+      +'<div style="font-size:10.5px;color:var(--text3);margin-top:2px">Ahora · '+targets.length+' enviados</div>'
+      +'</div>';
+    hist.insertAdjacentHTML('afterbegin', newItem);
+  }
+  showNotif('✓ Alerta "'+subj.substring(0,30)+'" enviada a '+targets.length+' negocios');
+}
 }
 
 // ══════════════════════════════════════════════
@@ -2288,10 +2391,10 @@ var MENUS_ALL = JSON.parse(localStorage.getItem('fenlora_menus') || '{}');
 
 // Plantilla base para nuevos negocios
 var MENU_DEFAULT = {
-  'Platos fuertes': [{nombre:'Viudo de bocachico',precio:'$25.000'},{nombre:'Lechona tolimense',precio:'$22.000'},{nombre:'Churrasco a la brasa',precio:'$32.000'}],
-  'Sopas':   [{nombre:'Sancocho de gallina',precio:'$18.000'},{nombre:'Sopa de mondongo',precio:'$16.000'}],
-  'Bebidas': [{nombre:'Jugo de mangostino',precio:'$6.000'},{nombre:'Limonada de coco',precio:'$7.000'},{nombre:'Agua panela con limón',precio:'$4.000'}],
-  'Postres': [{nombre:'Postre de mangostino',precio:'$9.000'},{nombre:'Tres leches',precio:'$8.000'}]
+  'Platos fuertes': [],
+  'Sopas':   [],
+  'Bebidas': [],
+  'Postres': []
 };
 var MENU_CATS_DEFAULT = ['Platos fuertes','Sopas','Bebidas','Postres'];
 var MENU_ICONS = {'Platos fuertes':'🍽️','Sopas':'🥣','Bebidas':'🥤','Postres':'🍮'};
@@ -2311,7 +2414,7 @@ function buildMenuClientsList(query){
     return '<div class="menu-client-item" onclick="selectMenuClient(this,\''+c.nombre.replace(/'/g,"\\'")+'\',\''+c.catLabel+'\')" '
       +'style="padding:8px 10px;border-radius:7px;cursor:pointer;background:'+(active?'var(--gold-dim)':'var(--bg3)')+';border:1px solid '+(active?'var(--gold-dim)':'transparent')+'">'
       +'<div style="font-size:12.5px;font-weight:500;color:'+(active?'var(--gold)':'var(--text)')+'">'+c.nombre+'</div>'
-      +'<div style="font-size:10.5px;color:var(--text3)">'+c.catLabel+' · '+(CONFIG.planes[c.plan]?.nombre||c.plan)+' · '+c.dir+'</div>'
+      +'<div style="font-size:10.5px;color:var(--text3)">'+c.catLabel+' · '+c.plan+' · '+c.dir+'</div>'
       +'</div>';
   }).join('');
   if(clients.length > 0){
@@ -2335,8 +2438,34 @@ function selectMenuClient(el, name, catLabel){
   var title = document.getElementById('menu-client-title');
   if(title) title.textContent = name + ' · Editor de menú';
 
-  // Si no tiene datos guardados, inicializar con plantilla base
-  if(!MENUS_ALL[name]){
+  // Cargar menú desde Supabase para este negocio
+  var client = CLIENTS.find(function(c){ return c.nombre === name; });
+  if(client && client.sbId && !MENUS_ALL[name]){
+    fetch(SUPA_URL_ADM + '/rest/v1/businesses?id=eq.'+client.sbId+'&select=menu,tiene_menu', {
+      headers: {'apikey':SUPA_KEY_ADM, 'Authorization':'Bearer '+SUPA_KEY_ADM}
+    }).then(function(r){ return r.json(); }).then(function(data){
+      if(data && data[0] && data[0].menu){
+        var m = data[0].menu;
+        // Convertir formato mapa → formato editor
+        var editorData = {};
+        (m.cats||[]).forEach(function(cat){
+          editorData[cat] = (m.items||[]).filter(function(it){ return it.cat===cat; })
+            .map(function(it){ return {nombre:it.name||it.nombre, precio:it.price||it.precio}; });
+        });
+        if(Object.keys(editorData).length) MENUS_ALL[name] = editorData;
+        else MENUS_ALL[name] = JSON.parse(JSON.stringify(MENU_DEFAULT));
+        // Precargar promo
+        if(m.promo){
+          var pb = document.getElementById('menu-promo-big'); if(pb) pb.value = m.promo.big||'';
+          var ps = document.getElementById('menu-promo-sub'); if(ps) ps.value = m.promo.sub||'';
+        }
+        renderMenuTabs(); renderMenuItems(menuCurrentCat);
+      } else {
+        MENUS_ALL[name] = JSON.parse(JSON.stringify(MENU_DEFAULT));
+        renderMenuTabs(); renderMenuItems(menuCurrentCat);
+      }
+    }).catch(function(){ MENUS_ALL[name] = JSON.parse(JSON.stringify(MENU_DEFAULT)); renderMenuTabs(); renderMenuItems(menuCurrentCat); });
+  } else if(!MENUS_ALL[name]){
     MENUS_ALL[name] = JSON.parse(JSON.stringify(MENU_DEFAULT));
   }
 
@@ -2447,68 +2576,16 @@ function nuevaCategoriaMenu(){
 }
 
 // ── GUARDAR MENÚ ──
-async function guardarMenu(){
-  if(!menuCurrentBiz){ showNotif('⚠️ Selecciona un negocio primero'); return; }
-  if(!MENUS_ALL[menuCurrentBiz]) MENUS_ALL[menuCurrentBiz] = {};
-
-  // Guardar promo
-  var promoBig = (document.getElementById('menu-promo-big')||{}).value||'';
-  var promoSub = (document.getElementById('menu-promo-sub')||{}).value||'';
-  MENUS_ALL[menuCurrentBiz].__promo__ = {big: promoBig, sub: promoSub};
-
-  // Guardar en localStorage (caché local)
+function guardarMenu(){
+  // Guardar promo del día junto con el menú
+  if(menuCurrentBiz){
+    if(!MENUS_ALL[menuCurrentBiz]) MENUS_ALL[menuCurrentBiz] = {};
+    var promoBig = (document.getElementById('menu-promo-big')||{}).value||'';
+    var promoSub = (document.getElementById('menu-promo-sub')||{}).value||'';
+    MENUS_ALL[menuCurrentBiz].__promo__ = {big: promoBig, sub: promoSub};
+  }
   localStorage.setItem('fenlora_menus', JSON.stringify(MENUS_ALL));
-
-  // Convertir al formato que lee el mapa: {promo:{big,sub}, cats:[], items:[{cat,name,price}]}
-  var bizData = MENUS_ALL[menuCurrentBiz] || {};
-  var cats = Object.keys(bizData).filter(function(k){ return k !== '__promo__'; });
-  var items = [];
-  cats.forEach(function(cat){
-    (bizData[cat] || []).forEach(function(it){
-      items.push({ cat: cat, name: it.nombre || it.name || '', price: it.precio || it.price || '$0', desc: it.desc || '', img: it.img || '' });
-    });
-  });
-  var menuObj = {
-    promo: { big: promoBig, sub: promoSub, badge: promoBig ? '🔥 Promo' : '' },
-    cats: cats,
-    items: items
-  };
-
-  // Buscar el sbId del negocio actual
-  var client = CLIENTS.find(function(c){ return c.nombre === menuCurrentBiz; });
-  if(!client || !client.sbId){
-    showNotif('✅ Menú guardado localmente (negocio sin UUID aún)');
-    return;
-  }
-
-  // Guardar en Supabase
-  try {
-    var res = await fetch(SUPA_URL_ADM + '/rest/v1/businesses?id=eq.' + client.sbId, {
-      method: 'PATCH',
-      headers: {
-        'apikey': SUPA_KEY_ADM,
-        'Authorization': 'Bearer ' + SUPA_KEY_ADM,
-        'Content-Type': 'application/json',
-        'Prefer': 'return=minimal'
-      },
-      body: JSON.stringify({ menu: menuObj, tiene_menu: items.length > 0 })
-    });
-    if(res.ok){
-      showNotif('✅ Menú guardado en Supabase para ' + menuCurrentBiz);
-    } else {
-      var err = await res.text();
-      // Si el error es que la columna menu no existe, intentar solo tiene_menu
-      if(err.includes('menu') && err.includes('column')){
-        showNotif('⚠️ Columna menu no existe en Supabase. Créala con: ALTER TABLE businesses ADD COLUMN menu jsonb DEFAULT \'{}\';');
-      } else {
-        showNotif('⚠️ Error al guardar: ' + res.status);
-        console.error('guardarMenu error:', err);
-      }
-    }
-  } catch(e){
-    showNotif('⚠️ Error de red: ' + e.message);
-    console.error('guardarMenu catch:', e);
-  }
+  showNotif('✅ Menú guardado para '+menuCurrentBiz);
 }
 
 // ── compatibilidad con funciones antiguas ──
@@ -2662,33 +2739,66 @@ function saveRutasData(){localStorage.setItem('fenlora_rutas',JSON.stringify(RUT
 // ══════════════════════════════════════════════
 // MÓDULO: RESEÑAS
 // ══════════════════════════════════════════════
-const REVIEWS_ADMIN=[
-];
-function renderReviewsAdmin(){
-  const el=document.getElementById('reviews-list');if(!el)return;
-  el.innerHTML=REVIEWS_ADMIN.map((r,i)=>`
-    <div style="padding:12px 0;border-bottom:1px solid var(--border);display:flex;gap:10px;align-items:flex-start">
-      <div style="flex:1">
-        <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;flex-wrap:wrap">
-          <span style="font-size:12.5px;font-weight:500;color:var(--text)">${r.nombre}</span>
-          <span style="font-size:10px;color:var(--gold)">${'★'.repeat(r.rating)}${'☆'.repeat(5-r.rating)}</span>
-          <span style="font-size:10px;color:var(--text3)">${r.fecha}</span>
-          <span style="margin-left:auto;font-size:9.5px;padding:2px 8px;border-radius:8px;${r.aprobada?'background:rgba(26,122,74,.15);color:#4CAF82':'background:rgba(200,134,10,.15);color:var(--gold)'}">${r.aprobada?'✓ Aprobada':'⏳ Pendiente'}</span>
-        </div>
-        <div style="font-size:11px;color:var(--text3);margin-bottom:4px">📍 ${r.negocio}</div>
-        <div style="font-size:12.5px;color:var(--text2);line-height:1.55">"${r.texto}"</div>
-      </div>
-      <div style="display:flex;flex-direction:column;gap:4px;flex-shrink:0">
-        ${!r.aprobada?`<button class="btn-sm" style="color:#4CAF82;border-color:rgba(76,175,130,.3)" onclick="aprobarReview(${i})">✓</button>`:''}
-        <button class="btn-sm" onclick="eliminarReview(${i})" style="color:var(--red)">🗑️</button>
-      </div>
-    </div>`).join('');
-  const pending=REVIEWS_ADMIN.filter(r=>!r.aprobada).length;
-  const badge=document.getElementById('badge-resenas');
-  if(badge)badge.textContent=pending||'';
+var REVIEWS_ADMIN = [];
+
+async function cargarResenasSupabase(){
+  try {
+    var res = await fetch(SUPA_URL_ADM + '/rest/v1/reviews?select=*&order=created_at.desc&limit=100', {
+      headers: { 'apikey': SUPA_KEY_ADM, 'Authorization': 'Bearer ' + SUPA_KEY_ADM }
+    });
+    if(res.ok){
+      var data = await res.json();
+      if(Array.isArray(data)){
+        REVIEWS_ADMIN = data.map(function(r){
+          return { id:r.id, nombre:r.nombre||'Anónimo', rating:r.rating||5,
+            fecha: r.created_at ? new Date(r.created_at).toLocaleDateString('es-CO') : '—',
+            texto:r.texto||'', negocio:r.business_name||r.negocio||'—',
+            municipio:r.municipio||'mariquita', aprobada:r.aprobada||false };
+        });
+      }
+    }
+  } catch(e){ console.warn('reseñas error:',e); }
+  renderReviewsAdmin();
 }
-function aprobarReview(i){REVIEWS_ADMIN[i].aprobada=true;renderReviewsAdmin();showToast('Reseña aprobada ✓');}
-function eliminarReview(i){REVIEWS_ADMIN.splice(i,1);renderReviewsAdmin();showToast('Reseña eliminada');}
+
+function renderReviewsAdmin(){
+  var el=document.getElementById('reviews-list'); if(!el) return;
+  if(!REVIEWS_ADMIN.length){
+    el.innerHTML='<div style="color:var(--text3);font-size:12px;padding:24px 0;text-align:center">Sin reseñas aún. Aparecerán aquí cuando los turistas opinen en el mapa.</div>';
+    var badge=document.getElementById('badge-resenas'); if(badge) badge.textContent='';
+    return;
+  }
+  var mun=(document.getElementById('filter-resenas-mun')||{}).value||'';
+  var list=mun?REVIEWS_ADMIN.filter(function(r){return r.municipio===mun;}):REVIEWS_ADMIN;
+  el.innerHTML=list.map(function(r){
+    return '<div style="padding:12px 0;border-bottom:1px solid var(--border);display:flex;gap:10px;align-items:flex-start">'
+      +'<div style="flex:1"><div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;flex-wrap:wrap">'
+      +'<span style="font-size:12.5px;font-weight:500;color:var(--text)">'+r.nombre+'</span>'
+      +'<span style="font-size:10px;color:var(--gold)">'+'★'.repeat(r.rating)+'☆'.repeat(5-r.rating)+'</span>'
+      +'<span style="font-size:10px;color:var(--text3)">'+r.fecha+'</span>'
+      +'<span style="margin-left:auto;font-size:9.5px;padding:2px 8px;border-radius:8px;'+(r.aprobada?'background:rgba(26,122,74,.15);color:#4CAF82':'background:rgba(200,134,10,.15);color:var(--gold)')+'">'\
+      +(r.aprobada?'✓ Aprobada':'⏳ Pendiente')+'</span></div>'
+      +'<div style="font-size:11px;color:var(--text3);margin-bottom:4px">📍 '+r.negocio+'</div>'
+      +'<div style="font-size:12.5px;color:var(--text2);line-height:1.55">"'+r.texto+'"</div></div>'
+      +'<div style="display:flex;flex-direction:column;gap:4px;flex-shrink:0">'
+      +(!r.aprobada?'<button class="btn-sm" style="color:#4CAF82;border-color:rgba(76,175,130,.3)" onclick="aprobarReview(\''+r.id+'\')">✓</button>':'')
+      +'<button class="btn-sm" onclick="eliminarReview(\''+r.id+'\')" style="color:var(--red)">🗑️</button>'
+      +'</div></div>';
+  }).join('');
+  var pending=REVIEWS_ADMIN.filter(function(r){return !r.aprobada;}).length;
+  var badge=document.getElementById('badge-resenas'); if(badge) badge.textContent=pending||'';
+}
+async function aprobarReview(id){
+  try{ await fetch(SUPA_URL_ADM+'/rest/v1/reviews?id=eq.'+id,{method:'PATCH',headers:{'apikey':SUPA_KEY_ADM,'Authorization':'Bearer '+SUPA_KEY_ADM,'Content-Type':'application/json','Prefer':'return=minimal'},body:JSON.stringify({aprobada:true})}); }catch(e){}
+  var r=REVIEWS_ADMIN.find(function(x){return x.id===id;}); if(r) r.aprobada=true;
+  renderReviewsAdmin(); showNotif('Reseña aprobada ✓');
+}
+async function eliminarReview(id){
+  try{ await fetch(SUPA_URL_ADM+'/rest/v1/reviews?id=eq.'+id,{method:'DELETE',headers:{'apikey':SUPA_KEY_ADM,'Authorization':'Bearer '+SUPA_KEY_ADM}}); }catch(e){}
+  REVIEWS_ADMIN=REVIEWS_ADMIN.filter(function(r){return r.id!==id;});
+  renderReviewsAdmin(); showNotif('Reseña eliminada');
+}
+
 
 // ══════════════════════════════════════════════
 // MÓDULO: TRADUCCIONES
@@ -2767,6 +2877,11 @@ function toggleAlertaClima(){
   tog.classList.toggle('on',alertaClimaActiva);
   document.getElementById('alerta-label').textContent=alertaClimaActiva?'Alerta activa — visible en el mapa':'Alerta desactivada';
   localStorage.setItem('alerta_clima',JSON.stringify(alertaClimaActiva));
+  // También guardar en Supabase para que el mapa lo lea
+  fetch(SUPA_URL_ADM + '/rest/v1/config?key=eq.alerta_clima', {
+    method: 'POST', headers: {'apikey':SUPA_KEY_ADM,'Authorization':'Bearer '+SUPA_KEY_ADM,'Content-Type':'application/json','Prefer':'resolution=merge-duplicates'},
+    body: JSON.stringify({key:'alerta_clima', value:JSON.stringify({activa:alertaClimaActiva, texto:document.getElementById('clima-alerta-txt')?.value||''}), updated_at:new Date().toISOString()})
+  }).catch(function(){});
 }
 function saveAlertaClima(){
   const texto=document.getElementById('alerta-texto')?.value;
@@ -3067,13 +3182,11 @@ showModule = function(name, el){
   // Render funciones por módulo
   if(name==='rutas')        { try{ renderRutasList(); }catch(e){} }
   if(name==='vendedores')   { try{ renderVendedoresList(); }catch(e){} }
-  if(name==='resenas')      { try{ renderReviewsAdmin(); }catch(e){} }
+  if(name==='resenas')      { try{ cargarResenasSupabase(); }catch(e){} }
   if(name==='traducciones') { try{ renderTransPoints(); }catch(e){} }
   if(name==='clima')        { try{ refreshClima(); }catch(e){} }
   if(name==='intros')       { try{ renderIntrosList(); }catch(e){} }
   if(name==='clientes')     { try{ renderClients(filteredClients); }catch(e){} }
-  if(name==='menus')        { try{ buildMenuClientsList(''); }catch(e){} }
-  if(name==='descuentos')   { try{ buildDescNegocioSelect(); }catch(e){} }
 };
 
 function selMenuCat(chip){
@@ -3135,21 +3248,6 @@ function buildDescNegocioSelect(){
     sel.appendChild(opt);
   });
 }
-
-function poblarSelectAlerta(){
-  // Pobla el select de alerta-negocio si existe
-  var sel = document.getElementById('alerta-negocio');
-  if(!sel) return;
-  var opts = Array.from(sel.options).filter(function(o){ return o.value==='' || o.value==='todos'; });
-  sel.innerHTML = '';
-  opts.forEach(function(o){ sel.appendChild(o); });
-  CLIENTS.forEach(function(c){
-    var o = document.createElement('option');
-    o.value = c.sbId || c.nombre;
-    o.textContent = c.nombre + ' · ' + c.catLabel;
-    sel.appendChild(o);
-  });
-}
 function crearDescuento(){
   var negocio = document.getElementById('desc-negocio')?.value;
   var valor   = document.getElementById('desc-valor')?.value;
@@ -3178,6 +3276,18 @@ function crearDescuento(){
   });
   document.getElementById('desc-negocio').value = '';
   showNotif('✅ Descuento creado para: '+negocio+' · '+valor+simbolo);
+
+  // Guardar descuento en Supabase (en addons del negocio)
+  var client = CLIENTS.find(function(c){ return c.nombre === negocio || c.catLabel === negocio; });
+  if(client && client.sbId){
+    var descObj = {valor:valor, tipo:dTipo||'pct', codigo:codigo, activo:true, vence:document.getElementById('desc-vence')?.value||''};
+    var addonsUpdate = Object.assign({}, client.addons||{}, {descuento: descObj});
+    fetch(SUPA_URL_ADM+'/rest/v1/businesses?id=eq.'+client.sbId,{
+      method:'PATCH', headers:{'apikey':SUPA_KEY_ADM,'Authorization':'Bearer '+SUPA_KEY_ADM,'Content-Type':'application/json','Prefer':'return=minimal'},
+      body:JSON.stringify({addons:addonsUpdate})
+    }).then(function(r){ if(r.ok) showNotif('✅ Descuento guardado en Supabase'); });
+    client.addons = addonsUpdate;
+  }
 }
 
 // ── CARGAR IMAGEN RUTA DESDE ARCHIVO ──
@@ -3289,6 +3399,32 @@ function eliminarPalabra(idx){
 
 // ══════════════════════════════════════════════
 // ── REPORTES TABS ──
+
+function actualizarMetricasReporte(){
+  var activos = CLIENTS.filter(function(c){ return c.estado==='active'; });
+  var ingreso = activos.reduce(function(s,c){ return s + (CONFIG.planes[c.plan]?.precio||0); }, 0);
+  var promedio = activos.length ? Math.round(ingreso / activos.length) : 0;
+  var el;
+  el=document.getElementById('rep-ingreso');       if(el) el.textContent = ingreso ? '$'+ingreso.toLocaleString('es-CO') : '$0';
+  el=document.getElementById('rep-promedio');      if(el) el.textContent = promedio ? '$'+promedio.toLocaleString('es-CO') : '$0';
+  el=document.getElementById('rep-clientes-activos'); if(el) el.textContent = activos.length || '0';
+  el=document.getElementById('rep-cancelaciones'); if(el) el.textContent = CLIENTS.filter(function(c){return c.estado==='inactivo';}).length || '—';
+  // Distribución por plan
+  var distEl = document.getElementById('rep-dist-planes');
+  if(distEl && CLIENTS.length){
+    var byPlan = {};
+    CLIENTS.forEach(function(c){ byPlan[c.plan] = (byPlan[c.plan]||0)+1; });
+    distEl.innerHTML = Object.entries(byPlan).map(function(kv){
+      var pct = Math.round(kv[1]/CLIENTS.length*100);
+      return '<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid var(--border)">'
+        +'<span style="font-size:12px;color:var(--text2)">'+(CONFIG.planes[kv[0]]?.nombre||kv[0])+'</span>'
+        +'<span style="font-size:12px;font-weight:500;color:var(--gold)">'+kv[1]+' ('+pct+'%)</span>'
+        +'</div>';
+    }).join('');
+  } else if(distEl){
+    distEl.innerHTML='<div style="color:var(--text3);font-size:12px;padding:12px 0;text-align:center">Sin clientes registrados aún</div>';
+  }
+}
 function switchReporteTab(btn){
   document.querySelectorAll('[data-rep]').forEach(function(t){ t.classList.remove('active'); });
   btn.classList.add('active');
@@ -3318,7 +3454,7 @@ function previewClientReport(){
     +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">'
     +'<div style="background:var(--bg4);padding:8px;border-radius:6px"><div style="font-size:10px;color:var(--text3)">Visitas</div><div style="font-size:18px;font-weight:600;color:var(--gold)">'+c.vistas+'</div></div>'
     +'<div style="background:var(--bg4);padding:8px;border-radius:6px"><div style="font-size:10px;color:var(--text3)">Clics WA</div><div style="font-size:18px;font-weight:600;color:#25D366">'+c.wsp+'</div></div>'
-    +'</div><div style="font-size:11px;color:var(--text3);margin-top:8px">Plan: '+(CONFIG.planes[c.plan]?.nombre||c.plan)+' · '+c.dir+'</div>';
+    +'</div><div style="font-size:11px;color:var(--text3);margin-top:8px">Plan: '+c.plan+' · '+c.dir+'</div>';
 }
 function enviarReporteWhatsApp(){
   var id = parseInt((document.getElementById('rep-select-client')||{}).value||0);
@@ -3343,11 +3479,17 @@ function exportarReporteFinanciero(){
   var activos = CLIENTS.filter(function(c){ return c.estado==='active'; }).length;
   var mora    = CLIENTS.filter(function(c){ return c.estado==='mora'; }).length;
   var pausa   = CLIENTS.filter(function(c){ return c.estado==='pausa'; }).length;
+  // Calcular ingresos reales desde CLIENTS
+  var ingresoMensual = CLIENTS.filter(function(c){ return c.estado==='active'; })
+    .reduce(function(s,c){ return s + (CONFIG.planes[c.plan]?.precio || 0); }, 0);
   var txt = 'REPORTE FINANCIERO FENLORA\n========================\n'
     +'Fecha: '+new Date().toLocaleDateString('es-CO')+'\n\n'
     +'Clientes activos: '+activos+'\nEn mora: '+mora+'\nEn pausa: '+pausa+'\n\n'
-    +'INGRESOS 2026\nEnero: $5.200.000\nFebrero: $6.100.000\nMarzo: $7.400.000\nAbril: $9.000.000\nMayo: $10.500.000\n\n'
-    +'* Datos reales disponibles al conectar Supabase.';
+    +'INGRESOS MENSUALES (proyectado): $'+ingresoMensual.toLocaleString('es-CO')+'\n\n'
+    +'Detalle clientes:\n'
+    +CLIENTS.filter(function(c){return c.estado==='active';}).map(function(c){
+      return '• '+c.nombre+' ('+( CONFIG.planes[c.plan]?.nombre||c.plan)+') $'+(CONFIG.planes[c.plan]?.precio||0).toLocaleString('es-CO')+'/mes';
+    }).join('\n');
   var a = document.createElement('a');
   a.href = URL.createObjectURL(new Blob([txt],{type:'text/plain'}));
   a.download = 'reporte-fenlora-'+new Date().toISOString().slice(0,10)+'.txt';
@@ -3392,7 +3534,7 @@ function calcularComision(v){
   var nivel = NIVELES_COMISION[v.nivel] || NIVELES_COMISION.activo;
   var clientes = clientesDeVendedor(v.id).filter(function(c){ return c.estado === 'active' || c.estado === 'vence'; });
   var mrr = clientes.reduce(function(s,c){
-    return s + (CONFIG.planes[c.plan]?.precio || 89900);
+    return s + ({basic:100000,pro:130000,premium:150000}[c.plan]||120000);
   }, 0);
   var pctMen  = (v.pctComision || nivel.pct     || 10) / 100;
   var pctVinc = (v.pctVinc    || nivel.pctVinc  || 30) / 100;
@@ -3487,14 +3629,12 @@ function selectVendedor(id){
     +(clientesList.length === 0
       ? '<div style="color:var(--text3);font-size:12px;padding:12px 0">Sin clientes asignados aún</div>'
       : clientesList.map(function(c){
-          var PLAN_COLORS = ['var(--text3)','#4DB8BB','var(--gold)','#E57373'];
-    var planIdx = Object.keys(CONFIG.planes).indexOf(c.plan);
-    var planColor = PLAN_COLORS[planIdx] || 'var(--text3)';
+          var planColor = {basic:'var(--text3)',pro:'#4DB8BB',premium:'var(--gold)'}[c.plan]||'var(--text3)';
           var estadoColor = {active:'#4CAF82',mora:'#E57373',vence:'#EF9F27',pausa:'#4DB8BB'}[c.estado]||'var(--text3)';
           return '<div style="display:flex;align-items:center;justify-content:space-between;padding:7px 0;border-bottom:.5px solid var(--border);font-size:12px">'
             +'<span style="color:var(--text)">'+c.nombre+'</span>'
             +'<div style="display:flex;gap:8px;align-items:center">'
-              +'<span style="color:'+planColor+'">'+(CONFIG.planes[c.plan]?.nombre||c.plan)+'</span>'
+              +'<span style="color:'+planColor+'">'+{basic:'Básico',pro:'Pro',premium:'Premium'}[c.plan]+'</span>'
               +'<span style="color:'+estadoColor+'">'+{active:'Al día',mora:'En mora',vence:'Por vencer',pausa:'Pausado'}[c.estado]+'</span>'
               +'<button onclick="quitarClienteDeVendedor('+c.id+','+v.id+')" style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:11px;padding:0">✕</button>'
             +'</div>'
@@ -3627,7 +3767,7 @@ function enviarLiquidacionIndividual(id){
     +'📊 Comisión mensual ('+calc.pctMen+'%): *$'+calc.comision.toLocaleString('es-CO')+'*\n'
     +(calc.comisionVinc>0?'🎉 Bono vinculación clientes nuevos ('+calc.pctVinc+'%): *$'+calc.comisionVinc.toLocaleString('es-CO')+'*\n':'')
     +'💰 *Total a recibir: $'+(calc.comision+calc.comisionVinc).toLocaleString('es-CO')+'*\n\n'
-    +(clientes.length ? '*Tus clientes activos este mes:*\n'+clientes.map(function(c){ return '• '+c.nombre+' ('+(CONFIG.planes[c.plan]?.nombre||c.plan)+')'; }).join('\n')+'\n\n' : '')
+    +(clientes.length ? '*Tus clientes activos este mes:*\n'+clientes.map(function(c){ return '• '+c.nombre+' ('+{basic:'Básico',pro:'Pro',premium:'Premium'}[c.plan]+')'; }).join('\n')+'\n\n' : '')
     +'💳 *Pago:* Lo recibirás en los próximos 5 días hábiles por Nequi.\n\n'
     +'¡Gracias por tu trabajo! — _Fenlora_ 🍇';
   var tel = v.tel.replace(/\D/g,'');
@@ -3910,60 +4050,45 @@ function toggleLoginEye(){
 // ══════════════════════════════════════════════
 // ── CARGAR CLIENTES DESDE SUPABASE ──
 async function cargarClientesSupabase() {
-  var CAT_LABELS = {hotel:'Hotel',finca:'Finca',rest:'Restaurante',bar:'Bar',agencia:'Agencia',
-    serv:'Servicio',hist:'Histórico',pub:'Público',cafe:'Cafetería',helado:'Heladería',
-    jugo:'Jugos',fritanga:'Fritanga',tipico:'Comida típica',airbnb:'Airbnb',licorera:'Licorera',
-    salsamen:'Salsamentaria',tienda:'Tienda',panaderia:'Panadería',fruteria:'Frutería',
-    disco:'Discoteca',guia:'Guía',aventura:'Aventura',pesca:'Pesca',farmacia:'Farmacia',
-    medico:'Médico',spa:'Spa',barber:'Barbería',iglesia:'Iglesia',panaderia:'Panadería',
-    fruteria:'Frutería'};
-  var TRANS_CATS = ['taxi','moto','chiva','alqmoto','alqbici','vereda','fletero'];
   try {
-    var res = await fetch(
-      SUPA_URL_ADM + '/rest/v1/businesses?select=id,name,category,phone,is_active,plan_fenlora,municipio,addons,tiene_menu,docs&order=name',
-      { headers: { 'apikey': SUPA_KEY_ADM, 'Authorization': 'Bearer ' + SUPA_KEY_ADM } }
-    );
-    if (!res.ok) { console.warn('Supabase clientes error:', res.status, await res.text()); return; }
-    var data = await res.json();
-    if (!Array.isArray(data)) { console.warn('Supabase clientes: respuesta no es array', data); return; }
-    // Filtrar transporte (van al módulo Conductores) y gratuitos hist/pub (no pagan)
-    var FREE_CATS = ['hist','pub'];
-    data = data.filter(function(r){
-      if (TRANS_CATS.includes(r.category)) return false;
-      if (FREE_CATS.includes(r.category)) return false;
-      if (r.plan_fenlora === 'free') return false;
-      return true;
+    // Cargar TODOS los negocios (no transporte) independiente de is_active
+    var transCategories = ['taxi','moto','chiva','alqmoto','alqbici','vereda','fletero'];
+    var res = await fetch(SUPA_URL_ADM + '/rest/v1/businesses?select=id,name,category,phone,is_active,plan_fenlora,municipio,addons&order=name', {
+      headers: { 'apikey': SUPA_KEY_ADM, 'Authorization': 'Bearer ' + SUPA_KEY_ADM }
     });
-    // Resetear CLIENTS con los datos frescos de Supabase (source of truth)
-    CLIENTS.length = 0;
-    data.forEach(function(row, i) {
-      CLIENTS.push({
-        id: i + 1,
-        sbId: row.id,
-        nombre: row.name || '(Sin nombre)',
-        catLabel: CAT_LABELS[row.category] || row.category || 'Servicio',
-        cat: row.category || 'serv',
-        plan: row.plan_fenlora || 'basic',
-        estado: row.is_active ? 'active' : 'inactivo',
-        dir: (row.addons && row.addons.direccion) || '',
-        tel: row.phone || '',
-        vistas: 0, wsp: 0, visPct: 0,
-        vence: (row.addons && row.addons.fecha_vencimiento) || '—',
-        municipio: row.municipio || 'mariquita',
-        tiene_menu: row.tiene_menu || false,
-        addons: row.addons || {},
-        docs: row.docs || {},
-      });
+    var data = await res.json();
+    if (!Array.isArray(data) || !data.length) return;
+    // Convertir al formato CLIENTS
+    var catLabels = {hotel:'Hotel',finca:'Finca',rest:'Restaurante',bar:'Bar',agencia:'Agencia',serv:'Servicio',hist:'Histórico',pub:'Público',cafe:'Cafetería',helado:'Heladería',jugo:'Jugos',fritanga:'Fritanga',tipico:'Comida típica',airbnb:'Airbnb',licorera:'Licorera',salsamen:'Salsamentaria',tienda:'Tienda',panaderia:'Panadería',fruteria:'Frutería',disco:'Discoteca',guia:'Guía',aventura:'Aventura',pesca:'Pesca',farmacia:'Farmacia',medico:'Médico',spa:'Spa',barber:'Barbería',iglesia:'Iglesia'};
+    // Actualizar CLIENTS con datos reales de Supabase (mantener los locales como base)
+    // Filtrar transporte
+    data = data.filter(function(row){ return !transCategories.includes(row.category); });
+    data.forEach(function(row) {
+      var existing = CLIENTS.find(function(c){ return String(c.sbId) === String(row.id) || c.nombre === row.name; });
+      if (existing) {
+        existing.municipio = row.municipio || 'mariquita';
+        existing.sbId = row.id;
+      } else {
+        CLIENTS.push({
+          id: CLIENTS.length + 1000,
+          sbId: row.id,
+          nombre: row.name || '',
+          catLabel: catLabels[row.category] || row.category || '',
+          cat: row.category || 'serv',
+          plan: row.plan_fenlora || 'basic',
+          estado: row.is_active ? 'active' : 'inactivo',
+          dir: '',
+          tel: row.phone || '',
+          vistas: 0, wsp: 0, visPct: 0,
+          vence: '—',
+          municipio: row.municipio || 'mariquita',
+        });
+      }
     });
     filteredClients = [...CLIENTS];
-    // Propagar a todos los módulos que usan CLIENTS
-    try { renderClients(filteredClients); } catch(e){}
-    try { buildMenuClientsList(''); } catch(e){}
-    try { buildDescNegocioSelect(); } catch(e){}
-    try { poblarSelectAlerta(); } catch(e){}
-    var sub = document.getElementById('clientes-sub');
+    renderClients(filteredClients);
+    var sub = document.querySelector('#mod-clientes .table-sub');
     if (sub) sub.textContent = CLIENTS.length + ' negocios registrados';
-    console.log('[Fenlora] Clientes cargados desde Supabase:', CLIENTS.length);
   } catch(e) { console.warn('Error cargando clientes desde Supabase:', e); }
 }
 
@@ -3999,8 +4124,6 @@ function initAdmin(){
   }
 
   showModule('dashboard');
-  // Cargar clientes reales desde Supabase inmediatamente
-  cargarClientesSupabase();
   renderClients(CLIENTS);
   filteredClients = [...CLIENTS];
   // Inicializar listeners del modal
@@ -4011,14 +4134,14 @@ function initAdmin(){
   // Populate menu clients from CLIENTS array
   buildMenuClientsList('');
   // Render initial menu items
-  renderMenuItems(menuCurrentCat);
+  renderMenuItems(activeCat);
   // Render bad words list
   setTimeout(function(){ try{ renderPalabrasBloq(); }catch(e){} }, 300);
   // Populate descuentos negocio dropdown
   setTimeout(function(){ try{ buildDescNegocioSelect(); }catch(e){} }, 100);
   // Pre-render otros módulos
   setTimeout(function(){
-    try { renderReviewsAdmin(); } catch(e){}
+    try { cargarResenasSupabase(); } catch(e){}
     try { renderTransPoints(); } catch(e){}
     try { renderIntrosList(); } catch(e){}
     try { refreshClima(); } catch(e){}
@@ -4041,7 +4164,8 @@ document.addEventListener('DOMContentLoaded', function(){
 
 
 // ── CONDUCTORES DESDE SUPABASE ──
-// [constantes movidas al inicio]
+const SUPA_URL_ADM = 'https://ikcutinvnkktfasgnanv.supabase.co';
+const SUPA_KEY_ADM = 'sb_publishable_G_MCq1M-a_CM77AKPocYvA_KOgmiw7h';
 var TRANS_CATS_ADM = ['taxi','moto','chiva','alqmoto','alqbici','vereda','fletero'];
 var TRANS_LABEL_ADM = {taxi:'Taxi',moto:'Mototransporte',chiva:'Chiva',alqmoto:'Alq. moto',alqbici:'Alq. bici',vereda:'Vereda',fletero:'Fletero'};
 var todosLosConductores = [];

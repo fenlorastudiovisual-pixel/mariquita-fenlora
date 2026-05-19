@@ -275,7 +275,14 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Instru
 <!-- LISTA -->
 <div class="list-panel">
   <div class="list-head">
-    <div class="list-title">Puntos del mapa</div>
+    <div class="list-title" style="display:flex;align-items:center;justify-content:space-between;padding-right:8px">
+      Puntos del mapa
+      <select id="editor-mun-filter" onchange="filterMunicipio(this.value)" style="font-size:11px;padding:3px 6px;background:var(--bg3);border:1px solid var(--border);border-radius:6px;color:var(--text);cursor:pointer;font-family:inherit">
+        <option value="">🌐 Todos</option>
+        <option value="mariquita">🥭 Mariquita</option>
+        <option value="chaparral">☕ Chaparral</option>
+      </select>
+    </div>
     <div class="search-wrap">
       <span class="search-icon">🔍</span>
       <input type="text" id="search-input" placeholder="Buscar negocio, vereda..." oninput="filterList(this.value)">
@@ -837,6 +844,9 @@ let points = [];
 let selected = null;
 let activeFilter = 'todos';
 let searchQuery = '';
+let munFilter = '';
+
+function filterMunicipio(val){ munFilter=val; renderList(); }
 let pickerMap = null;
 let pickerMarker = null;
 
@@ -883,7 +893,8 @@ function renderList() {
     }[grupo] || grupo;
     const matchCat = activeFilter === 'todos' || grupoKey === activeFilter;
     const matchQ = !searchQuery || p.nombre.toLowerCase().includes(searchQuery) || (p.sub||'').toLowerCase().includes(searchQuery);
-    return matchCat && matchQ;
+    const matchMun = !munFilter || (p.municipio||'mariquita') === munFilter;
+    return matchCat && matchQ && matchMun;
   });
 
   body.innerHTML = filtered.length === 0
@@ -909,9 +920,9 @@ function renderList() {
         </div>`;
       }).join('');
 
-  document.getElementById('stat-total').textContent = points.length;
-  document.getElementById('stat-active').textContent = points.filter(p=>p.activo!==false).length;
-  document.getElementById('stat-inactive').textContent = points.filter(p=>p.activo===false).length;
+  document.getElementById('stat-total').textContent = filtered.length;
+  document.getElementById('stat-active').textContent = filtered.filter(p=>p.activo!==false).length;
+  document.getElementById('stat-inactive').textContent = filtered.filter(p=>p.activo===false).length;
 }
 
 function filterList(q) {

@@ -421,9 +421,7 @@ tr:hover td{background:var(--bg3)}
         <span class="ni">⭐</span> Reseñas
         <span class="nav-badge" id="badge-resenas">0</span>
       </div>
-      <div class="nav-item" onclick="showModule('traducciones',this)">
-        <span class="ni">🌍</span> Traducciones EN
-      </div>
+      
       <div class="nav-item" onclick="showModule('clima',this)">
         <span class="ni">🌤️</span> Clima y alertas
       </div>
@@ -1613,46 +1611,6 @@ tr:hover td{background:var(--bg3)}
         </div>
       </div>
     </div>
-    <div class="module" id="mod-traducciones">
-      <!-- EXPLICACIÓN CLARA -->
-      <div style="background:rgba(200,134,10,.08);border:1px solid rgba(200,134,10,.2);border-radius:10px;padding:12px 16px;margin-bottom:16px;font-size:12px;color:var(--text2);line-height:1.65">
-        <div style="font-weight:600;color:var(--gold);margin-bottom:5px">🌍 ¿Para qué sirve este módulo?</div>
-        El mapa tiene un botón <strong>ES · EN</strong> que los turistas extranjeros pueden activar para ver la información en inglés.
-        Este módulo te permite escribir la descripción en inglés para cada punto del mapa.
-        <br><br>
-        <strong>¿Qué puntos tienen traducción?</strong> Solo los históricos (La Ermita, Casa Mutis, etc.) y las entidades públicas (Alcaldía, Hospital).
-        Los negocios comerciales (hoteles, restaurantes) no necesitan traducción aquí — cada dueño puede agregar su descripción en inglés desde el <em>Editor de puntos</em>.
-        <br><br>
-        <strong>¿Cómo se ve en el mapa?</strong> Cuando el turista activa EN, el panel de cada negocio muestra el texto que escribiste aquí. Si está vacío, muestra el texto en español.
-      </div>
-      <div class="metrics-grid" style="grid-template-columns:repeat(3,1fr)">
-        <div class="metric-card"><div class="metric-label">✅ Traducidos</div><div class="metric-val" style="color:#4CAF82" id="trans-done">0</div><div class="metric-sub">Puntos históricos y públicos</div></div>
-        <div class="metric-card"><div class="metric-label">⏳ Pendientes</div><div class="metric-val" style="color:var(--gold)" id="trans-pending">—</div><div class="metric-sub">Sin descripción EN</div></div>
-        <div class="metric-card"><div class="metric-label">🌐 Toggle activo</div><div class="metric-val">ES+EN</div><div class="metric-sub">Botón en el mapa</div></div>
-      </div>
-      <div class="panel-card">
-        <div class="panel-hdr">
-          <div class="panel-title">Editor de traducciones — Español → English</div>
-          <div class="table-actions">
-            <select id="trans-filter" onchange="filterTransPoints(this.value)" style="background:var(--bg3);border:1px solid var(--border);border-radius:7px;padding:5px 9px;color:var(--text2);font-size:11px;outline:none">
-              <option value="all">Todos los puntos</option>
-              <option value="hist">Solo históricos</option>
-              <option value="pub">Solo entidades</option>
-              <option value="missing">Sin traducción</option>
-            </select>
-            <button class="btn-sm" style="margin-left:6px;color:var(--gold)" onclick="showNotif('DeepL API — conectar cuando dispongas de cuenta deepl.com')">🤖 Auto-traducir (DeepL)</button>
-          </div>
-        </div>
-        <div style="display:grid;grid-template-columns:auto 1fr 1fr auto;gap:0;font-size:10px;font-weight:600;color:var(--text3);padding:6px 18px;letter-spacing:.4px;border-bottom:1px solid var(--border)">
-          <span style="min-width:120px">PUNTO</span>
-          <span style="padding:0 12px">ESPAÑOL (no editar)</span>
-          <span style="padding:0 12px">INGLÉS (escribir aquí)</span>
-          <span></span>
-        </div>
-        <div class="panel-body" style="padding:8px 18px" id="trans-list"></div>
-      </div>
-    </div>
-
     <!-- ══════════════ CLIMA Y ALERTAS ══════════════ -->
     <div class="module" id="mod-clima">
       <div style="display:flex;gap:8px;margin-bottom:16px;align-items:center;flex-wrap:wrap">
@@ -3923,7 +3881,9 @@ function toggleLoginEye(){
 // ── CARGAR CLIENTES DESDE SUPABASE ──
 async function cargarClientesSupabase() {
   try {
-    var res = await fetch(SUPA_URL_ADM + '/rest/v1/businesses?select=id,name,category,phone,is_active,plan_fenlora,municipio,addons&is_active=eq.true&order=name&category=not.in.(taxi,moto,chiva,alqmoto,alqbici,vereda,fletero)', {
+    // Cargar TODOS los negocios (no transporte) independiente de is_active
+    var transCategories = ['taxi','moto','chiva','alqmoto','alqbici','vereda','fletero'];
+    var res = await fetch(SUPA_URL_ADM + '/rest/v1/businesses?select=id,name,category,phone,is_active,plan_fenlora,municipio,addons&order=name', {
       headers: { 'apikey': SUPA_KEY_ADM, 'Authorization': 'Bearer ' + SUPA_KEY_ADM }
     });
     var data = await res.json();
@@ -3931,6 +3891,8 @@ async function cargarClientesSupabase() {
     // Convertir al formato CLIENTS
     var catLabels = {hotel:'Hotel',finca:'Finca',rest:'Restaurante',bar:'Bar',agencia:'Agencia',serv:'Servicio',hist:'Histórico',pub:'Público',cafe:'Cafetería',helado:'Heladería',jugo:'Jugos',fritanga:'Fritanga',tipico:'Comida típica',airbnb:'Airbnb',licorera:'Licorera',salsamen:'Salsamentaria',tienda:'Tienda',panaderia:'Panadería',fruteria:'Frutería',disco:'Discoteca',guia:'Guía',aventura:'Aventura',pesca:'Pesca',farmacia:'Farmacia',medico:'Médico',spa:'Spa',barber:'Barbería',iglesia:'Iglesia'};
     // Actualizar CLIENTS con datos reales de Supabase (mantener los locales como base)
+    // Filtrar transporte
+    data = data.filter(function(row){ return !transCategories.includes(row.category); });
     data.forEach(function(row) {
       var existing = CLIENTS.find(function(c){ return String(c.sbId) === String(row.id) || c.nombre === row.name; });
       if (existing) {

@@ -1511,7 +1511,7 @@ function openPanel(p){
     aventura: {emoji:'🧗', label: isEN?'View plans & rates':'Ver planes y tarifas',     color:'#CA6F1E', bg:'rgba(202,111,30,.15)'},
   };
   const mc = menuConfig[p.cat] || {emoji:'📋', label:t('menu-default'), color:'var(--gold)', bg:'rgba(200,134,10,.15)'};
-  const menuBtn = (p.tiene_menu && p.menu && p.menu.items && p.menu.items.length > 0)
+  const menuBtn = (p.tiene_menu)
     ? `<button class="bmenu" onclick="openMenu()" style="background:${mc.bg};border-color:${mc.color};color:${mc.color}">${mc.emoji} ${mc.label}</button>`
     : '';
 

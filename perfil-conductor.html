@@ -89,6 +89,12 @@ body{display:flex;flex-direction:column;align-items:center}
 /* Disclaimer */
 .disclaimer{font-size:10px;color:var(--text3);text-align:center;line-height:1.6;padding:16px 20px;border-top:1px solid var(--border);max-width:480px;width:100%}
 
+/* Banner no disponible */
+.no-disp-banner{background:rgba(212,88,10,.12);border:1px solid rgba(212,88,10,.3);border-radius:14px;padding:16px 18px;margin-bottom:16px;display:none}
+.no-disp-title{font-size:13px;font-weight:700;color:#E09060;margin-bottom:4px}
+.no-disp-sub{font-size:12px;color:rgba(253,246,236,.5);line-height:1.5;margin-bottom:10px}
+.no-disp-horario{font-size:11px;color:rgba(200,134,10,.7);background:rgba(200,134,10,.08);border-radius:8px;padding:8px 12px;margin-bottom:10px}
+.cta-btn-outline{display:flex;align-items:center;justify-content:center;gap:8px;padding:12px;border-radius:12px;font-size:13px;font-weight:600;cursor:pointer;text-decoration:none;border:1px solid rgba(37,168,100,.3);background:rgba(37,168,100,.08);color:#25A864;font-family:'DM Sans',sans-serif}
 /* Loading / Error */
 #loading-screen,#error-screen{width:100%;height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:40px 20px;text-align:center}
 .loading-dot{width:8px;height:8px;border-radius:50%;background:var(--gold);animation:pulse 1.2s infinite}
@@ -168,6 +174,14 @@ body{display:flex;flex-direction:column;align-items:center}
         <div class="placa-label">Placa</div>
         <div class="placa-val" id="placa">—</div>
       </div>
+    </div>
+
+    <!-- Banner no disponible -->
+    <div class="no-disp-banner" id="no-disp-banner">
+      <div class="no-disp-title">⏸ No disponible en este momento</div>
+      <div class="no-disp-sub">Este conductor no está activo ahora mismo. Puedes contactarlo de todas formas — quizás esté disponible pronto.</div>
+      <div class="no-disp-horario" id="no-disp-horario" style="display:none">🕐 Horario habitual: <span id="horario-txt">—</span></div>
+      <a class="cta-btn-outline" id="btn-wsp-nodisp" href="#" target="_blank">💬 Contactar por WhatsApp de todas formas</a>
     </div>
 
     <!-- Botones CTA -->
@@ -289,6 +303,21 @@ function renderPerfil(d) {
     dot.className = 'status-dot inactivo';
     txt.className = 'status-txt inactivo';
     txt.textContent = 'No disponible en este momento';
+    // Mostrar banner
+    var banner = document.getElementById('no-disp-banner');
+    if (banner) banner.style.display = 'block';
+    // Mostrar horario si existe
+    var addons = d.addons || {};
+    var horario = '';
+    if (addons.horario_inicio_m && addons.horario_fin_t) {
+      horario = addons.horario_inicio_m + ' – ' + addons.horario_fin_t;
+    } else if (addons.horario_inicio_m && addons.horario_fin_m) {
+      horario = addons.horario_inicio_m + ' – ' + addons.horario_fin_m;
+    }
+    if (horario) {
+      document.getElementById('horario-txt').textContent = horario;
+      document.getElementById('no-disp-horario').style.display = 'block';
+    }
   }
 
   // Foto conductor
@@ -326,8 +355,12 @@ function renderPerfil(d) {
   var tel = d.phone || '';
   var telLimpio = tel.replace(/\D/g,'');
   if (telLimpio) {
+    var wspMsg = encodeURIComponent('Hola ' + (d.name||'conductor') + ', te vi en el mapa de Fenlora y quiero solicitar un servicio.');
+    var wspUrl = 'https://wa.me/57' + telLimpio.slice(-10) + '?text=' + wspMsg;
     document.getElementById('btn-llamar').href = 'tel:' + telLimpio;
-    document.getElementById('btn-wsp').href = 'https://wa.me/57' + telLimpio.slice(-10) + '?text=' + encodeURIComponent('Hola ' + (d.name||'conductor') + ', te vi en el mapa de Fenlora y quiero solicitar un servicio.');
+    document.getElementById('btn-wsp').href = wspUrl;
+    var noDispWsp = document.getElementById('btn-wsp-nodisp');
+    if (noDispWsp) noDispWsp.href = wspUrl;
   }
 
   // Nota del conductor

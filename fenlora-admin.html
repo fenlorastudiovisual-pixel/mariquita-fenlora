@@ -884,51 +884,7 @@ tr:hover td{background:var(--bg3)}
 
             <!-- Items: cada uno tiene data-item-cat, se muestran/ocultan según tab activo -->
             <div id="menu-items-list">
-              <div class="menu-item-row" data-item-cat="Platos fuertes">
-                <div class="menu-item-name">Viudo de bocachico</div>
-                <input class="price-input" value="$25.000">
-                <button class="btn-sm" onclick="this.closest('.menu-item-row').remove()">🗑️</button>
-              </div>
-              <div class="menu-item-row" data-item-cat="Platos fuertes">
-                <div class="menu-item-name">Lechona tolimense</div>
-                <input class="price-input" value="$22.000">
-                <button class="btn-sm" onclick="this.closest('.menu-item-row').remove()">🗑️</button>
-              </div>
-              <div class="menu-item-row" data-item-cat="Platos fuertes">
-                <div class="menu-item-name">Churrasco a la brasa</div>
-                <input class="price-input" value="$32.000">
-                <button class="btn-sm" onclick="this.closest('.menu-item-row').remove()">🗑️</button>
-              </div>
-              <div class="menu-item-row" data-item-cat="Sopas" style="display:none">
-                <div class="menu-item-name">Sancocho de gallina</div>
-                <input class="price-input" value="$18.000">
-                <button class="btn-sm" onclick="this.closest('.menu-item-row').remove()">🗑️</button>
-              </div>
-              <div class="menu-item-row" data-item-cat="Sopas" style="display:none">
-                <div class="menu-item-name">Sopa de mondongo</div>
-                <input class="price-input" value="$16.000">
-                <button class="btn-sm" onclick="this.closest('.menu-item-row').remove()">🗑️</button>
-              </div>
-              <div class="menu-item-row" data-item-cat="Bebidas" style="display:none">
-                <div class="menu-item-name">Jugo de mangostino</div>
-                <input class="price-input" value="$6.000">
-                <button class="btn-sm" onclick="this.closest('.menu-item-row').remove()">🗑️</button>
-              </div>
-              <div class="menu-item-row" data-item-cat="Bebidas" style="display:none">
-                <div class="menu-item-name">Limonada de coco</div>
-                <input class="price-input" value="$7.000">
-                <button class="btn-sm" onclick="this.closest('.menu-item-row').remove()">🗑️</button>
-              </div>
-              <div class="menu-item-row" data-item-cat="Postres" style="display:none">
-                <div class="menu-item-name">Postre de mangostino</div>
-                <input class="price-input" value="$9.000">
-                <button class="btn-sm" onclick="this.closest('.menu-item-row').remove()">🗑️</button>
-              </div>
-              <div class="menu-item-row" data-item-cat="Postres" style="display:none">
-                <div class="menu-item-name">Tres leches</div>
-                <input class="price-input" value="$8.000">
-                <button class="btn-sm" onclick="this.closest('.menu-item-row').remove()">🗑️</button>
-              </div>
+              <!-- Items se cargan al seleccionar negocio -->
             </div>
             <button class="btn" style="width:100%;margin-top:12px;justify-content:center" onclick="addMenuItemTab()">+ Agregar ítem a esta categoría</button>
           </div>
@@ -1742,6 +1698,8 @@ tr:hover td{background:var(--bg3)}
 <div id="toast" style="position:fixed;bottom:24px;right:24px;background:var(--bg3);border:1px solid var(--border2);border-radius:10px;padding:12px 18px;font-size:13px;color:var(--text);z-index:9999;opacity:0;transition:opacity .25s;pointer-events:none;max-width:300px"></div>
 
 <script>
+const SUPA_URL_ADM = 'https://ikcutinvnkktfasgnanv.supabase.co';
+const SUPA_KEY_ADM = 'sb_publishable_G_MCq1M-a_CM77AKPocYvA_KOgmiw7h';
 // ══════════════════════════════════════════════════════════
 // 🔧 AUTO-LIMPIEZA DE DATOS CORRUPTOS (arrays vacíos)
 // Corre ANTES de inicializar cualquier variable — sin necesidad de localStorage.clear() manual
@@ -3061,6 +3019,8 @@ showModule = function(name, el){
   if(name==='clima')        { try{ refreshClima(); }catch(e){} }
   if(name==='intros')       { try{ renderIntrosList(); }catch(e){} }
   if(name==='clientes')     { try{ renderClients(filteredClients); }catch(e){} }
+  if(name==='menus')        { try{ buildMenuClientsList(''); }catch(e){} }
+  if(name==='descuentos')   { try{ buildDescNegocioSelect(); }catch(e){} }
 };
 
 function selMenuCat(chip){
@@ -3120,6 +3080,21 @@ function buildDescNegocioSelect(){
     opt.value = c.nombre;
     opt.textContent = c.nombre + ' · ' + c.catLabel;
     sel.appendChild(opt);
+  });
+}
+
+function poblarSelectAlerta(){
+  // Pobla el select de alerta-negocio si existe
+  var sel = document.getElementById('alerta-negocio');
+  if(!sel) return;
+  var opts = Array.from(sel.options).filter(function(o){ return o.value==='' || o.value==='todos'; });
+  sel.innerHTML = '';
+  opts.forEach(function(o){ sel.appendChild(o); });
+  CLIENTS.forEach(function(c){
+    var o = document.createElement('option');
+    o.value = c.sbId || c.nombre;
+    o.textContent = c.nombre + ' · ' + c.catLabel;
+    sel.appendChild(o);
   });
 }
 function crearDescuento(){
@@ -3880,45 +3855,54 @@ function toggleLoginEye(){
 // ══════════════════════════════════════════════
 // ── CARGAR CLIENTES DESDE SUPABASE ──
 async function cargarClientesSupabase() {
+  var CAT_LABELS = {hotel:'Hotel',finca:'Finca',rest:'Restaurante',bar:'Bar',agencia:'Agencia',
+    serv:'Servicio',hist:'Histórico',pub:'Público',cafe:'Cafetería',helado:'Heladería',
+    jugo:'Jugos',fritanga:'Fritanga',tipico:'Comida típica',airbnb:'Airbnb',licorera:'Licorera',
+    salsamen:'Salsamentaria',tienda:'Tienda',panaderia:'Panadería',fruteria:'Frutería',
+    disco:'Discoteca',guia:'Guía',aventura:'Aventura',pesca:'Pesca',farmacia:'Farmacia',
+    medico:'Médico',spa:'Spa',barber:'Barbería',iglesia:'Iglesia',panaderia:'Panadería',
+    fruteria:'Frutería'};
+  var TRANS_CATS = ['taxi','moto','chiva','alqmoto','alqbici','vereda','fletero'];
   try {
-    // Cargar TODOS los negocios (no transporte) independiente de is_active
-    var transCategories = ['taxi','moto','chiva','alqmoto','alqbici','vereda','fletero'];
-    var res = await fetch(SUPA_URL_ADM + '/rest/v1/businesses?select=id,name,category,phone,is_active,plan_fenlora,municipio,addons&order=name', {
-      headers: { 'apikey': SUPA_KEY_ADM, 'Authorization': 'Bearer ' + SUPA_KEY_ADM }
-    });
+    var res = await fetch(
+      SUPA_URL_ADM + '/rest/v1/businesses?select=id,name,category,phone,is_active,plan_fenlora,municipio,addons,tiene_menu,docs&order=name',
+      { headers: { 'apikey': SUPA_KEY_ADM, 'Authorization': 'Bearer ' + SUPA_KEY_ADM } }
+    );
+    if (!res.ok) { console.warn('Supabase clientes error:', res.status, await res.text()); return; }
     var data = await res.json();
-    if (!Array.isArray(data) || !data.length) return;
-    // Convertir al formato CLIENTS
-    var catLabels = {hotel:'Hotel',finca:'Finca',rest:'Restaurante',bar:'Bar',agencia:'Agencia',serv:'Servicio',hist:'Histórico',pub:'Público',cafe:'Cafetería',helado:'Heladería',jugo:'Jugos',fritanga:'Fritanga',tipico:'Comida típica',airbnb:'Airbnb',licorera:'Licorera',salsamen:'Salsamentaria',tienda:'Tienda',panaderia:'Panadería',fruteria:'Frutería',disco:'Discoteca',guia:'Guía',aventura:'Aventura',pesca:'Pesca',farmacia:'Farmacia',medico:'Médico',spa:'Spa',barber:'Barbería',iglesia:'Iglesia'};
-    // Actualizar CLIENTS con datos reales de Supabase (mantener los locales como base)
-    // Filtrar transporte
-    data = data.filter(function(row){ return !transCategories.includes(row.category); });
-    data.forEach(function(row) {
-      var existing = CLIENTS.find(function(c){ return String(c.sbId) === String(row.id) || c.nombre === row.name; });
-      if (existing) {
-        existing.municipio = row.municipio || 'mariquita';
-        existing.sbId = row.id;
-      } else {
-        CLIENTS.push({
-          id: CLIENTS.length + 1000,
-          sbId: row.id,
-          nombre: row.name || '',
-          catLabel: catLabels[row.category] || row.category || '',
-          cat: row.category || 'serv',
-          plan: row.plan_fenlora || 'basic',
-          estado: row.is_active ? 'active' : 'inactivo',
-          dir: '',
-          tel: row.phone || '',
-          vistas: 0, wsp: 0, visPct: 0,
-          vence: '—',
-          municipio: row.municipio || 'mariquita',
-        });
-      }
+    if (!Array.isArray(data)) { console.warn('Supabase clientes: respuesta no es array', data); return; }
+    // Filtrar transporte — esos van al módulo Conductores
+    data = data.filter(function(r){ return !TRANS_CATS.includes(r.category); });
+    // Resetear CLIENTS con los datos frescos de Supabase (source of truth)
+    CLIENTS.length = 0;
+    data.forEach(function(row, i) {
+      CLIENTS.push({
+        id: i + 1,
+        sbId: row.id,
+        nombre: row.name || '(Sin nombre)',
+        catLabel: CAT_LABELS[row.category] || row.category || 'Servicio',
+        cat: row.category || 'serv',
+        plan: row.plan_fenlora || 'basic',
+        estado: row.is_active ? 'active' : 'inactivo',
+        dir: (row.addons && row.addons.direccion) || '',
+        tel: row.phone || '',
+        vistas: 0, wsp: 0, visPct: 0,
+        vence: '—',
+        municipio: row.municipio || 'mariquita',
+        tiene_menu: row.tiene_menu || false,
+        addons: row.addons || {},
+        docs: row.docs || {},
+      });
     });
     filteredClients = [...CLIENTS];
-    renderClients(filteredClients);
+    // Propagar a todos los módulos que usan CLIENTS
+    try { renderClients(filteredClients); } catch(e){}
+    try { buildMenuClientsList(''); } catch(e){}
+    try { buildDescNegocioSelect(); } catch(e){}
+    try { poblarSelectAlerta(); } catch(e){}
     var sub = document.querySelector('#mod-clientes .table-sub');
     if (sub) sub.textContent = CLIENTS.length + ' negocios registrados';
+    console.log('[Fenlora] Clientes cargados desde Supabase:', CLIENTS.length);
   } catch(e) { console.warn('Error cargando clientes desde Supabase:', e); }
 }
 
@@ -3994,8 +3978,7 @@ document.addEventListener('DOMContentLoaded', function(){
 
 
 // ── CONDUCTORES DESDE SUPABASE ──
-const SUPA_URL_ADM = 'https://ikcutinvnkktfasgnanv.supabase.co';
-const SUPA_KEY_ADM = 'sb_publishable_G_MCq1M-a_CM77AKPocYvA_KOgmiw7h';
+// [constantes movidas al inicio]
 var TRANS_CATS_ADM = ['taxi','moto','chiva','alqmoto','alqbici','vereda','fletero'];
 var TRANS_LABEL_ADM = {taxi:'Taxi',moto:'Mototransporte',chiva:'Chiva',alqmoto:'Alq. moto',alqbici:'Alq. bici',vereda:'Vereda',fletero:'Fletero'};
 var todosLosConductores = [];

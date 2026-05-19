@@ -4024,9 +4024,16 @@ const SESSION_KEY  = 'fenlora_admin_session';
 function tryLogin(){
   var val = document.getElementById('login-input').value;
   var err = document.getElementById('login-error');
-  // Check saved password first (changed via recovery), then default
-  var currentPass = localStorage.getItem('fenlora_admin_pass') || ADMIN_PASS;
-  if(val === currentPass){
+  // Siempre usar contraseñas del código como fuente principal
+  // localStorage solo se usa si se cambió explícitamente via recuperación
+  var savedPass = localStorage.getItem('fenlora_admin_pass');
+  var currentPass  = ADMIN_PASS;   // principal siempre
+  var currentPass2 = ADMIN_PASS_2; // secundario siempre
+  // Si hay contraseña guardada Y es diferente a las originales, usarla también
+  var validPasses = [currentPass, currentPass2];
+  if(savedPass && savedPass !== ADMIN_PASS && savedPass !== ADMIN_PASS_2) validPasses.push(savedPass);
+
+  if(validPasses.includes(val)){
     sessionStorage.setItem(SESSION_KEY,'1');
     document.getElementById('login-screen').style.display='none';
     initAdmin();

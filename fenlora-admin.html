@@ -2362,9 +2362,7 @@ function sendAlert(){
   // Abrir WhatsApp para el primer destinatario (los demás se muestran en lista)
   var tel = targets[0].tel.replace(/[^0-9]/g,'');
   if(!tel.startsWith('57')) tel = '57' + tel;
-  var texto = encodeURIComponent('*'+subj+'*
-
-'+msg);
+  var texto = encodeURIComponent('*'+subj+'*\n\n'+msg);
   window.open('https://wa.me/'+tel+'?text='+texto,'_blank');
 
   // Guardar en historial local

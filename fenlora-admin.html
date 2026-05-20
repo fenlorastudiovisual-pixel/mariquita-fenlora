@@ -4508,34 +4508,64 @@ function enviarTodosRecordatorios(){
   showNotif('✓ Recordatorios enviados a '+targets.length+' negocios');
 }
 
-// ── Calcular total mensual de un cliente (plan + add-ons mensuales) ──
+// ── Calcular total de un cliente (plan + TODOS los add-ons) ──
 function calcularTotalCliente(c){
   var base = CONFIG.planes[c.plan]?.precio || 0;
-  var addons = CONFIG.addons || {};
+  var addonsConfig = CONFIG.addons || {};
   var listaActiva = (c.addons && c.addons.lista) ? c.addons.lista
                     : JSON.parse(localStorage.getItem('fenlora_addons_'+c.id)||'[]');
-  var totalAddons = listaActiva.reduce(function(sum, nombre){
-    var a = addons[nombre];
-    if(!a || a.tipo !== 'mes') return sum; // solo mensuales
-    return sum + (a.precio || 0);
-  }, 0);
-  return { base: base, addons: totalAddons, total: base + totalAddons, lista: listaActiva };
+  var totalMes = 0;    // add-ons mensuales
+  var totalUnico = 0;  // add-ons pago único
+  var detallesMes = [];
+  var detallesUnico = [];
+  listaActiva.forEach(function(nombre){
+    var a = addonsConfig[nombre];
+    if(!a) return;
+    if(a.tipo === 'mes'){
+      totalMes += a.precio || 0;
+      detallesMes.push({ nombre: nombre, precio: a.precio || 0 });
+    } else {
+      totalUnico += a.precio || 0;
+      detallesUnico.push({ nombre: nombre, precio: a.precio || 0 });
+    }
+  });
+  return {
+    base: base,
+    addons: totalMes,
+    unico: totalUnico,
+    total: base + totalMes,           // total mensual recurrente
+    totalConUnico: base + totalMes + totalUnico, // incluye pagos únicos pendientes
+    lista: listaActiva,
+    detallesMes: detallesMes,
+    detallesUnico: detallesUnico
+  };
 }
 
-// ── Generar desglose de add-ons para mensaje WA ──
+// ── Generar desglose completo para mensaje WA ──
 function desgloseWA(c){
   var t = calcularTotalCliente(c);
-  var addons = CONFIG.addons || {};
   var lineas = [];
-  t.lista.forEach(function(nombre){
-    var a = addons[nombre];
-    if(!a || a.tipo !== 'mes') return;
-    lineas.push('  + '+nombre+': $'+(a.precio||0).toLocaleString('es-CO')+'/mes');
+  // Plan base
+  lineas.push('Plan base ('+( CONFIG.planes[c.plan]?.nombre||c.plan)+'): $'+t.base.toLocaleString('es-CO')+'/mes');
+  // Add-ons mensuales
+  t.detallesMes.forEach(function(a){
+    lineas.push('  + '+a.nombre+': $'+a.precio.toLocaleString('es-CO')+'/mes');
   });
-  var texto = 'Plan base ('+( CONFIG.planes[c.plan]?.nombre||c.plan)+'): $'+t.base.toLocaleString('es-CO')+'/mes';
-  if(lineas.length) texto += '\n' + lineas.join('\n');
-  texto += '\n\n*Total a pagar: $'+t.total.toLocaleString('es-CO')+'/mes*';
-  return texto;
+  if(t.detallesMes.length){
+    lineas.push('*Subtotal mensual: $'+t.total.toLocaleString('es-CO')+'/mes*');
+  } else {
+    lineas.push('*Total mensual: $'+t.total.toLocaleString('es-CO')+'/mes*');
+  }
+  // Add-ons pago único
+  if(t.detallesUnico.length){
+    lineas.push('');
+    lineas.push('Servicios adicionales (pago único):');
+    t.detallesUnico.forEach(function(a){
+      lineas.push('  + '+a.nombre+': $'+a.precio.toLocaleString('es-CO'));
+    });
+    lineas.push('*Total único pendiente: $'+t.unico.toLocaleString('es-CO')+'*');
+  }
+  return lineas.join('\n');
 }
 function actualizarRenovaciones(){
   actualizarMetricasRenovaciones();
@@ -4570,11 +4600,14 @@ function actualizarRenovaciones(){
     var planLabel = CONFIG.planes[c.plan]?.nombre || c.plan;
     var addonCount = totales.lista.filter(function(n){ var a=(CONFIG.addons||{})[n]; return a&&a.tipo==='mes'; }).length;
     var planBadge = planLabel + (addonCount ? ' +'+addonCount+' add-on'+(addonCount>1?'s':'') : '');
-    return '<tr>'      +'<td style="font-weight:500;color:var(--text)">'+c.nombre+'</td>'
-      +'<td><span class="badge b-serv" title="'+planBadge+'">'+planBadge+'</span></td>'      +'<td style="color:var(--gold);font-weight:500" title="Base: $'+totales.base.toLocaleString('es-CO')+' + Add-ons: $'+totales.addons.toLocaleString('es-CO')+'">$'+totales.total.toLocaleString('es-CO')+'</td>'
-      +'<td style="font-family:DM Mono,monospace;font-size:11.5px">'+c.vence+'</td>'
-      +'<td>'+(tel?'<a href="https://wa.me/'+tel+'?text='+waMsgEnc+'" target="_blank" style="padding:3px 10px;font-size:10.5px;border-radius:6px;border:1px solid rgba(37,168,100,.3);background:rgba(37,168,100,.08);color:#25A864;text-decoration:none">📤 WA</a>':'—')+'</td>'
-      +'</tr>';
+        var valorDisplay = '$'+totales.total.toLocaleString('es-CO')+'/mes';
+    var tooltipValor = 'Plan base: $'+totales.base.toLocaleString('es-CO');
+    if(totales.detallesMes && totales.detallesMes.length) tooltipValor += ' + Servicios mes: $'+totales.addons.toLocaleString('es-CO');
+    if(totales.detallesUnico && totales.detallesUnico.length) tooltipValor += ' | Pago único pendiente: $'+totales.unico.toLocaleString('es-CO');
+    var badgeUnico = (totales.detallesUnico && totales.detallesUnico.length)
+      ? ' <span style="font-size:9px;background:rgba(200,134,10,.2);color:var(--gold);border-radius:4px;padding:1px 5px;margin-left:4px">+único</span>'
+      : '';
+    return '<tr>'      +'<td style="font-weight:500;color:var(--text)">'+c.nombre+'</td>'      +'<td><span class="badge b-serv" title="'+planBadge+'">'+planBadge+'</span></td>'      +'<td style="color:var(--gold);font-weight:500" title="'+tooltipValor+'">'+valorDisplay+badgeUnico+'</td>'      +'<td style="font-family:DM Mono,monospace;font-size:11.5px">'+c.vence+'</td>'      +'<td><span style="color:'+estadoColor+';font-weight:600;font-size:11.5px">'+estado+'</span></td>'      +'<td>'+(tel?'<a href="https://wa.me/'+tel+'?text='+waMsgEnc+'" target="_blank" style="padding:3px 10px;font-size:10.5px;border-radius:6px;border:1px solid rgba(37,168,100,.3);background:rgba(37,168,100,.08);color:#25A864;text-decoration:none">📤 WA</a>':'—')+'</td>'      +'</tr>';
   }).join('');
 }
 function filtrarRutas() {

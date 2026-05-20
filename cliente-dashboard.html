@@ -698,20 +698,34 @@ function renderDiscount(){
 
 // ── RENOVACIÓN ──
 
-// ── Calcular total mensual del cliente (plan + add-ons mensuales) ──
+// ── Calcular total del cliente (plan + TODOS los add-ons) ──
 function calcularTotalCD(n){
   var base = PRECIOS[n.plan] || 0;
   var listaActiva = n.addons || [];
   var addonsConfig = CONFIG.addons || {};
-  var totalAddons = 0;
-  var detalleAddons = [];
+  var totalMes = 0;
+  var totalUnico = 0;
+  var detallesMes = [];
+  var detallesUnico = [];
   listaActiva.forEach(function(nombre){
     var a = addonsConfig[nombre];
-    if(!a || a.tipo !== 'mes') return;
-    totalAddons += a.precio || 0;
-    detalleAddons.push({ nombre: nombre, precio: a.precio || 0, icon: a.icon || '⭐' });
+    if(!a) return;
+    if(a.tipo === 'mes'){
+      totalMes += a.precio || 0;
+      detallesMes.push({ nombre: nombre, precio: a.precio || 0, icon: a.icon || '⭐' });
+    } else {
+      totalUnico += a.precio || 0;
+      detallesUnico.push({ nombre: nombre, precio: a.precio || 0, icon: a.icon || '⭐' });
+    }
   });
-  return { base: base, addons: totalAddons, total: base + totalAddons, detalle: detalleAddons };
+  return {
+    base: base,
+    addons: totalMes,
+    unico: totalUnico,
+    total: base + totalMes,
+    detalle: detallesMes,
+    detallesUnico: detallesUnico
+  };
 }
 function renderRenewal(){
   const n = NEGOCIO;
@@ -749,11 +763,21 @@ function renderRenewal(){
       var html = '<div style="display:flex;justify-content:space-between;align-items:center;font-size:12px;color:var(--text2)">'
         +'<span>📌 Plan base ('+n.planNombre+')</span>'
         +'<span style="font-family:DM Mono,monospace;color:var(--text)">'+fmtPrice(precio)+'/mes</span></div>';
+      // Add-ons mensuales
       totalesCD.detalle.forEach(function(a){
         html += '<div style="display:flex;justify-content:space-between;align-items:center;font-size:12px;color:var(--text2)">'
           +'<span>'+a.icon+' '+a.nombre+'</span>'
           +'<span style="font-family:DM Mono,monospace;color:var(--gold)">+'+fmtPrice(a.precio)+'/mes</span></div>';
       });
+      // Add-ons pago único
+      if(totalesCD.detallesUnico && totalesCD.detallesUnico.length){
+        html += '<div style="font-size:10px;color:var(--text3);margin-top:6px;margin-bottom:2px;font-weight:600">SERVICIOS ADICIONALES (pago único)</div>';
+        totalesCD.detallesUnico.forEach(function(a){
+          html += '<div style="display:flex;justify-content:space-between;align-items:center;font-size:12px;color:var(--text2)">'
+            +'<span>'+a.icon+' '+a.nombre+'</span>'
+            +'<span style="font-family:DM Mono,monospace;color:#EFA030">'+fmtPrice(a.precio)+' único</span></div>';
+        });
+      }
       listaEl.innerHTML = html;
     }
     if(totalEl) totalEl.textContent = fmtPrice(totalMensual)+'/mes';
@@ -772,9 +796,16 @@ function renderRenewal(){
   const desgloseLinesCD = totalesCD.detalle.map(function(a){
     return '  + '+a.icon+' '+a.nombre+': '+fmtPrice(a.precio)+'/mes';
   });
-  const desgloseTextoCD = '• Plan base ('+n.planNombre+'): '+fmtPrice(precio)+'/mes'
+  const desgloseUnicoCD = (totalesCD.detallesUnico||[]).map(function(a){
+    return '  + '+a.icon+' '+a.nombre+': '+fmtPrice(a.precio)+' (único)';
+  });
+  var desgloseTextoCD = '• Plan base ('+n.planNombre+'): '+fmtPrice(precio)+'/mes'
     + (desgloseLinesCD.length ? '\n' + desgloseLinesCD.join('\n') : '')
-    + '\n• *Total: '+fmtPrice(totalMensual)+'/mes*';
+    + '\n• *Total mensual: '+fmtPrice(totalMensual)+'/mes*';
+  if(desgloseUnicoCD.length){
+    desgloseTextoCD += '\n\nServicios adicionales (pago único):\n' + desgloseUnicoCD.join('\n')
+      + '\n• *Total único: '+fmtPrice(totalesCD.unico)+'*';
+  }
 
   const msgWA = `Hola Fenlora 👋 Soy *${n.nombre}*.
 
@@ -947,11 +978,21 @@ function renderUpsell(){
       var html = '<div style="display:flex;justify-content:space-between;align-items:center;font-size:12px;color:var(--text2)">'
         +'<span>📌 Plan base ('+n.planNombre+')</span>'
         +'<span style="font-family:DM Mono,monospace;color:var(--text)">'+fmtPrice(precio)+'/mes</span></div>';
+      // Add-ons mensuales
       totalesCD.detalle.forEach(function(a){
         html += '<div style="display:flex;justify-content:space-between;align-items:center;font-size:12px;color:var(--text2)">'
           +'<span>'+a.icon+' '+a.nombre+'</span>'
           +'<span style="font-family:DM Mono,monospace;color:var(--gold)">+'+fmtPrice(a.precio)+'/mes</span></div>';
       });
+      // Add-ons pago único
+      if(totalesCD.detallesUnico && totalesCD.detallesUnico.length){
+        html += '<div style="font-size:10px;color:var(--text3);margin-top:6px;margin-bottom:2px;font-weight:600">SERVICIOS ADICIONALES (pago único)</div>';
+        totalesCD.detallesUnico.forEach(function(a){
+          html += '<div style="display:flex;justify-content:space-between;align-items:center;font-size:12px;color:var(--text2)">'
+            +'<span>'+a.icon+' '+a.nombre+'</span>'
+            +'<span style="font-family:DM Mono,monospace;color:#EFA030">'+fmtPrice(a.precio)+' único</span></div>';
+        });
+      }
       listaEl.innerHTML = html;
     }
     if(totalEl) totalEl.textContent = fmtPrice(totalMensual)+'/mes';

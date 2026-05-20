@@ -1195,7 +1195,7 @@ tr:hover td{background:var(--bg3)}
         <div class="section-title">Servicios adicionales — los mismos que aparecen en la columna de clientes</div>
       </div>
       <div style="margin-bottom:12px;padding:10px 14px;background:rgba(200,134,10,.08);border:1px solid rgba(200,134,10,.2);border-radius:10px;font-size:12px;color:var(--text2)">
-        💡 Estos 6 servicios son los que puedes activar por cliente en la columna <strong>Add-ons activos</strong>. Los precios se editan desde <strong>⚙️ Precios</strong>.
+        💡 Estos servicios se activan por cliente desde la columna <strong>Add-ons activos</strong>. Haz clic en <strong>✏️ Editar</strong> en cada tarjeta para cambiar el nombre, precio o descripción.
       </div>
       <div id="addons-grid" style="display:grid;grid-template-columns:repeat(2,1fr);gap:12px"></div>
     </div>
@@ -4011,34 +4011,91 @@ async function cargarClientesSupabase() {
 function renderAddonGrid(){
   var grid = document.getElementById('addons-grid');
   if(!grid) return;
+  // Cargar addons guardados en localStorage (por si el usuario los editó)
+  try {
+    var saved = JSON.parse(localStorage.getItem('fenlora_addons_config') || 'null');
+    if(saved) CONFIG.addons = saved;
+  } catch(e){}
   var addons = CONFIG.addons || {};
   var names = Object.keys(addons);
   var html = '';
   names.forEach(function(name, i){
     var a = addons[name];
     var precio = a.precio || 0;
-    var tipo = a.tipo === 'mes' ? '/mes' : ' único';
-    var precioFmt = '+$' + precio.toLocaleString('es-CO') + tipo;
-    // Contar clientes con este addon activo
+    var tipoLabel = a.tipo === 'mes' ? '/mes' : ' único';
+    var precioFmt = '+$' + precio.toLocaleString('es-CO') + tipoLabel;
     var activos = CLIENTS.filter(function(c){
-      try{ var saved=JSON.parse(localStorage.getItem('fenlora_addons_'+c.id)||'[]'); return saved.includes(name); }catch(e){ return false; }
+      var adList = (c.addons && c.addons.lista) ? c.addons.lista : [];
+      return adList.includes(name);
     }).length;
     var ingresoMes = a.tipo==='mes' ? activos * precio : 0;
-    var isLast = names.length % 2 !== 0 && i === names.length - 1;
-    html += '<div class="panel-card"'+(isLast?' style="grid-column:1/-1"':'')+'>'+
+    var nameEncoded = encodeURIComponent(name);
+    html += '<div class="panel-card">'+
       '<div class="panel-hdr">'+
         '<div class="panel-icon" style="background:'+a.color+'">'+a.icon+'</div>'+
         '<div class="panel-title">'+name+'</div>'+
-        '<span class="badge b-pro" style="margin-left:auto">'+precioFmt+'</span>'+
+        '<button class="addon-edit-btn" data-addon="'+nameEncoded+'" style="margin-left:auto;background:rgba(255,255,255,.06);border:1px solid var(--border);border-radius:6px;color:var(--text2);padding:3px 10px;font-size:11px;cursor:pointer">✏️ Editar</button>'+
+        '<span class="badge b-pro" style="margin-left:8px">'+precioFmt+'</span>'+
       '</div>'+
       '<div class="panel-body">'+
         '<div style="font-size:12px;color:var(--text2);margin-bottom:10px;line-height:1.6">'+a.desc+'</div>'+
         '<div class="stat-row"><div class="sl">Clientes activos</div><div class="sv">'+activos+'</div></div>'+
-        (a.tipo==='mes'?'<div class="stat-row"><div class="sl">Ingreso recurrente</div><div class="sv" style="color:var(--gold)">$'+ingresoMes.toLocaleString('es-CO')+'/mes</div></div>':'<div class="stat-row"><div class="sl">Estado</div><div class="sv">Pago único</div></div>')+
+        (a.tipo==='mes'
+          ? '<div class="stat-row"><div class="sl">Ingreso recurrente</div><div class="sv" style="color:var(--gold)">$'+ingresoMes.toLocaleString('es-CO')+'/mes</div></div>'
+          : '<div class="stat-row"><div class="sl">Cobro</div><div class="sv">Pago único</div></div>')+
       '</div>'+
     '</div>';
   });
-  grid.innerHTML = html;
+  grid.innerHTML = html || '<div style="color:var(--text3);padding:20px">No hay add-ons configurados</div>';
+  // Listener para botones ✏️
+  grid.querySelectorAll('.addon-edit-btn').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      openAddonModal(decodeURIComponent(this.dataset.addon));
+    });
+  });
+}
+
+function openAddonModal(name){
+  var a = CONFIG.addons[name];
+  if(!a) return;
+  document.getElementById('addon-original-name').value = name;
+  document.getElementById('addon-modal-title').textContent = '✏️ Editar: ' + name;
+  document.getElementById('addon-name').value = name;
+  document.getElementById('addon-precio').value = a.precio || 0;
+  document.getElementById('addon-tipo').value = a.tipo || 'mes';
+  document.getElementById('addon-desc').value = a.desc || '';
+  document.getElementById('addon-modal').style.display = 'flex';
+}
+
+function closeAddonModal(){
+  document.getElementById('addon-modal').style.display = 'none';
+}
+
+function guardarAddon(){
+  var originalName = document.getElementById('addon-original-name').value;
+  var newName  = document.getElementById('addon-name').value.trim();
+  var newPrecio = parseInt(document.getElementById('addon-precio').value) || 0;
+  var newTipo  = document.getElementById('addon-tipo').value;
+  var newDesc  = document.getElementById('addon-desc').value.trim();
+  if(!newName){ showNotif('⚠️ El nombre no puede estar vacío'); return; }
+  // Si cambió el nombre, eliminar el viejo y crear el nuevo
+  var old = CONFIG.addons[originalName];
+  if(originalName !== newName) {
+    delete CONFIG.addons[originalName];
+    // Actualizar la lista de opts en columna de clientes
+  }
+  CONFIG.addons[newName] = {
+    precio: newPrecio,
+    tipo: newTipo,
+    icon: old ? old.icon : '⭐',
+    color: old ? old.color : 'rgba(200,134,10,.15)',
+    desc: newDesc,
+  };
+  // Persistir en localStorage
+  localStorage.setItem('fenlora_addons_config', JSON.stringify(CONFIG.addons));
+  closeAddonModal();
+  renderAddonGrid();
+  showNotif('✅ Add-on "'+newName+'" guardado');
 }
 function initAdmin(){
   // Fix bug: [] vacío es truthy en JS → borrar para usar defaults
@@ -4663,6 +4720,42 @@ document.addEventListener('DOMContentLoaded', function() {
     </div>
   </div>
 </div>
+
+
+  <!-- ══ MODAL EDITAR ADD-ON ══ -->
+  <div id="addon-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:2000;align-items:center;justify-content:center">
+    <div style="background:var(--bg2);border:1px solid var(--border);border-radius:16px;padding:28px 24px;width:480px;max-width:95vw;position:relative">
+      <div style="font-size:16px;font-weight:700;margin-bottom:4px" id="addon-modal-title">Editar add-on</div>
+      <div style="font-size:12px;color:var(--text3);margin-bottom:20px">Los cambios se guardan en localStorage y persisten en este navegador</div>
+      <button onclick="closeAddonModal()" style="position:absolute;top:16px;right:16px;background:none;border:none;color:var(--text3);font-size:18px;cursor:pointer">✕</button>
+      <input type="hidden" id="addon-original-name">
+      <div style="margin-bottom:14px">
+        <label style="font-size:11px;color:var(--text3);display:block;margin-bottom:4px">Nombre del servicio</label>
+        <input id="addon-name" style="width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:9px 12px;color:var(--text);font-size:13px;box-sizing:border-box;outline:none">
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px">
+        <div>
+          <label style="font-size:11px;color:var(--text3);display:block;margin-bottom:4px">Precio (COP)</label>
+          <input id="addon-precio" type="number" style="width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:9px 12px;color:var(--text);font-size:13px;box-sizing:border-box;outline:none">
+        </div>
+        <div>
+          <label style="font-size:11px;color:var(--text3);display:block;margin-bottom:4px">Tipo de cobro</label>
+          <select id="addon-tipo" style="width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:9px 12px;color:var(--text);font-size:13px;box-sizing:border-box;outline:none">
+            <option value="mes">Mensual (recurrente)</option>
+            <option value="unico">Pago único</option>
+          </select>
+        </div>
+      </div>
+      <div style="margin-bottom:14px">
+        <label style="font-size:11px;color:var(--text3);display:block;margin-bottom:4px">Descripción</label>
+        <textarea id="addon-desc" rows="3" style="width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:9px 12px;color:var(--text);font-size:13px;box-sizing:border-box;outline:none;resize:vertical;font-family:inherit"></textarea>
+      </div>
+      <div style="display:flex;gap:10px;justify-content:flex-end">
+        <button onclick="closeAddonModal()" style="padding:9px 18px;background:var(--bg3);border:1px solid var(--border);border-radius:8px;color:var(--text2);cursor:pointer;font-size:13px">Cancelar</button>
+        <button onclick="guardarAddon()" style="padding:9px 22px;background:var(--gold);border:none;border-radius:8px;color:#000;font-weight:700;cursor:pointer;font-size:13px">💾 Guardar cambios</button>
+      </div>
+    </div>
+  </div>
 
 </body>
 </html>

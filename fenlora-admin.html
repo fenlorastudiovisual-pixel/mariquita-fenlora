@@ -1855,7 +1855,8 @@ function renderClients(list){
       </div></td>
       <td onclick="event.stopPropagation()" style="min-width:180px;padding:6px 8px">
         ${(()=>{
-          const saved = JSON.parse(localStorage.getItem('fenlora_addons_'+c.id)||'[]');
+          // Prioridad: Supabase (c.addons.lista) — única fuente de verdad
+          const saved = (c.addons && Array.isArray(c.addons.lista)) ? c.addons.lista : [];
           const opts = ['Spot tótem','Video comercial','Piezas gráficas','Redes sociales','Página web','Sistema POS'];
           return '<div style="display:flex;flex-wrap:wrap;gap:4px">' +
             opts.map(function(o){
@@ -1926,23 +1927,23 @@ function filterClients(q){
 }
 
 async function toggleAddon(clientId, addonName, btn){
-  // Leer lista actual — primero desde CLIENTS (Supabase), fallback localStorage
   var c = CLIENTS.find(function(x){ return x.id === clientId; });
-  var saved = (c && c.addons && c.addons.lista) ? [...c.addons.lista]
-              : JSON.parse(localStorage.getItem('fenlora_addons_'+clientId)||'[]');
+  if(!c){ showNotif('⚠️ Cliente no encontrado'); return; }
+  // Fuente unica de verdad: c.addons.lista (viene de Supabase)
+  var saved = (c.addons && Array.isArray(c.addons.lista)) ? [...c.addons.lista] : [];
   var idx = saved.indexOf(addonName);
   if(idx >= 0) saved.splice(idx,1);
   else saved.push(addonName);
-  localStorage.setItem('fenlora_addons_'+clientId, JSON.stringify(saved));
+  // Actualizar en memoria inmediatamente
+  if(!c.addons) c.addons = {};
+  c.addons.lista = saved;
   // Guardar en Supabase
-  if(c && c.sbId){
-    var addonsActualizados = Object.assign({}, c.addons||{}, { lista: saved });
-    c.addons = addonsActualizados;
+  if(c.sbId){
     try{
       await fetch(SUPA_URL_ADM+'/rest/v1/businesses?id=eq.'+c.sbId,{
         method:'PATCH',
         headers:{'apikey':SUPA_KEY_ADM,'Authorization':'Bearer '+SUPA_KEY_ADM,'Content-Type':'application/json','Prefer':'return=minimal'},
-        body:JSON.stringify({addons: addonsActualizados})
+        body:JSON.stringify({addons: c.addons})
       });
     }catch(e){ console.warn('toggleAddon Supabase error:',e); }
   }
@@ -1951,8 +1952,9 @@ async function toggleAddon(clientId, addonName, btn){
   btn.style.background  = on ? 'var(--gold-dim)' : 'transparent';
   btn.style.color       = on ? 'var(--gold)' : 'var(--text3)';
   showNotif('Add-on '+(on?'activado':'desactivado')+': '+addonName+' ✓');
-  // Actualizar contador en Add-ons y servicios en tiempo real
+  // Actualizar contadores en tiempo real
   renderAddonGrid();
+  actualizarRenovaciones();
 }
 
 // ── LINK ÚNICO POR CLIENTE ──
@@ -4072,9 +4074,8 @@ function renderAddonGrid(){
     var tipoLabel = a.tipo === 'mes' ? '/mes' : ' único';
     var precioFmt = '+$' + precio.toLocaleString('es-CO') + tipoLabel;
     var activos = CLIENTS.filter(function(c){
-      // Prioridad: Supabase (addons.lista) > localStorage
-      var adList = (c.addons && c.addons.lista) ? c.addons.lista
-                   : JSON.parse(localStorage.getItem('fenlora_addons_'+c.id)||'[]');
+      // Unica fuente: Supabase via c.addons.lista
+      var adList = (c.addons && Array.isArray(c.addons.lista)) ? c.addons.lista : [];
       return adList.includes(name);
     }).length;
     var ingresoMes = a.tipo==='mes' ? activos * precio : 0;
@@ -4349,8 +4350,9 @@ function filtrarTotem() {
 // ── RENOVACIONES — actualizar métricas dinámicamente desde CLIENTS ──
 function actualizarMetricasRenovaciones() {
   var mora = CLIENTS.filter(function(c){ return c.estado === 'mora'; }).length;
+  // Proyeccion = plan base + add-ons mensuales de cada cliente
   var proyeccion = CLIENTS.reduce(function(acc, c) {
-    return acc + (planVal(c.plan) || 0);
+    return acc + calcularTotalCliente(c).total;
   }, 0);
   var el_mora = document.getElementById('renov-mora');
   var el_proy = document.getElementById('renov-proyeccion');
@@ -4510,10 +4512,10 @@ function enviarTodosRecordatorios(){
 
 // ── Calcular total de un cliente (plan + TODOS los add-ons) ──
 function calcularTotalCliente(c){
-  var base = CONFIG.planes[c.plan]?.precio || 0;
+  var base = (CONFIG.planes[c.plan] && CONFIG.planes[c.plan].precio) ? CONFIG.planes[c.plan].precio : 0;
   var addonsConfig = CONFIG.addons || {};
-  var listaActiva = (c.addons && c.addons.lista) ? c.addons.lista
-                    : JSON.parse(localStorage.getItem('fenlora_addons_'+c.id)||'[]');
+  // Unica fuente: Supabase via c.addons.lista
+  var listaActiva = (c.addons && Array.isArray(c.addons.lista)) ? c.addons.lista : [];
   var totalMes = 0;    // add-ons mensuales
   var totalUnico = 0;  // add-ons pago único
   var detallesMes = [];

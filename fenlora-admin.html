@@ -694,7 +694,7 @@ tr:hover td{background:var(--bg3)}
         <div class="table-head">
           <div class="table-title">Calendario de renovaciones</div>
           <div class="table-actions">
-            <button class="btn" onclick="showNotif('Recordatorios enviados a 8 negocios vía WhatsApp ✓')">📤 Enviar todos los recordatorios</button>
+            <button class="btn" onclick="enviarTodosRecordatorios()">📤 Enviar todos los recordatorios</button>
           </div>
         </div>
         <table>
@@ -2836,28 +2836,42 @@ function pausarCliente(id){
   overlay.addEventListener('click',e=>{if(e.target===overlay)overlay.remove();});
 }
 
-function confirmarPausa(id,btn){
+async function confirmarPausa(id,btn){
   const c=CLIENTS.find(x=>x.id===id);if(!c)return;
   c.estadoPrevio=c.estado;c.estado='pausa';
   c.pausaDesde=document.getElementById('pausa-desde')?.value;
   c.pausaHasta=document.getElementById('pausa-hasta')?.value;
   c.pausaMotivo=document.getElementById('pausa-motivo')?.value||'Pausa temporal';
   btn.closest('div[style*=fixed]').remove();
-  // ── Sincronizar con fenlora_points (editor de puntos y mapa) ──
-  syncActivoEnMapa(id, false);
+  if(c.sbId){
+    try{
+      await fetch(SUPA_URL_ADM+'/rest/v1/businesses?id=eq.'+c.sbId,{
+        method:'PATCH',
+        headers:{'apikey':SUPA_KEY_ADM,'Authorization':'Bearer '+SUPA_KEY_ADM,'Content-Type':'application/json','Prefer':'return=minimal'},
+        body:JSON.stringify({is_active:false,addons:Object.assign({},c.addons||{},{pausa_desde:c.pausaDesde,pausa_hasta:c.pausaHasta,pausa_motivo:c.pausaMotivo})})
+      });
+    }catch(e){console.warn('pausarCliente error:',e);}
+  }
   renderClients(filteredClients);
-  showToast('⏸ '+c.nombre+' pausado · Pin oculto del mapa');
+  showNotif('⏸ '+c.nombre+' pausado — pin oculto del mapa');
 }
 
-function reactivarCliente(id){
+async function reactivarCliente(id){
   const c=CLIENTS.find(x=>x.id===id);if(!c)return;
   if(!confirm('¿Reactivar '+c.nombre+' y mostrar su pin en el mapa?'))return;
   c.estado=c.estadoPrevio||'active';
   delete c.pausaDesde;delete c.pausaHasta;delete c.pausaMotivo;delete c.estadoPrevio;
-  // ── Sincronizar con fenlora_points (editor de puntos y mapa) ──
-  syncActivoEnMapa(id, true);
+  if(c.sbId){
+    try{
+      await fetch(SUPA_URL_ADM+'/rest/v1/businesses?id=eq.'+c.sbId,{
+        method:'PATCH',
+        headers:{'apikey':SUPA_KEY_ADM,'Authorization':'Bearer '+SUPA_KEY_ADM,'Content-Type':'application/json','Prefer':'return=minimal'},
+        body:JSON.stringify({is_active:true})
+      });
+    }catch(e){console.warn('reactivarCliente error:',e);}
+  }
   renderClients(filteredClients);
-  showToast('▶ '+c.nombre+' reactivado · Pin visible en el mapa ✓');
+  showNotif('▶ '+c.nombre+' reactivado — pin visible en el mapa ✓');
 }
 
 // Actualiza el campo 'activo' en fenlora_points para que el editor y el mapa lo reflejen
@@ -4317,6 +4331,26 @@ function actualizarDashboard(){
   }
 }
 
+
+function enviarTodosRecordatorios(){
+  var hoy = new Date();
+  var en15 = new Date(); en15.setDate(en15.getDate()+15);
+  var targets = CLIENTS.filter(function(c){
+    if(!c.vence || c.vence==='—') return false;
+    var fv = new Date(c.vence);
+    return fv >= hoy && fv <= en15 && c.tel;
+  });
+  if(!targets.length){ showNotif('No hay negocios con renovación próxima en 15 días'); return; }
+  targets.forEach(function(c, i){
+    var tel = (c.tel||'').replace(/[^0-9]/g,'');
+    if(!tel.startsWith('57')) tel='57'+tel;
+    var precio = CONFIG.planes[c.plan]?.precio || 0;
+    var msg = encodeURIComponent('Hola *'+c.nombre+'* \u{1F44B}\n\nTe recordamos que tu suscripción a Fenlora vence el *'+c.vence+'*.\n\nValor a renovar: *$'+precio.toLocaleString('es-CO')+'/mes*\n\nPara renovar realiza el pago a Nequi: '+((CONFIG.fenlora&&CONFIG.fenlora.tel)||'311 274 6813')+'.\n\n_Fenlora Visual Studio_');
+    setTimeout(function(){ window.open('https://wa.me/'+tel+'?text='+msg,'_blank'); }, i*600);
+  });
+  var el=document.getElementById('renov-recordatorios'); if(el) el.textContent=targets.length;
+  showNotif('✓ Recordatorios enviados a '+targets.length+' negocios');
+}
 function actualizarRenovaciones(){
   actualizarMetricasRenovaciones();
   var hoy = new Date();
@@ -4351,7 +4385,6 @@ function actualizarRenovaciones(){
       +'<td><span class="badge b-serv">'+(CONFIG.planes[c.plan]?.nombre||c.plan)+'</span></td>'
       +'<td style="color:var(--gold);font-weight:500">$'+precio.toLocaleString('es-CO')+'</td>'
       +'<td style="font-family:DM Mono,monospace;font-size:11.5px">'+c.vence+'</td>'
-      +'<td>'+(tel?'<a href="https://wa.me/'+tel+'?text='+waMsgEnc+'" target="_blank" style="padding:3px 10px;font-size:10.5px;border-radius:6px;border:1px solid rgba(37,168,100,.3);background:rgba(37,168,100,.08);color:#25A864;text-decoration:none">📤 WA</a>':'—')+'</td>'
       +'<td>'+(tel?'<a href="https://wa.me/'+tel+'?text='+waMsgEnc+'" target="_blank" style="padding:3px 10px;font-size:10.5px;border-radius:6px;border:1px solid rgba(37,168,100,.3);background:rgba(37,168,100,.08);color:#25A864;text-decoration:none">📤 WA</a>':'—')+'</td>'
       +'</tr>';
   }).join('');

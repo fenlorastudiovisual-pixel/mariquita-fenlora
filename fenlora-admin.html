@@ -2351,6 +2351,7 @@ function showModule(name,el){
   }
   const titles={dashboard:['Dashboard','Resumen general · Mayo 2026'],clientes:['Clientes','Directorio de suscriptores'],renovaciones:['Renovaciones','Cobros y vencimientos'],alertas:['Alertas y mensajes','Comunicación con suscriptores'],cotizaciones:['Cotizaciones','Leads de turistas'],menus:['Editor de menús','Actualiza precios e ítems en tiempo real'],descuentos:['Descuentos y promos','Gestión de ofertas activas'],totem:['Control tótem','Pantalla Plaza Central · Mariquita'],eventos:['Agenda de eventos','Calendario turístico 2026'],addons:['Add-ons y servicios','Servicios adicionales Fenlora'],reportes:['Reportes','Finanzas y métricas exportables']};
   if(titles[name]){document.getElementById('topbar-title').textContent=titles[name][0];document.getElementById('topbar-sub').textContent=titles[name][1]}
+  if(name==='addons') renderAddonGrid();
 }
 
 // ── ALERT ──
@@ -4074,6 +4075,7 @@ function initAdmin(){
   cargarClientesSupabase();
   renderClients(CLIENTS);
   filteredClients = [...CLIENTS];
+  setTimeout(function(){ renderAddonGrid(); }, 300);
   // Inicializar listeners del modal
   const cm = document.getElementById('client-modal');
   if(cm) cm.addEventListener('click',function(e){if(e.target===this)closeClient();});

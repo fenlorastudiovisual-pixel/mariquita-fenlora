@@ -338,8 +338,22 @@ const CONFIG = JSON.parse(localStorage.getItem('fenlora_config')) || {
     basic:   { nombre:'Básico',  precio:89900  },
     pro:     { nombre:'Pro',     precio:179900 },
     premium: { nombre:'Premium', precio:329900 },
+  },
+  addons: {
+    'Spot tótem':      { precio:89900,  tipo:'mes',  icon:'📺' },
+    'Video comercial': { precio:350000, tipo:'unico', icon:'🎬' },
+    'Piezas gráficas': { precio:150000, tipo:'mes',  icon:'🎨' },
+    'Redes sociales':  { precio:290000, tipo:'mes',  icon:'📱' },
+    'Página web':      { precio:450000, tipo:'unico', icon:'🌐' },
+    'Sistema POS':     { precio:890000, tipo:'unico', icon:'🖥️' },
   }
 };
+// Cargar config guardada por el admin si existe
+try {
+  var savedCfg = JSON.parse(localStorage.getItem('fenlora_addons_config')||'null');
+  if(savedCfg) CONFIG.addons = savedCfg;
+} catch(e){}
+
 const PRECIOS = {
   basic:   CONFIG.planes.basic?.precio   || 89900,
   pro:     CONFIG.planes.pro?.precio     || 179900,
@@ -370,7 +384,10 @@ async function cargarNegocioSupabase(uuid){
     const data = await res.json();
     if (!Array.isArray(data) || !data.length) return null;
     const row = data[0];
-    const addons = Array.isArray(row.addons) ? row.addons : [];
+    // addons es un objeto {lista:[...], ...} en Supabase
+    const addonsObj = (row.addons && typeof row.addons === 'object' && !Array.isArray(row.addons))
+                      ? row.addons : {};
+    const addons = addonsObj.lista || (Array.isArray(row.addons) ? row.addons : []);
     const mun = row.municipio || 'mariquita';
     const ruta = MUN_RUTAS[mun] || 'Fenlora Visual Studio';
     // Actualizar label de ruta en topbar
@@ -553,8 +570,8 @@ function renderStatus(){
       <div class="sc-icon">⏰</div>
       <div class="sc-body">
         <div class="sc-title">Tu suscripción vence en ${n.diasParaVencer} días · Plan ${n.planNombre}</div>
-        <div class="sc-desc">Para no perder visibilidad, renueva antes del vencimiento. ${fmtPrice(PRECIOS[n.plan])}/mes.</div>
-        <a href="https://wa.me/${n.wsp}?text=Hola Fenlora, soy ${encodeURIComponent(n.nombre)}. Quiero renovar mi plan ${n.planNombre} (${fmtPrice(PRECIOS[n.plan])}/mes). _(Desde ${n.ruta || "Fenlora Visual Studio"})_" target="_blank" class="sc-cta">💬 Renovar por WhatsApp</a>
+        <div class="sc-desc">Para no perder visibilidad, renueva antes del vencimiento. ${fmtPrice(calcularTotalCD(n).total)}/mes.</div>
+        <a href="https://wa.me/${n.wsp}?text=Hola Fenlora, soy ${encodeURIComponent(n.nombre)}. Quiero renovar mi plan ${n.planNombre} (${fmtPrice(calcularTotalCD(n).total)}/mes). _(Desde ${n.ruta || "Fenlora Visual Studio"})_" target="_blank" class="sc-cta">💬 Renovar por WhatsApp</a>
       </div>
     </div>`;
   } else {
@@ -562,7 +579,7 @@ function renderStatus(){
       <div class="sc-icon">✅</div>
       <div class="sc-body">
         <div class="sc-title">Suscripción activa · Plan ${n.planNombre}</div>
-        <div class="sc-desc">Renovar antes del ${n.diasParaVencer} días · ${fmtPrice(PRECIOS[n.plan])}/mes · Tu negocio es visible en el mapa.</div>
+        <div class="sc-desc">Renovar antes del ${n.diasParaVencer} días · ${fmtPrice(calcularTotalCD(n).total)}/mes · Tu negocio es visible en el mapa.</div>
       </div>
     </div>`;
   }
@@ -680,9 +697,27 @@ function renderDiscount(){
 }
 
 // ── RENOVACIÓN ──
+
+// ── Calcular total mensual del cliente (plan + add-ons mensuales) ──
+function calcularTotalCD(n){
+  var base = PRECIOS[n.plan] || 0;
+  var listaActiva = n.addons || [];
+  var addonsConfig = CONFIG.addons || {};
+  var totalAddons = 0;
+  var detalleAddons = [];
+  listaActiva.forEach(function(nombre){
+    var a = addonsConfig[nombre];
+    if(!a || a.tipo !== 'mes') return;
+    totalAddons += a.precio || 0;
+    detalleAddons.push({ nombre: nombre, precio: a.precio || 0, icon: a.icon || '⭐' });
+  });
+  return { base: base, addons: totalAddons, total: base + totalAddons, detalle: detalleAddons };
+}
 function renderRenewal(){
   const n = NEGOCIO;
+  const totalesCD = calcularTotalCD(n);
   const precio = PRECIOS[n.plan];
+  const totalMensual = totalesCD.total;
   const el = document.getElementById('renewal-card');
   const subEl = document.getElementById('renewal-sub');
 
@@ -706,6 +741,23 @@ function renderRenewal(){
     premium: ['Todo lo del Pro','Spot en el tótem de la plaza','Video comercial Fenlora','Badge verificado en el mapa'],
   };
   const includes = INCLUDES[n.plan] || INCLUDES.basic;
+  // Poblar desglose visual
+  setTimeout(function(){
+    var listaEl = document.getElementById('cd-desglose-lista');
+    var totalEl = document.getElementById('cd-total-display');
+    if(listaEl){
+      var html = '<div style="display:flex;justify-content:space-between;align-items:center;font-size:12px;color:var(--text2)">'
+        +'<span>📌 Plan base ('+n.planNombre+')</span>'
+        +'<span style="font-family:DM Mono,monospace;color:var(--text)">'+fmtPrice(precio)+'/mes</span></div>';
+      totalesCD.detalle.forEach(function(a){
+        html += '<div style="display:flex;justify-content:space-between;align-items:center;font-size:12px;color:var(--text2)">'
+          +'<span>'+a.icon+' '+a.nombre+'</span>'
+          +'<span style="font-family:DM Mono,monospace;color:var(--gold)">+'+fmtPrice(a.precio)+'/mes</span></div>';
+      });
+      listaEl.innerHTML = html;
+    }
+    if(totalEl) totalEl.textContent = fmtPrice(totalMensual)+'/mes';
+  }, 50);
 
   if(!n.activo || n.diasParaVencer <= 0){
     subEl.textContent = '⚠️ Renueva ahora para volver a aparecer en el mapa';
@@ -716,26 +768,46 @@ function renderRenewal(){
   }
 
   // Mensaje de WhatsApp con TODO listo — el cliente solo da clic y envía
+  // Desglose de add-ons para WA
+  const desgloseLinesCD = totalesCD.detalle.map(function(a){
+    return '  + '+a.icon+' '+a.nombre+': '+fmtPrice(a.precio)+'/mes';
+  });
+  const desgloseTextoCD = '• Plan base ('+n.planNombre+'): '+fmtPrice(precio)+'/mes'
+    + (desgloseLinesCD.length ? '\n' + desgloseLinesCD.join('\n') : '')
+    + '\n• *Total: '+fmtPrice(totalMensual)+'/mes*';
+
   const msgWA = `Hola Fenlora 👋 Soy *${n.nombre}*.
 
 Quiero renovar mi suscripción a ${n.ruta || "Fenlora Visual Studio"}
 
-📋 *Detalle:*
-• Plan: *${n.planNombre}*
-• Valor: *${fmtPrice(precio)}/mes*
+📋 *Detalle del cobro:*
+${desgloseTextoCD}
 • Período: ${n.mesReporte}
 
 ¿A qué número o cuenta transfiero? _(Desde ${n.ruta || "Fenlora Visual Studio"})_`;
 
   const msgComprobante = `Hola Fenlora 👋 Soy *${n.nombre}*.
 
-✅ Ya realicé el pago de *${fmtPrice(precio)}* para renovar mi Plan ${n.planNombre} de ${n.ruta || "Fenlora Visual Studio"}
+✅ Ya realicé el pago de *${fmtPrice(totalMensual)}* para renovar mi plan de ${n.ruta || "Fenlora Visual Studio"}
+
+📋 *Detalle:*
+${desgloseTextoCD}
 
 Adjunto el comprobante. Por favor confirmar la activación.
 _(Desde ${n.ruta || "Fenlora Visual Studio"})_`;
 
   el.innerHTML = `
   <div class="renewal-card">
+
+    <!-- DESGLOSE DE SERVICIOS ACTIVOS -->
+    <div id="cd-desglose-servicios" style="background:rgba(200,134,10,.06);border:1px solid rgba(200,134,10,.15);border-radius:12px;padding:14px 16px;margin-bottom:16px">
+      <div style="font-size:10px;font-weight:600;color:var(--gold);letter-spacing:.08em;text-transform:uppercase;margin-bottom:10px">📋 Tu facturación mensual</div>
+      <div id="cd-desglose-lista" style="display:flex;flex-direction:column;gap:6px"></div>
+      <div style="border-top:1px solid rgba(200,134,10,.2);margin-top:10px;padding-top:10px;display:flex;justify-content:space-between;align-items:center">
+        <span style="font-size:12px;color:var(--text2);font-weight:600">Total mensual</span>
+        <span id="cd-total-display" style="font-size:18px;font-weight:700;color:var(--gold)">—</span>
+      </div>
+    </div>
 
     <!-- HEADER PLAN -->
     <div class="renewal-plan-header">
@@ -867,6 +939,23 @@ function renderUpsell(){
     premium:['Todo lo del plan Pro','Spot en el tótem de la Plaza Central','Video comercial producido por Fenlora','Badge "Verificado Fenlora" en el mapa','Punto destacado al inicio del mapa','Reportes mensuales avanzados'],
   };
   const includes = INCLUDES[n.plan] || INCLUDES.basic;
+  // Poblar desglose visual
+  setTimeout(function(){
+    var listaEl = document.getElementById('cd-desglose-lista');
+    var totalEl = document.getElementById('cd-total-display');
+    if(listaEl){
+      var html = '<div style="display:flex;justify-content:space-between;align-items:center;font-size:12px;color:var(--text2)">'
+        +'<span>📌 Plan base ('+n.planNombre+')</span>'
+        +'<span style="font-family:DM Mono,monospace;color:var(--text)">'+fmtPrice(precio)+'/mes</span></div>';
+      totalesCD.detalle.forEach(function(a){
+        html += '<div style="display:flex;justify-content:space-between;align-items:center;font-size:12px;color:var(--text2)">'
+          +'<span>'+a.icon+' '+a.nombre+'</span>'
+          +'<span style="font-family:DM Mono,monospace;color:var(--gold)">+'+fmtPrice(a.precio)+'/mes</span></div>';
+      });
+      listaEl.innerHTML = html;
+    }
+    if(totalEl) totalEl.textContent = fmtPrice(totalMensual)+'/mes';
+  }, 50);
 
   // Subtítulo según urgencia
   if(!n.activo || n.diasParaVencer <= 0){

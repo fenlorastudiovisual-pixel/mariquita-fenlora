@@ -4377,7 +4377,7 @@ function actualizarDashboard(){
   var pausa    = CLIENTS.filter(function(c){ return c.estado==='pausa'; });
 
   // Proyección = suma de precios de activos
-  var proyeccion = activos.reduce(function(s,c){ return s+(CONFIG.planes[c.plan]?.precio||0); },0);
+  var proyeccion = activos.reduce(function(s,c){ return s + calcularTotalCliente(c).total; },0);
 
   // Confirmado = clientes cuya fecha_inicio es este mes
   var confirmado = CLIENTS.filter(function(c){
@@ -4499,12 +4499,43 @@ function enviarTodosRecordatorios(){
   targets.forEach(function(c, i){
     var tel = (c.tel||'').replace(/[^0-9]/g,'');
     if(!tel.startsWith('57')) tel='57'+tel;
-    var precio = CONFIG.planes[c.plan]?.precio || 0;
-    var msg = encodeURIComponent('Hola *'+c.nombre+'* \u{1F44B}\n\nTe recordamos que tu suscripción a Fenlora vence el *'+c.vence+'*.\n\nValor a renovar: *$'+precio.toLocaleString('es-CO')+'/mes*\n\nPara renovar realiza el pago a Nequi: '+((CONFIG.fenlora&&CONFIG.fenlora.tel)||'311 274 6813')+'.\n\n_Fenlora Visual Studio_');
+    var totalesR = calcularTotalCliente(c);
+    var desgloseR = desgloseWA(c);
+    var msg = encodeURIComponent('Hola *'+c.nombre+'* \u{1F44B}\n\nTe recordamos que tu suscripción a Fenlora vence el *'+c.vence+'*.\n\nDetalle del cobro:\n'+desgloseR+'\n\nPara renovar realiza el pago a Nequi: '+((CONFIG.fenlora&&CONFIG.fenlora.tel)||'311 274 6813')+'.\n\n_Fenlora Visual Studio_');
     setTimeout(function(){ window.open('https://wa.me/'+tel+'?text='+msg,'_blank'); }, i*600);
   });
   var el=document.getElementById('renov-recordatorios'); if(el) el.textContent=targets.length;
   showNotif('✓ Recordatorios enviados a '+targets.length+' negocios');
+}
+
+// ── Calcular total mensual de un cliente (plan + add-ons mensuales) ──
+function calcularTotalCliente(c){
+  var base = CONFIG.planes[c.plan]?.precio || 0;
+  var addons = CONFIG.addons || {};
+  var listaActiva = (c.addons && c.addons.lista) ? c.addons.lista
+                    : JSON.parse(localStorage.getItem('fenlora_addons_'+c.id)||'[]');
+  var totalAddons = listaActiva.reduce(function(sum, nombre){
+    var a = addons[nombre];
+    if(!a || a.tipo !== 'mes') return sum; // solo mensuales
+    return sum + (a.precio || 0);
+  }, 0);
+  return { base: base, addons: totalAddons, total: base + totalAddons, lista: listaActiva };
+}
+
+// ── Generar desglose de add-ons para mensaje WA ──
+function desgloseWA(c){
+  var t = calcularTotalCliente(c);
+  var addons = CONFIG.addons || {};
+  var lineas = [];
+  t.lista.forEach(function(nombre){
+    var a = addons[nombre];
+    if(!a || a.tipo !== 'mes') return;
+    lineas.push('  + '+nombre+': $'+(a.precio||0).toLocaleString('es-CO')+'/mes');
+  });
+  var texto = 'Plan base ('+( CONFIG.planes[c.plan]?.nombre||c.plan)+'): $'+t.base.toLocaleString('es-CO')+'/mes';
+  if(lineas.length) texto += '\n' + lineas.join('\n');
+  texto += '\n\n*Total a pagar: $'+t.total.toLocaleString('es-CO')+'/mes*';
+  return texto;
 }
 function actualizarRenovaciones(){
   actualizarMetricasRenovaciones();
@@ -4531,14 +4562,16 @@ function actualizarRenovaciones(){
     else if(diasRestantes <= 5)    { estado='⚠ Urgente';  estadoColor='#FFB300'; }
     else if(diasRestantes <= 15)   { estado='Por vencer';  estadoColor='#EFA030'; }
     else                           { estado='Al día';      estadoColor='#4CAF82'; }
-    var precio = CONFIG.planes[c.plan]?.precio || 0;
+    var totales = calcularTotalCliente(c);
     var tel = (c.tel||'').replace(/[^0-9]/g,'');
     if(tel && !tel.startsWith('57')) tel='57'+tel;
-    var waMsgEnc = encodeURIComponent('Hola *'+c.nombre+'* 👋\n\nTe recordamos que tu suscripción a Fenlora vence el *'+c.vence+'*.\n\nValor a renovar: *$'+precio.toLocaleString('es-CO')+'/mes*\n\nPara renovar escríbenos o realiza el pago a:\nNequi: '+((CONFIG.fenlora&&CONFIG.fenlora.tel)||'311 274 6813')+'.\n\n_Fenlora Visual Studio_');
-    return '<tr>'
-      +'<td style="font-weight:500;color:var(--text)">'+c.nombre+'</td>'
-      +'<td><span class="badge b-serv">'+(CONFIG.planes[c.plan]?.nombre||c.plan)+'</span></td>'
-      +'<td style="color:var(--gold);font-weight:500">$'+precio.toLocaleString('es-CO')+'</td>'
+    var desglose = desgloseWA(c);
+    var waMsgEnc = encodeURIComponent('Hola *'+c.nombre+'* 👋\n\nTe recordamos que tu suscripción a Fenlora vence el *'+c.vence+'*.\n\nDetalle del cobro:\n'+desglose+'\n\nPara renovar realiza el pago a Nequi: '+((CONFIG.fenlora&&CONFIG.fenlora.tel)||'311 274 6813')+'.\n\n_Fenlora Visual Studio_');
+    var planLabel = CONFIG.planes[c.plan]?.nombre || c.plan;
+    var addonCount = totales.lista.filter(function(n){ var a=(CONFIG.addons||{})[n]; return a&&a.tipo==='mes'; }).length;
+    var planBadge = planLabel + (addonCount ? ' +'+addonCount+' add-on'+(addonCount>1?'s':'') : '');
+    return '<tr>'      +'<td style="font-weight:500;color:var(--text)">'+c.nombre+'</td>'
+      +'<td><span class="badge b-serv" title="'+planBadge+'">'+planBadge+'</span></td>'      +'<td style="color:var(--gold);font-weight:500" title="Base: $'+totales.base.toLocaleString('es-CO')+' + Add-ons: $'+totales.addons.toLocaleString('es-CO')+'">$'+totales.total.toLocaleString('es-CO')+'</td>'
       +'<td style="font-family:DM Mono,monospace;font-size:11.5px">'+c.vence+'</td>'
       +'<td>'+(tel?'<a href="https://wa.me/'+tel+'?text='+waMsgEnc+'" target="_blank" style="padding:3px 10px;font-size:10.5px;border-radius:6px;border:1px solid rgba(37,168,100,.3);background:rgba(37,168,100,.08);color:#25A864;text-decoration:none">📤 WA</a>':'—')+'</td>'
       +'</tr>';

@@ -967,11 +967,31 @@ function suscribirCambiosEnVivo() {
         if (idx >= 0) {
           PUNTOS[idx].disponible = updated.disponible;
           PUNTOS[idx].horario = updated.horario || PUNTOS[idx].horario;
+          // Sincronizar is_active — pausa/reactivación desde el admin
+          if (typeof updated.is_active !== 'undefined') {
+            PUNTOS[idx].activo = updated.is_active;
+          }
           const markerObj = markers.find(function(m){ return String(m.id) === String(updated.id); });
           const p = PUNTOS[idx];
+          // Si el negocio fue pausado — quitar pin del mapa inmediatamente
+          if (p.activo === false) {
+            if (markerObj) {
+              map.removeLayer(markerObj.mk);
+              const mi = markers.findIndex(function(m){ return String(m.id) === String(updated.id); });
+              if (mi >= 0) markers.splice(mi, 1);
+            }
+            if (currentPunto && String(currentPunto.id) === String(updated.id)) closePanel();
+            return;
+          }
+          // Si el negocio fue reactivado y no tenía marker — agregarlo
+          if (p.activo !== false && !markerObj) {
+            const mk = L.marker(p.coords, {icon: makeIcon(p)}).addTo(map);
+            mk.on('click', function(){ openPanel(p); });
+            markers.push({mk: mk, cat: p.cat, id: p.id, coords: p.coords});
+            return;
+          }
           if (TRANS_CATS.has(p.cat)) {
             if (p.disponible) {
-              // Se activó — agregar al mapa si no estaba
               if (!markerObj) {
                 const mk = L.marker(p.coords, {icon: makeIcon(p)}).addTo(map);
                 mk.on('click', function(){ openPanel(p); });
@@ -980,7 +1000,6 @@ function suscribirCambiosEnVivo() {
                 markerObj.mk.setIcon(makeIcon(p));
               }
             } else {
-              // Se desactivó — quitar del mapa
               if (markerObj) {
                 map.removeLayer(markerObj.mk);
                 const mi = markers.findIndex(function(m){ return String(m.id) === String(updated.id); });

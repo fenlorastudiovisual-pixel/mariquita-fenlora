@@ -331,56 +331,62 @@ html,body{width:100%;height:100%;overflow:hidden;font-family:DM Sans,sans-serif;
 @media(max-width:600px){
   #panel{width:100%;border-radius:16px 16px 0 0}
   .brand h1 span{display:none}
-  #fen-btn span{display:none}
-  /* MOBILE HEADER — 2 filas limpias */
-  #hdr{padding:0;gap:0;flex-wrap:nowrap;flex-direction:column;height:auto;min-height:unset}
-  /* ── Fila 1: logo + título/selector + botones control ── */
-  .brand{order:1;display:flex;align-items:center;gap:5px;padding:5px 10px;width:100%;box-sizing:border-box;flex-shrink:0;min-width:0}
+
+  /* ── Header: 2 filas exactas ── */
+  #hdr{padding:0;gap:0;flex-direction:column;flex-wrap:nowrap;height:auto}
+
+  /* Fila 1: .brand ocupa todo el ancho, flex horizontal, todo en una línea */
+  .brand{
+    display:flex;align-items:center;flex-wrap:nowrap;
+    width:100%;box-sizing:border-box;
+    padding:5px 8px;gap:4px;
+    overflow:hidden
+  }
   .brand .logo-c{flex-shrink:0}
-  .brand h1{font-size:10.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:1;min-width:0}
-  #mun-selector{flex-shrink:0;padding:3px 7px;font-size:10px}
-  #mun-selector span{font-size:10px}
-  #mun-dropdown{left:auto;right:0;min-width:200px;top:calc(100% + 4px)}
-  /* Botones control en fila 1 — compactos */
-  #btn-rutas{order:1;flex-shrink:0;padding:3px 7px;font-size:10px;margin-left:2px}
-  #btn-lang{order:1;flex-shrink:0;padding:3px 7px;font-size:10px}
-  #fen-btn{order:1;flex-shrink:0;padding:3px 7px}
+  .brand h1{font-size:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:1;min-width:0;margin:0}
+  #mun-selector{flex-shrink:0;padding:2px 6px;font-size:9.5px}
+  #mun-selector span{font-size:9.5px}
+  #mun-dropdown{position:absolute;left:auto;right:0;min-width:190px;top:calc(100% + 4px);z-index:1100}
+  #btn-rutas{flex-shrink:0;padding:3px 6px;font-size:9px;margin-left:0}
+  #btn-lang{flex-shrink:0;padding:3px 6px;font-size:9px}
+  #search-wrap{flex-shrink:0;position:static;margin-left:0}
+  #search-icon{width:26px;height:26px;font-size:12px;backdrop-filter:none;background:rgba(255,255,255,.08)}
+  #fen-btn{flex-shrink:0;padding:3px 6px;font-size:9px}
   #fen-btn span{display:none}
-  #search-wrap{order:1;flex-shrink:0;position:static;display:flex;align-items:center}
-  #search-icon{backdrop-filter:none;background:rgba(255,255,255,.08);width:28px;height:28px;font-size:13px}
-  /* ── Fila 2: filtros en scroll horizontal ── */
-  #filters{order:2;width:100%;margin-left:0;padding:3px 8px;border-top:1px solid rgba(200,134,10,.1);justify-content:flex-start;flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none}
-  #filters::-webkit-scrollbar{display:none}
-  .fb{padding:3px 8px;font-size:9.5px;flex-shrink:0}
-  /* Caja de búsqueda: OCULTA por defecto, aparece flotando bajo el header al abrir */
-  #search-input-box{display:none;position:fixed;top:var(--hdr-h,88px);right:0;left:0;
-    width:auto!important;overflow:visible;
-    background:rgba(28,18,8,.97);padding:8px 12px;
+
+  /* Caja de búsqueda flotante al abrirse */
+  #search-input-box{display:none;position:fixed;top:var(--hdr-h,64px);right:0;left:0;
+    width:auto!important;background:rgba(28,18,8,.97);padding:8px 12px;
     border-bottom:1px solid rgba(200,134,10,.25);
     box-shadow:0 6px 24px rgba(0,0,0,.5);z-index:1020}
   #search-input-box.open{display:flex}
   #search-input{width:100%;border-radius:10px;padding:10px 14px 10px 36px}
-  #search-results{position:fixed;top:calc(var(--hdr-h,88px) + 52px);left:0;right:0;
+  #search-results{position:fixed;top:calc(var(--hdr-h,64px) + 52px);left:0;right:0;
     width:100%;border-radius:0;border-left:none;border-right:none;max-height:55vh}
-  /* Stops bar en ruta: más alto porque tiene chips + botón salir */
+
+  /* Fila 2: filtros scroll horizontal */
+  #filters{
+    order:unset;width:100%;margin-left:0;
+    padding:3px 8px;
+    border-top:1px solid rgba(200,134,10,.1);
+    justify-content:flex-start;flex-wrap:nowrap;
+    overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none
+  }
+  #filters::-webkit-scrollbar{display:none}
+  .fb{padding:3px 7px;font-size:9px;flex-shrink:0}
+
+  /* Resto de elementos */
   #btn-next-stop{bottom:215px;right:12px;font-size:11px;padding:9px 14px}
-  /* Lightbox más alto en móvil */
   #pgal,.gslide{height:220px}
-  /* Acciones en columna */
   #pacts{flex-direction:column}
-  /* Leyenda: visible pero compacta, esquina inferior izquierda */
   #legend{display:block;padding:7px 10px;bottom:14px;left:8px;max-width:160px}
   #legend h3{font-size:7.5px;margin-bottom:4px}
   .li{font-size:9px;margin-bottom:2px}
   .ld{width:7px;height:7px}
-  /* Contador */
   #cnt{font-size:9.5px;padding:4px 10px;bottom:14px;right:8px}
-  /* Clima */
   #clima-widget{bottom:12px;left:50%;transform:translateX(-50%)}
-  /* Pasaporte flotante */
   #passport-btn{bottom:16px!important;right:8px!important}
-  /* Alerta clima */
-  #clima-alerta{top:var(--hdr-h,88px)}
+  #clima-alerta{top:var(--hdr-h,64px)}
 }
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -418,6 +424,19 @@ html,body{width:100%;height:100%;overflow:hidden;font-family:DM Sans,sans-serif;
       </div>
     </div>
   </div><!-- fin mun-selector -->
+  <!-- Botones de control en fila 1 (se muestran en .brand en mobile) -->
+  <button id="btn-rutas" onclick="toggleRoutes()">🧭 <span data-i18n="routes-btn">Rutas</span></button>
+  <button id="btn-lang" onclick="toggleLang()">ES · EN</button>
+  <div id="search-wrap">
+    <div id="search-icon" onclick="toggleSearch()" title="Buscar">🔍</div>
+    <div id="search-input-box">
+      <input id="search-input" data-i18n-placeholder="search-placeholder" placeholder="Buscar: lechona, piscina, masaje, tour..." oninput="doSearch(this.value)">
+    </div>
+    <div id="search-results"></div>
+  </div>
+  <a id="fen-btn" href="#" onclick="openFenlora(event)">
+    <div class="pulse"></div><span>Fenlora</span>
+  </a>
   </div><!-- fin brand -->
 
   <div id="filters">
@@ -431,19 +450,6 @@ html,body{width:100%;height:100%;overflow:hidden;font-family:DM Sans,sans-serif;
     <button class="fb on" data-g="nocturna"><div class="d" style="background:#6C3483"></div><span data-i18n="fb-nocturna">Nocturna</span></button>
     <button class="fb on" data-g="salud"><div class="d" style="background:#E74C3C"></div><span data-i18n="fb-salud">Salud</span></button>
   </div>
-  <button id="btn-rutas" onclick="toggleRoutes()">🧭 <span data-i18n="routes-btn">Rutas</span></button>
-  <button id="btn-lang" onclick="toggleLang()">ES · EN</button>
-  <!-- Buscador: icono en header row 1 en mobile, absoluto en desktop -->
-  <div id="search-wrap">
-    <div id="search-icon" onclick="toggleSearch()" title="Buscar">🔍</div>
-    <div id="search-input-box">
-      <input id="search-input" data-i18n-placeholder="search-placeholder" placeholder="Buscar: lechona, piscina, masaje, tour..." oninput="doSearch(this.value)">
-    </div>
-    <div id="search-results"></div>
-  </div>
-  <a id="fen-btn" href="#" onclick="openFenlora(event)">
-    <div class="pulse"></div><span>Fenlora</span>
-  </a>
 </header>
 
 <!-- DROPDOWN TRANSPORTE (flotante bajo el botón) -->

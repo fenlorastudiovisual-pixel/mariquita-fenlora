@@ -1783,8 +1783,41 @@ function normStr(s){
 }
 
 function getMenuKeywords(p){
-  if(!p.menu || !p.menu.items) return [];
-  return p.menu.items.map(function(it){ return normStr(it.name); });
+  if(!p.menu) return [];
+  var kws = [];
+  // Items del menú: nombre + descripción
+  if(p.menu.items && p.menu.items.length){
+    p.menu.items.forEach(function(it){
+      if(it.name) kws.push(normStr(it.name));
+      if(it.desc) kws.push(normStr(it.desc));
+    });
+  }
+  // Categorías del menú (ej: "Platos fuertes", "Bebidas", "Postres")
+  if(p.menu.cats && p.menu.cats.length){
+    p.menu.cats.forEach(function(cat){ if(cat) kws.push(normStr(cat)); });
+  }
+  // Promo del menú
+  if(p.menu.promo){
+    if(p.menu.promo.big) kws.push(normStr(p.menu.promo.big));
+    if(p.menu.promo.sub) kws.push(normStr(p.menu.promo.sub));
+  }
+  return kws;
+}
+
+// Busca el item específico del menú que hace match para mostrar en el hint
+function getMatchedMenuItem(p, terms){
+  if(!p.menu || !p.menu.items) return null;
+  for(var i=0; i<p.menu.items.length; i++){
+    var it = p.menu.items[i];
+    var nameN = normStr(it.name);
+    var descN = normStr(it.desc||'');
+    for(var j=0; j<terms.length; j++){
+      if(nameN.indexOf(terms[j])>=0 || descN.indexOf(terms[j])>=0){
+        return it.name; // retorna el nombre original (no normalizado)
+      }
+    }
+  }
+  return null;
 }
 
 // Alias de búsqueda por categoría — palabras que el turista usa en la vida real
@@ -1858,8 +1891,8 @@ function doSearch(q){
       if(nombre.indexOf(t)      >= 0) score += 10;
       if(catLbl.indexOf(t)      >= 0) score += 8;
       if(catAliases.indexOf(t)  >= 0) score += 7;
+      if(menuKws.indexOf(t)     >= 0) score += 9; // menú tiene alto peso
       if(idxKeys.indexOf(t)     >= 0) score += 6;
-      if(menuKws.indexOf(t)     >= 0) score += 5;
       if(sub.indexOf(t)         >= 0) score += 4;
       if(desc.indexOf(t)        >= 0) score += 2;
     });
@@ -1867,7 +1900,7 @@ function doSearch(q){
   })
   .filter(function(x){ return x.score > 0; })
   .sort(function(a,b){ return b.score - a.score; })
-  .slice(0,7);
+  .slice(0,10);
 
   if(!scored.length){
     results.innerHTML = '<div style="padding:16px 14px;font-size:12px;color:rgba(253,246,236,.4);text-align:center">Sin resultados para <strong style="color:rgba(253,246,236,.7)">' + q2 + '</strong><br><span style="font-size:10.5px;color:rgba(253,246,236,.3)">Intenta: taxi, lechona, masaje, tour, cascada...</span></div>';
@@ -1883,16 +1916,10 @@ function doSearch(q){
     var menuItems = getMenuKeywords(p);
     var kwn = normStr(q2);
     var hint = c.label;
-    var matchedMenu = '';
+    var matchedMenuName = getMatchedMenuItem(p, terms);
     var matchedKw = '';
 
-    for(var i=0; i<menuItems.length; i++){
-      if(menuItems[i].indexOf(kwn) >= 0 || kwn.indexOf(menuItems[i]) >= 0){
-        matchedMenu = menuItems[i];
-        break;
-      }
-    }
-    if(!matchedMenu){
+    if(!matchedMenuName){
       for(var j=0; j<idxKeys.length; j++){
         if(idxKeys[j].indexOf(kwn) >= 0 || kwn.indexOf(idxKeys[j]) >= 0){
           matchedKw = idxKeys[j];
@@ -1900,7 +1927,7 @@ function doSearch(q){
         }
       }
     }
-    if(matchedMenu) hint = c.emoji + ' ' + matchedMenu.charAt(0).toUpperCase() + matchedMenu.slice(1);
+    if(matchedMenuName) hint = '🍽️ Tiene: ' + matchedMenuName;
     else if(matchedKw) hint = c.emoji + ' ' + matchedKw.charAt(0).toUpperCase() + matchedKw.slice(1);
     else hint = c.emoji + ' ' + c.label;
 

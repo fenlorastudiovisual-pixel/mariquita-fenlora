@@ -4702,27 +4702,22 @@ function calcularTotalCliente(c){
 // ── Generar desglose completo para mensaje WA ──
 function desgloseWA(c){
   var t = calcularTotalCliente(c);
+  var planNombre = (CONFIG.planes[c.plan] && CONFIG.planes[c.plan].nombre) ? CONFIG.planes[c.plan].nombre : c.plan;
   var lineas = [];
   // Plan base
-  lineas.push('Plan base ('+( CONFIG.planes[c.plan]?.nombre||c.plan)+'): $'+t.base.toLocaleString('es-CO')+'/mes');
+  lineas.push('📌 Plan '+planNombre+': $'+t.base.toLocaleString('es-CO')+'/mes');
   // Add-ons mensuales
   t.detallesMes.forEach(function(a){
-    lineas.push('  + '+a.nombre+': $'+a.precio.toLocaleString('es-CO')+'/mes');
+    lineas.push('  + '+a.nombre+' (mensual): $'+a.precio.toLocaleString('es-CO'));
   });
-  if(t.detallesMes.length){
-    lineas.push('*Subtotal mensual: $'+t.total.toLocaleString('es-CO')+'/mes*');
-  } else {
-    lineas.push('*Total mensual: $'+t.total.toLocaleString('es-CO')+'/mes*');
-  }
   // Add-ons pago único
-  if(t.detallesUnico.length){
-    lineas.push('');
-    lineas.push('Servicios adicionales (pago único):');
-    t.detallesUnico.forEach(function(a){
-      lineas.push('  + '+a.nombre+': $'+a.precio.toLocaleString('es-CO'));
-    });
-    lineas.push('*Total único pendiente: $'+t.unico.toLocaleString('es-CO')+'*');
-  }
+  t.detallesUnico.forEach(function(a){
+    lineas.push('  + '+a.nombre+' (único): $'+a.precio.toLocaleString('es-CO'));
+  });
+  // Total unificado — un solo valor claro
+  var totalFinal = t.base + (t.addons||0) + (t.unico||0);
+  lineas.push('');
+  lineas.push('*💰 Total a pagar: $'+totalFinal.toLocaleString('es-CO')+'*');
   return lineas.join('\n');
 }
 // ── TOOLTIP PLAN: posicionado con fixed para escapar del overflow ──

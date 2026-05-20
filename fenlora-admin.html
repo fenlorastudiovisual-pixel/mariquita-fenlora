@@ -283,33 +283,35 @@ tr:hover td{background:var(--bg3)}
 .module.active{display:block}
 
 /* ── TOOLTIP PLAN BADGE ── */
-.plan-tip{position:relative;cursor:default}
-.plan-tip .tip-box{
-  display:none;position:absolute;z-index:999;
-  left:50%;top:calc(100% + 6px);transform:translateX(-50%);
-  background:#1C1C1C;border:1px solid rgba(255,255,255,0.14);
-  border-radius:10px;padding:10px 13px;min-width:200px;max-width:280px;
-  box-shadow:0 8px 24px rgba(0,0,0,.5);pointer-events:none;
+.plan-tip{cursor:default}
+/* Tooltip global fixed — fuera del overflow de la tabla */
+#plan-tooltip{
+  display:none;position:fixed;z-index:9999;
+  background:#1C1C1C;border:1px solid rgba(255,255,255,0.18);
+  border-radius:12px;padding:12px 15px;min-width:220px;max-width:300px;
+  box-shadow:0 12px 32px rgba(0,0,0,.7);pointer-events:none;
   font-family:'Instrument Sans',sans-serif;
 }
-.plan-tip:hover .tip-box{display:block}
-.tip-box::before{
-  content:'';position:absolute;top:-5px;left:50%;transform:translateX(-50%);
-  width:8px;height:8px;background:#1C1C1C;border-left:1px solid rgba(255,255,255,0.14);
-  border-top:1px solid rgba(255,255,255,0.14);rotate:45deg;
+#plan-tooltip::before{
+  content:'';position:absolute;top:-5px;left:20px;
+  width:8px;height:8px;background:#1C1C1C;
+  border-left:1px solid rgba(255,255,255,0.18);
+  border-top:1px solid rgba(255,255,255,0.18);
+  rotate:45deg;
 }
-.tip-row{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:3px 0;font-size:11px}
-.tip-row:not(:last-child){border-bottom:1px solid rgba(255,255,255,.06)}
-.tip-label{color:#8A8680}
+.tip-row{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:4px 0;font-size:11.5px}
+.tip-row+.tip-row{border-top:1px solid rgba(255,255,255,.06)}
+.tip-label{color:#8A8680;display:flex;align-items:center;gap:4px}
 .tip-val{color:#F0EDE8;font-weight:600;white-space:nowrap}
-.tip-total{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:5px 0 0;margin-top:4px;border-top:1px solid rgba(200,134,10,.3);font-size:11.5px}
-.tip-total .tip-label{color:var(--gold)}
-.tip-total .tip-val{color:var(--gold);font-size:12px}
-.tip-badge-mes{font-size:9px;background:rgba(26,122,74,.2);color:#4CAF82;border-radius:4px;padding:1px 4px;margin-left:3px}
-.tip-badge-uno{font-size:9px;background:rgba(200,134,10,.2);color:var(--gold);border-radius:4px;padding:1px 4px;margin-left:3px}
+.tip-total{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:6px 0 0;margin-top:5px;border-top:1px solid rgba(200,134,10,.4);font-size:12px}
+.tip-total .tip-label{color:var(--gold);font-weight:600}
+.tip-total .tip-val{color:var(--gold);font-size:13px;font-weight:700}
+.tip-badge-mes{font-size:9px;background:rgba(26,122,74,.25);color:#4CAF82;border-radius:4px;padding:1px 5px}
+.tip-badge-uno{font-size:9px;background:rgba(200,134,10,.25);color:#EFA030;border-radius:4px;padding:1px 5px}
 </style>
 </head>
 <body>
+<div id="plan-tooltip"></div>
 
 <!-- ═══════════════════════════════════════════
      LOGIN SCREEN
@@ -4723,6 +4725,27 @@ function desgloseWA(c){
   }
   return lineas.join('\n');
 }
+// ── TOOLTIP PLAN: posicionado con fixed para escapar del overflow ──
+function showPlanTip(e, el){
+  var tip = document.getElementById('plan-tooltip');
+  if(!tip) return;
+  var html = decodeURIComponent(el.dataset.tip || '');
+  if(!html) return;
+  tip.innerHTML = html;
+  tip.style.display = 'block';
+  var rect = el.getBoundingClientRect();
+  var tipW = 240;
+  var left = rect.left;
+  // Evitar que se salga por la derecha
+  if(left + tipW > window.innerWidth - 12) left = window.innerWidth - tipW - 12;
+  tip.style.left = left + 'px';
+  tip.style.top  = (rect.bottom + 8) + 'px';
+}
+function hidePlanTip(){
+  var tip = document.getElementById('plan-tooltip');
+  if(tip) tip.style.display = 'none';
+}
+
 function actualizarRenovaciones(){
   actualizarMetricasRenovaciones();
   var hoy = new Date();
@@ -4788,8 +4811,9 @@ function actualizarRenovaciones(){
       });
     }
     tipRows += '<div class="tip-total"><span class="tip-label">Total</span><span class="tip-val">$'+valorTotal.toLocaleString('es-CO')+'</span></div>';
+    var tipHtml = encodeURIComponent(tipRows);
     var planCell = addonCountTotal
-      ? '<span class="badge b-serv plan-tip">'+planBadge+'<div class="tip-box">'+tipRows+'</div></span>'
+      ? '<span class="badge b-serv plan-tip" data-tip="'+tipHtml+'" onmouseenter="showPlanTip(event,this)" onmouseleave="hidePlanTip()">'+planBadge+'</span>'
       : '<span class="badge b-serv">'+planBadge+'</span>';
 
     return '<tr>'      +'<td style="font-weight:500;color:var(--text)">'+c.nombre+'</td>'      +'<td>'+planCell+'</td>'      +'<td style="color:var(--gold);font-weight:500" title="'+tooltipValor+'">'+valorDisplay+badgeUnico+'</td>'      +'<td style="font-family:DM Mono,monospace;font-size:11.5px">'+c.vence+'</td>'      +'<td><span style="color:'+estadoColor+';font-weight:600;font-size:11.5px">'+estado+'</span></td>'      +'<td>'+(tel?'<a href="https://wa.me/'+tel+'?text='+waMsgEnc+'" target="_blank" style="padding:3px 10px;font-size:10.5px;border-radius:6px;border:1px solid rgba(37,168,100,.3);background:rgba(37,168,100,.08);color:#25A864;text-decoration:none">📤 WA</a>':'—')+'</td>'      +'</tr>';

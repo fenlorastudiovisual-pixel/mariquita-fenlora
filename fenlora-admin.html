@@ -4480,7 +4480,7 @@ function actualizarMetricasRenovaciones() {
   var mora = CLIENTS.filter(function(c){ return c.estado === 'mora'; }).length;
   // Proyeccion = plan base + add-ons mensuales de cada cliente
   var proyeccion = CLIENTS.reduce(function(acc, c) {
-    return acc + calcularTotalCliente(c).total;
+    return acc + calcularTotalCliente(c).totalConUnico;
   }, 0);
   var el_mora = document.getElementById('renov-mora');
   var el_proy = document.getElementById('renov-proyeccion');
@@ -4507,7 +4507,7 @@ function actualizarDashboard(){
   var pausa    = CLIENTS.filter(function(c){ return c.estado==='pausa'; });
 
   // Proyección = suma de precios de activos
-  var proyeccion = activos.reduce(function(s,c){ return s + calcularTotalCliente(c).total; },0);
+  var proyeccion = activos.reduce(function(s,c){ return s + calcularTotalCliente(c).totalConUnico; },0);
 
   // Confirmado = clientes cuya fecha_inicio es este mes
   var confirmado = CLIENTS.filter(function(c){
@@ -4728,14 +4728,25 @@ function actualizarRenovaciones(){
     var desglose = desgloseWA(c);
     var waMsgEnc = encodeURIComponent('Hola *'+c.nombre+'* 👋\n\nTe recordamos que tu suscripción a Fenlora vence el *'+c.vence+'*.\n\nDetalle del cobro:\n'+desglose+'\n\nPara renovar realiza el pago a Nequi: '+((CONFIG.fenlora&&CONFIG.fenlora.tel)||'311 274 6813')+'.\n\n_Fenlora Visual Studio_');
     var planLabel = CONFIG.planes[c.plan]?.nombre || c.plan;
-    var addonCount = totales.lista.filter(function(n){ var a=(CONFIG.addons||{})[n]; return a&&a.tipo==='mes'; }).length;
-    var planBadge = planLabel + (addonCount ? ' +'+addonCount+' add-on'+(addonCount>1?'s':'') : '');
-        var valorDisplay = '$'+totales.total.toLocaleString('es-CO')+'/mes';
-    var tooltipValor = 'Plan base: $'+totales.base.toLocaleString('es-CO');
-    if(totales.detallesMes && totales.detallesMes.length) tooltipValor += ' + Servicios mes: $'+totales.addons.toLocaleString('es-CO');
-    if(totales.detallesUnico && totales.detallesUnico.length) tooltipValor += ' | Pago único pendiente: $'+totales.unico.toLocaleString('es-CO');
+    // Contar TODOS los add-ons (mensuales + únicos)
+    var addonCountMes   = totales.detallesMes   ? totales.detallesMes.length   : 0;
+    var addonCountUnico = totales.detallesUnico ? totales.detallesUnico.length : 0;
+    var addonCountTotal = addonCountMes + addonCountUnico;
+    var planBadge = planLabel + (addonCountTotal ? ' +'+addonCountTotal+' add-on'+(addonCountTotal>1?'s':'') : '');
+    // Valor total = plan base + mensuales + únicos
+    var valorTotal = totales.base + (totales.addons||0) + (totales.unico||0);
+    var valorDisplay = '$'+valorTotal.toLocaleString('es-CO');
+    // Tooltip con desglose completo
+    var tooltipLineas = ['Plan base ('+planLabel+'): $'+totales.base.toLocaleString('es-CO')+'/mes'];
+    if(totales.detallesMes && totales.detallesMes.length){
+      totales.detallesMes.forEach(function(a){ tooltipLineas.push('+ '+a.nombre+': $'+a.precio.toLocaleString('es-CO')+'/mes'); });
+    }
+    if(totales.detallesUnico && totales.detallesUnico.length){
+      totales.detallesUnico.forEach(function(a){ tooltipLineas.push('+ '+a.nombre+': $'+a.precio.toLocaleString('es-CO')+' (único)'); });
+    }
+    var tooltipValor = tooltipLineas.join(' | ');
     var badgeUnico = (totales.detallesUnico && totales.detallesUnico.length)
-      ? ' <span style="font-size:9px;background:rgba(200,134,10,.2);color:var(--gold);border-radius:4px;padding:1px 5px;margin-left:4px">+único</span>'
+      ? ' <span style="font-size:9px;background:rgba(200,134,10,.2);color:var(--gold);border-radius:4px;padding:1px 5px;margin-left:4px">incluye únicos</span>'
       : '';
     return '<tr>'      +'<td style="font-weight:500;color:var(--text)">'+c.nombre+'</td>'      +'<td><span class="badge b-serv" title="'+planBadge+'">'+planBadge+'</span></td>'      +'<td style="color:var(--gold);font-weight:500" title="'+tooltipValor+'">'+valorDisplay+badgeUnico+'</td>'      +'<td style="font-family:DM Mono,monospace;font-size:11.5px">'+c.vence+'</td>'      +'<td><span style="color:'+estadoColor+';font-weight:600;font-size:11.5px">'+estado+'</span></td>'      +'<td>'+(tel?'<a href="https://wa.me/'+tel+'?text='+waMsgEnc+'" target="_blank" style="padding:3px 10px;font-size:10.5px;border-radius:6px;border:1px solid rgba(37,168,100,.3);background:rgba(37,168,100,.08);color:#25A864;text-decoration:none">📤 WA</a>':'—')+'</td>'      +'</tr>';
   }).join('');

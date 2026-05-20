@@ -4001,10 +4001,10 @@ async function cargarClientesSupabase() {
   var FREE  = ['hist','pub'];
   try {
     var res = await fetch(
-      SUPA_URL_ADM + '/rest/v1/businesses?select=id,name,category,phone,email,description,address,is_active,plan_fenlora,municipio,addons,tiene_menu,docs,coords&order=name',
+      SUPA_URL_ADM + '/rest/v1/businesses?select=id,name,category,phone,is_active,plan_fenlora,municipio,addons,tiene_menu,docs&order=name',
       { headers: { 'apikey': SUPA_KEY_ADM, 'Authorization': 'Bearer ' + SUPA_KEY_ADM } }
     );
-    if(!res.ok){ console.warn('Supabase clientes error:', res.status); return; }
+    if(!res.ok){ var err=await res.text(); console.error('Supabase clientes error:', res.status, err); showNotif('⚠️ Error cargando clientes: '+res.status); return; }
     var data = await res.json();
     if(!Array.isArray(data)){ console.warn('Respuesta no es array:', data); return; }
     // Solo negocios de pago — sin transporte ni gratuitos
@@ -4026,10 +4026,10 @@ async function cargarClientesSupabase() {
         cat: row.category || 'serv',
         plan: row.plan_fenlora || 'basic',
         estado: row.is_active ? 'active' : 'inactivo',
-        dir: row.address || addons.direccion || '',
-        tel: row.phone || '',
-        email: row.email || addons.email || '',
-        desc: row.description || '',
+        dir: addons.direccion || addons.address || '',
+        tel: row.phone || addons.phone || '',
+        email: addons.email || '',
+        desc: addons.description || '',
         vistas: 0, wsp: 0, visPct: 0,
         vence: addons.fecha_vencimiento || '—',
         inicio: addons.fecha_inicio || '',

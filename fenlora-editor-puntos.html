@@ -859,6 +859,55 @@ async function init() {
   showToast('Cargando puntos…', 'info');
   await loadFromSupabase();
   renderList();
+  iniciarRealtime();
+}
+
+function iniciarRealtime() {
+  // Canal realtime: detecta cambios de otro usuario en tiempo real
+  _sb.channel('editor-puntos-sync')
+    .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'businesses' }, function(payload) {
+      var nuevo = sbRowToPoint(payload.new);
+      var existe = points.findIndex(function(p){ return p.id === nuevo.id; });
+      if(existe === -1){
+        points.push(nuevo);
+        renderList();
+        showToast('📍 Nuevo punto agregado por otro usuario: ' + nuevo.nombre, 'info');
+      }
+    })
+    .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'businesses' }, function(payload) {
+      var actualizado = sbRowToPoint(payload.new);
+      var idx = points.findIndex(function(p){ return p.id === actualizado.id; });
+      if(idx !== -1){
+        // Si es el punto seleccionado actualmente, no reemplazar el form (el usuario puede estar editando)
+        var estaSeleccionado = selected && selected.id === actualizado.id;
+        points[idx] = actualizado;
+        renderList();
+        if(estaSeleccionado){
+          showToast('⚠️ Este punto fue modificado por otro usuario', 'info');
+        }
+      }
+    })
+    .on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'businesses' }, function(payload) {
+      var eliminadoId = payload.old && payload.old.id;
+      if(!eliminadoId) return;
+      var idx = points.findIndex(function(p){ return p.sbId === eliminadoId || p.id === eliminadoId; });
+      if(idx !== -1){
+        var nombre = points[idx].nombre;
+        if(selected && selected.id === points[idx].id){
+          selected = null;
+          document.getElementById('editor-panel-inner') && (document.getElementById('editor-panel-inner').style.display = 'none');
+          document.getElementById('editor-empty') && (document.getElementById('editor-empty').style.display = '');
+        }
+        points.splice(idx, 1);
+        renderList();
+        showToast('🗑 Punto eliminado por otro usuario: ' + nombre, 'info');
+      }
+    })
+    .subscribe(function(status){
+      if(status === 'SUBSCRIBED'){
+        console.log('[Editor] Realtime activo — sincronización en vivo habilitada');
+      }
+    });
 }
 
 async function loadFromSupabase() {

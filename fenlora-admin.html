@@ -12,6 +12,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Fenlora Admin · Rutas Fenlora Visual</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Mono:wght@400;500&family=Instrument+Sans:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root {
@@ -467,6 +468,7 @@ tr:hover td{background:var(--bg3)}
       <div class="topbar-sub" id="topbar-sub">Resumen general · Mayo 2026</div>
     </div>
     <div class="topbar-right">
+      <span id="realtime-dot" title="Conectando..." style="display:inline-flex;align-items:center;gap:5px;font-size:11px;color:var(--text3);margin-right:4px"><span style="width:7px;height:7px;border-radius:50%;background:#888;display:inline-block;transition:background .3s" id="realtime-dot-circle"></span>Sync</span>
       <button class="btn" onclick="openPriceConfig()">⚙️ Precios</button>
       <button class="btn" onclick="showModule('alertas',null)">🔔 Nueva alerta</button>
       <button class="btn primary" onclick="openClient(null)">+ Nuevo cliente</button>
@@ -1718,6 +1720,130 @@ tr:hover td{background:var(--bg3)}
 <script>
 const SUPA_URL_ADM = 'https://ikcutinvnkktfasgnanv.supabase.co';
 const SUPA_KEY_ADM = 'sb_publishable_G_MCq1M-a_CM77AKPocYvA_KOgmiw7h';
+
+// ── CLIENTE SUPABASE (para realtime) ──
+const _sbAdmin = supabase.createClient(SUPA_URL_ADM, SUPA_KEY_ADM);
+
+// ── REALTIME ADMIN: sincronización en vivo con editor de puntos ──
+function iniciarRealtimeAdmin() {
+  _sbAdmin.channel('admin-businesses-sync')
+    .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'businesses' }, function(payload) {
+      // Nuevo negocio creado desde editor de puntos
+      var row = payload.new;
+      if(!row) return;
+      var addons = row.addons || {};
+      var yaExiste = CLIENTS.some(function(c){ return c.sbId === row.id; });
+      if(yaExiste) return;
+      // Filtrar: solo negocios de pago
+      var TRANS_RT = ['taxi','mototaxi','transporte','conductor','bus'];
+      var FREE_RT  = ['hist','pub','historico','publico'];
+      if(TRANS_RT.includes(row.category)) return;
+      if(FREE_RT.includes(row.category))  return;
+      if(row.plan_fenlora === 'free')     return;
+      var nuevoCliente = {
+        id: CLIENTS.length + Date.now(),
+        sbId: row.id,
+        nombre: row.name || '(Sin nombre)',
+        catLabel: (typeof CAT_LABELS !== 'undefined' ? CAT_LABELS[row.category] : null) || row.category || 'Servicio',
+        cat: row.category || 'serv',
+        plan: row.plan_fenlora || 'basic',
+        estado: row.is_active ? 'active' : 'inactivo',
+        dir: addons.direccion || '',
+        tel: row.phone || '',
+        email: addons.email || '',
+        vence: addons.fecha_vencimiento || '—',
+        inicio: addons.fecha_inicio || '',
+        notas: addons.notas_internas || '',
+        descuento: addons.descuento || null,
+        municipio: row.municipio || 'mariquita',
+        tiene_menu: row.tiene_menu || false,
+        addons: addons,
+        docs: row.docs || {},
+        vistas: 0, wsp: 0, visPct: 0,
+      };
+      CLIENTS.push(nuevoCliente);
+      filteredClients = [...CLIENTS];
+      try { renderClients(filteredClients); } catch(e){}
+      try { actualizarDashboard(); } catch(e){}
+      try { actualizarRenovaciones(); } catch(e){}
+      try { actualizarBadges(); } catch(e){}
+      showNotif('📍 Nuevo negocio agregado: ' + nuevoCliente.nombre);
+    })
+    .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'businesses' }, function(payload) {
+      var row = payload.new;
+      if(!row) return;
+      var idx = CLIENTS.findIndex(function(c){ return c.sbId === row.id; });
+      if(idx === -1) return; // No es un cliente de pago, ignorar
+      var addons = row.addons || {};
+      // Actualizar en memoria
+      Object.assign(CLIENTS[idx], {
+        nombre: row.name || CLIENTS[idx].nombre,
+        plan: row.plan_fenlora || CLIENTS[idx].plan,
+        estado: row.is_active ? (CLIENTS[idx].estado === 'pausa' ? 'pausa' : 'active') : 'inactivo',
+        tel: row.phone || CLIENTS[idx].tel,
+        municipio: row.municipio || CLIENTS[idx].municipio,
+        vence: addons.fecha_vencimiento || CLIENTS[idx].vence,
+        inicio: addons.fecha_inicio || CLIENTS[idx].inicio,
+        addons: addons,
+        tiene_menu: row.tiene_menu || false,
+      });
+      filteredClients = [...CLIENTS];
+      try { renderClients(filteredClients); } catch(e){}
+      try { actualizarDashboard(); } catch(e){}
+      try { actualizarRenovaciones(); } catch(e){}
+      try { renderAddonGrid(); } catch(e){}
+    })
+    .on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'businesses' }, function(payload) {
+      var deletedId = payload.old && payload.old.id;
+      if(!deletedId) return;
+      var idx = CLIENTS.findIndex(function(c){ return c.sbId === deletedId; });
+      if(idx === -1) return;
+      var nombre = CLIENTS[idx].nombre;
+      CLIENTS.splice(idx, 1);
+      filteredClients = [...CLIENTS];
+      try { renderClients(filteredClients); } catch(e){}
+      try { actualizarDashboard(); } catch(e){}
+      try { actualizarRenovaciones(); } catch(e){}
+      try { actualizarBadges(); } catch(e){}
+      showNotif('🗑 Negocio eliminado del sistema: ' + nombre);
+    })
+    .subscribe(function(status){
+      if(status === 'SUBSCRIBED'){
+        console.log('[Admin] Realtime activo — sincronización en vivo habilitada');
+        var circle = document.getElementById('realtime-dot-circle');
+        var label  = document.getElementById('realtime-dot');
+        if(circle){ circle.style.background = '#4CAF82'; }
+        if(label){ label.title = '✅ Sincronización en vivo activa'; label.style.color = '#4CAF82'; }
+      } else if(status === 'CHANNEL_ERROR' || status === 'TIMED_OUT'){
+        console.warn('[Admin] Realtime error — reconectando…');
+        var circle = document.getElementById('realtime-dot-circle');
+        var label  = document.getElementById('realtime-dot');
+        if(circle){ circle.style.background = '#E57373'; }
+        if(label){ label.title = '⚠️ Error de sincronización'; label.style.color = '#E57373'; }
+      }
+    });
+
+  // Canal reseñas — nuevas reseñas del mapa aparecen en admin al instante
+  _sbAdmin.channel('admin-reviews-sync')
+    .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'reviews' }, function(payload) {
+      var r = payload.new;
+      if(!r) return;
+      REVIEWS_ADMIN.unshift({
+        id: r.id,
+        business: r.business_name || '(Negocio)',
+        nombre: r.nombre || 'Anónimo',
+        rating: r.rating || 5,
+        texto: r.texto || '',
+        aprobada: r.aprobada || false,
+        fecha: (r.created_at||'').slice(0,10)
+      });
+      try { renderReviewsAdmin(); } catch(e){}
+      var br = document.getElementById('badge-resenas');
+      if(br){ var pendientes = REVIEWS_ADMIN.filter(function(x){return !x.aprobada;}).length; br.textContent = pendientes; br.style.display = pendientes ? '' : 'none'; }
+      showNotif('⭐ Nueva reseña de ' + (r.business_name||'un negocio'));
+    })
+    .subscribe();
+}
 // ══════════════════════════════════════════════════════════
 // 🔧 AUTO-LIMPIEZA DE DATOS CORRUPTOS (arrays vacíos)
 // Corre ANTES de inicializar cualquier variable — sin necesidad de localStorage.clear() manual
@@ -4204,6 +4330,8 @@ function initAdmin(){
     try { renderIntrosList(); } catch(e){}
     try { refreshClima(); } catch(e){}
   }, 200);
+  // Iniciar sincronización realtime
+  try { iniciarRealtimeAdmin(); } catch(e){ console.warn('Realtime init error:', e); }
 }
 
 // ══════════════════════════════════════════════

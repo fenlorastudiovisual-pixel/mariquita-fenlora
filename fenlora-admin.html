@@ -619,19 +619,34 @@ tr:hover td{background:var(--bg3)}
           <div class="table-actions">
             <select id="filter-plan" style="background:var(--bg3);border:1px solid var(--border);border-radius:7px;padding:6px 10px;color:var(--text2);font-size:12px;outline:none" onchange="applyFilters()">
               <option value="">Todos los planes</option>
-              <option value="basic">Básico</option>
-              <option value="pro">Pro</option>
-              <option value="premium">Premium</option>
             </select>
             <select id="filter-cat" style="background:var(--bg3);border:1px solid var(--border);border-radius:7px;padding:6px 10px;color:var(--text2);font-size:12px;outline:none" onchange="applyFilters()">
               <option value="">Todas las categorías</option>
-              <option value="hotel">Hoteles</option>
-              <option value="rest">Restaurantes</option>
-              <option value="bar">Bares</option>
-              <option value="finca">Fincas</option>
-              <option value="agencia">Agencias</option>
-              <option value="serv">Servicios</option>
-              <option value="trans">Transporte</option>
+              <option value="hotel">Hotel</option>
+              <option value="airbnb">Casa / Airbnb</option>
+              <option value="finca">Finca ecoturística</option>
+              <option value="rest">Restaurante</option>
+              <option value="fritanga">Fritanga / Asadero</option>
+              <option value="tipico">Comida típica</option>
+              <option value="cafe">Cafetería</option>
+              <option value="helado">Heladería</option>
+              <option value="jugo">Jugos</option>
+              <option value="bar">Bar</option>
+              <option value="disco">Discoteca</option>
+              <option value="licorera">Licorera</option>
+              <option value="salsamen">Salsamentaría</option>
+              <option value="tienda">Tienda</option>
+              <option value="panaderia">Panadería</option>
+              <option value="fruteria">Frutería</option>
+              <option value="agencia">Agencia de viajes</option>
+              <option value="guia">Guía turístico</option>
+              <option value="aventura">Aventura</option>
+              <option value="pesca">Pesca deportiva</option>
+              <option value="drogueria">Droguería</option>
+              <option value="medico">Médico</option>
+              <option value="spa">Spa</option>
+              <option value="peluqueria">Peluquería</option>
+              <option value="serv">Servicio turístico</option>
             </select>
             <select id="filter-estado" style="background:var(--bg3);border:1px solid var(--border);border-radius:7px;padding:6px 10px;color:var(--text2);font-size:12px;outline:none" onchange="applyFilters()">
               <option value="">Todos los estados</option>
@@ -1910,12 +1925,27 @@ function filterClients(q){
   renderClients(filteredClients);
 }
 
-function toggleAddon(clientId, addonName, btn){
-  var saved = JSON.parse(localStorage.getItem('fenlora_addons_'+clientId)||'[]');
+async function toggleAddon(clientId, addonName, btn){
+  // Leer lista actual — primero desde CLIENTS (Supabase), fallback localStorage
+  var c = CLIENTS.find(function(x){ return x.id === clientId; });
+  var saved = (c && c.addons && c.addons.lista) ? [...c.addons.lista]
+              : JSON.parse(localStorage.getItem('fenlora_addons_'+clientId)||'[]');
   var idx = saved.indexOf(addonName);
   if(idx >= 0) saved.splice(idx,1);
   else saved.push(addonName);
   localStorage.setItem('fenlora_addons_'+clientId, JSON.stringify(saved));
+  // Guardar en Supabase
+  if(c && c.sbId){
+    var addonsActualizados = Object.assign({}, c.addons||{}, { lista: saved });
+    c.addons = addonsActualizados;
+    try{
+      await fetch(SUPA_URL_ADM+'/rest/v1/businesses?id=eq.'+c.sbId,{
+        method:'PATCH',
+        headers:{'apikey':SUPA_KEY_ADM,'Authorization':'Bearer '+SUPA_KEY_ADM,'Content-Type':'application/json','Prefer':'return=minimal'},
+        body:JSON.stringify({addons: addonsActualizados})
+      });
+    }catch(e){ console.warn('toggleAddon Supabase error:',e); }
+  }
   var on = saved.includes(addonName);
   btn.style.borderColor = on ? 'var(--gold)' : 'var(--border2)';
   btn.style.background  = on ? 'var(--gold-dim)' : 'transparent';
@@ -2356,6 +2386,21 @@ function showModule(name,el){
 
 // ── ALERT ──
 function selectAlertType(el){document.querySelectorAll('.alert-type').forEach(a=>a.classList.remove('sel'));el.classList.add('sel')}
+function poblarFilterPlan(){
+  var sel = document.getElementById('filter-plan');
+  if(!sel) return;
+  // Mantener solo la primera opción "Todos los planes"
+  sel.innerHTML = '<option value="">Todos los planes</option>';
+  Object.keys(CONFIG.planes).forEach(function(key){
+    var p = CONFIG.planes[key];
+    if(!p || p.precio === 0) return; // omitir gratuito
+    var opt = document.createElement('option');
+    opt.value = key;
+    opt.textContent = p.nombre || key;
+    sel.appendChild(opt);
+  });
+}
+
 function poblarPlanesEnAlerta(){
   var sel = document.getElementById('alert-dest');
   if(!sel) return;
@@ -4025,7 +4070,9 @@ function renderAddonGrid(){
     var tipoLabel = a.tipo === 'mes' ? '/mes' : ' único';
     var precioFmt = '+$' + precio.toLocaleString('es-CO') + tipoLabel;
     var activos = CLIENTS.filter(function(c){
-      var adList = (c.addons && c.addons.lista) ? c.addons.lista : [];
+      // Prioridad: Supabase (addons.lista) > localStorage
+      var adList = (c.addons && c.addons.lista) ? c.addons.lista
+                   : JSON.parse(localStorage.getItem('fenlora_addons_'+c.id)||'[]');
       return adList.includes(name);
     }).length;
     var ingresoMes = a.tipo==='mes' ? activos * precio : 0;
@@ -4129,6 +4176,7 @@ function initAdmin(){
   }
 
   showModule('dashboard');
+  poblarFilterPlan();
   cargarClientesSupabase();
   renderClients(CLIENTS);
   filteredClients = [...CLIENTS];

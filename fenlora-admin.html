@@ -1951,6 +1951,8 @@ async function toggleAddon(clientId, addonName, btn){
   btn.style.background  = on ? 'var(--gold-dim)' : 'transparent';
   btn.style.color       = on ? 'var(--gold)' : 'var(--text3)';
   showNotif('Add-on '+(on?'activado':'desactivado')+': '+addonName+' ✓');
+  // Actualizar contador en Add-ons y servicios en tiempo real
+  renderAddonGrid();
 }
 
 // ── LINK ÚNICO POR CLIENTE ──

@@ -4922,11 +4922,10 @@ function actualizarBadges() {
 
 async function cargarEmergencias() {
   try {
-    const res = await fetch(SUPA_URL_ADM + '/rest/v1/businesses?emergencia_activa=eq.true&select=id,name,emergencia_data,category', {
-      headers: { 'apikey': SUPA_KEY_ADM, 'Authorization': 'Bearer ' + SUPA_KEY_ADM }
-    });
-    const data = await res.json();
-    renderEmergencias(Array.isArray(data) ? data : []);
+    var result = await _sbAdmin.from('businesses')
+      .select('id,name,emergencia_data,category')
+      .eq('emergencia_activa', true);
+    renderEmergencias(Array.isArray(result.data) ? result.data : []);
   } catch(e) { console.warn('Error cargando emergencias', e); }
 }
 
@@ -4972,11 +4971,7 @@ function renderEmergencias(lista) {
 async function resolverEmergencia(id) {
   if (!confirm('Marcar esta emergencia como resuelta?')) return;
   try {
-    await fetch(SUPA_URL_ADM + '/rest/v1/businesses?id=eq.' + id, {
-      method: 'PATCH',
-      headers: { 'apikey': SUPA_KEY_ADM, 'Authorization': 'Bearer ' + SUPA_KEY_ADM, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ emergencia_activa: false, emergencia_data: null })
-    });
+    await _sbAdmin.from('businesses').update({ emergencia_activa: false, emergencia_data: null }).eq('id', id);
     cargarEmergencias();
   } catch(e) { alert('Error al resolver. Intenta de nuevo.'); }
 }

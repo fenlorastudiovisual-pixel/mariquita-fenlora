@@ -1851,12 +1851,13 @@ function iniciarRealtimeAdmin() {
       }
     });
 
-  // Canal emergencias — alerta de pánico llega al admin en tiempo real
-  _sbAdmin.channel('admin-emergencias-sync')
+  // Canal único para emergencias y reseñas — evita límite de canales del plan gratuito
+  _sbAdmin.channel('admin-extras-sync')
     .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'emergencias' }, function(payload) {
       var r = payload.new;
       if(!r) return;
-      // Reproducir sonido de alerta
+      console.log('[Admin] PÁNICO recibido:', r.business_name);
+      // Sonido de alerta
       try{
         var ctx = new (window.AudioContext || window.webkitAudioContext)();
         function beep(freq, dur, t){
@@ -1870,10 +1871,10 @@ function iniciarRealtimeAdmin() {
         beep(880,0.15,t); beep(660,0.15,t+0.2); beep(880,0.15,t+0.4);
         beep(660,0.15,t+0.6); beep(880,0.3,t+0.8);
       }catch(e){}
-      // Mostrar alerta visual prominente
+      // Alerta visual
       var hora = new Date(r.created_at||Date.now()).toLocaleTimeString('es-CO',{hour:'2-digit',minute:'2-digit'});
       var alertDiv = document.createElement('div');
-      alertDiv.style.cssText = 'position:fixed;top:0;left:0;right:0;z-index:99999;background:#B71C1C;color:#fff;padding:18px 24px;display:flex;align-items:center;justify-content:space-between;gap:16px;box-shadow:0 4px 24px rgba(0,0,0,.5);font-family:Instrument Sans,sans-serif;animation:slideDown .3s ease';
+      alertDiv.style.cssText = 'position:fixed;top:0;left:0;right:0;z-index:99999;background:#B71C1C;color:#fff;padding:18px 24px;display:flex;align-items:center;justify-content:space-between;gap:16px;box-shadow:0 4px 24px rgba(0,0,0,.5);font-family:Instrument Sans,sans-serif';
       alertDiv.innerHTML = '<div style="display:flex;align-items:center;gap:14px">'
         +'<span style="font-size:32px">🚨</span>'
         +'<div><div style="font-size:16px;font-weight:700">ALERTA DE PÁNICO — '+(r.business_name||'Negocio')+'</div>'
@@ -1883,15 +1884,9 @@ function iniciarRealtimeAdmin() {
         +'<button onclick="this.parentElement.parentElement.remove()" style="padding:8px 14px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.25);border-radius:8px;color:#fff;cursor:pointer;font-size:13px">✕ Cerrar</button>'
         +'</div>';
       document.body.insertBefore(alertDiv, document.body.firstChild);
-      // Auto-cerrar después de 30 segundos
       setTimeout(function(){ try{ alertDiv.remove(); }catch(e){} }, 30000);
-      // Actualizar badge si el módulo de alertas tiene sección de emergencias
       showNotif('🚨 PÁNICO: ' + (r.business_name||'Negocio') + ' en ' + (r.municipio||'—'));
     })
-    .subscribe();
-
-  // Canal reseñas — nuevas reseñas del mapa aparecen en admin al instante
-  _sbAdmin.channel('admin-reviews-sync')
     .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'reviews' }, function(payload) {
       var r = payload.new;
       if(!r) return;
@@ -1909,7 +1904,9 @@ function iniciarRealtimeAdmin() {
       if(br){ var pendientes = REVIEWS_ADMIN.filter(function(x){return !x.aprobada;}).length; br.textContent = pendientes; br.style.display = pendientes ? '' : 'none'; }
       showNotif('⭐ Nueva reseña de ' + (r.business_name||'un negocio'));
     })
-    .subscribe();
+    .subscribe(function(status){
+      console.log('[Admin] Canal extras (emergencias+reseñas):', status);
+    });
 }
 // ══════════════════════════════════════════════════════════
 // 🔧 AUTO-LIMPIEZA DE DATOS CORRUPTOS (arrays vacíos)

@@ -172,9 +172,63 @@ footer{background:var(--dark);padding:20px;text-align:center;margin-top:8px}
   #hero-name{font-size:22px}
   .mc-val{font-size:24px}
 }
+
+/* ── BOTÓN DE PÁNICO ── */
+#panic-btn{
+  position:fixed;bottom:22px;right:22px;z-index:8000;
+  width:58px;height:58px;border-radius:50%;border:none;cursor:pointer;
+  background:#C62828;color:#fff;font-size:26px;
+  box-shadow:0 4px 18px rgba(198,40,40,.6);
+  display:flex;align-items:center;justify-content:center;
+  animation:panic-pulse 2s infinite;
+  transition:transform .15s,box-shadow .15s;
+}
+#panic-btn:hover{transform:scale(1.1);box-shadow:0 6px 24px rgba(198,40,40,.8)}
+@keyframes panic-pulse{
+  0%,100%{box-shadow:0 4px 18px rgba(198,40,40,.6)}
+  50%{box-shadow:0 4px 28px rgba(198,40,40,.9),0 0 0 10px rgba(198,40,40,.15)}
+}
+/* Modal de pánico */
+#panic-modal{
+  display:none;position:fixed;inset:0;z-index:9000;
+  background:rgba(0,0,0,.7);backdrop-filter:blur(4px);
+  align-items:center;justify-content:center;
+}
+#panic-modal.show{display:flex}
+#panic-box{
+  background:#1C0A0A;border:1px solid rgba(198,40,40,.4);
+  border-radius:16px;padding:28px 24px;max-width:360px;width:90%;
+  text-align:center;animation:panic-in .2s ease;
+}
+@keyframes panic-in{from{transform:scale(.92);opacity:0}to{transform:scale(1);opacity:1}}
+#panic-box .p-icon{font-size:48px;margin-bottom:10px}
+#panic-box .p-title{font-family:'Playfair Display',serif;font-size:22px;font-weight:700;color:#E53935;margin-bottom:6px}
+#panic-box .p-sub{font-size:13px;color:rgba(255,255,255,.6);margin-bottom:20px;line-height:1.5}
+.p-btn{display:flex;align-items:center;justify-content:center;gap:9px;width:100%;
+  padding:14px;border-radius:10px;border:none;cursor:pointer;font-size:14px;
+  font-weight:600;font-family:'DM Sans',sans-serif;margin-bottom:10px;transition:opacity .2s}
+.p-btn:hover{opacity:.88}
+.p-btn-llamar{background:#C62828;color:#fff}
+.p-btn-fenlora{background:#1A3A2A;border:1px solid rgba(37,211,102,.3);color:#25D366}
+.p-btn-cancel{background:transparent;border:1px solid rgba(255,255,255,.15);color:rgba(255,255,255,.5);font-size:13px;padding:10px;margin-bottom:0}
 </style>
 </head>
 <body>
+
+<!-- BOTÓN DE PÁNICO — siempre visible -->
+<button id="panic-btn" onclick="abrirPanico()" title="Emergencia">🚨</button>
+
+<!-- MODAL DE PÁNICO -->
+<div id="panic-modal">
+  <div id="panic-box">
+    <div class="p-icon">🚨</div>
+    <div class="p-title">¿Estás en peligro?</div>
+    <div class="p-sub" id="panic-sub">Vamos a alertar al equipo Fenlora y a los servicios de emergencia de inmediato.</div>
+    <button class="p-btn p-btn-llamar" onclick="llamarEmergencia()">📞 Llamar al 123 ahora</button>
+    <button class="p-btn p-btn-fenlora" onclick="notificarFenlora()" id="panic-notif-btn">🆘 Notificar a Fenlora</button>
+    <button class="p-btn p-btn-cancel" onclick="cerrarPanico()">Cerrar (solo si fue un error)</button>
+  </div>
+</div>
 
 <!-- TOPBAR FENLORA -->
 <div id="fenlora-bar">
@@ -1409,6 +1463,57 @@ function iniciarRealtimeCD(){
       });
   } catch(e){ console.warn('Realtime no disponible:', e); }
 }
+// ══════════════════════════════════════════════════════
+// BOTÓN DE PÁNICO
+// ══════════════════════════════════════════════════════
+function abrirPanico(){
+  var modal = document.getElementById('panic-modal');
+  if(modal) modal.classList.add('show');
+  var sub = document.getElementById('panic-sub');
+  var nombre = (NEGOCIO && NEGOCIO.nombre) ? NEGOCIO.nombre : 'Tu negocio';
+  if(sub) sub.textContent = nombre + ' — Vamos a alertar al equipo Fenlora y a los servicios de emergencia de inmediato.';
+}
+function cerrarPanico(){
+  var modal = document.getElementById('panic-modal');
+  if(modal) modal.classList.remove('show');
+}
+function llamarEmergencia(){
+  window.location.href = 'tel:123';
+}
+async function notificarFenlora(){
+  var btn = document.getElementById('panic-notif-btn');
+  if(btn){ btn.textContent = '⏳ Enviando alerta…'; btn.disabled = true; }
+  var n = NEGOCIO || {};
+  var nombre    = n.nombre    || 'Negocio desconocido';
+  var municipio = n.municipio || '—';
+  var sbId      = n.id        || null;
+  var ts        = new Date().toISOString();
+  // 1. Guardar en Supabase — admin recibe en tiempo real
+  try{
+    var _sbPanic = window.supabase ? window.supabase.createClient(SUPA_URL_CD, SUPA_KEY_CD) : null;
+    if(_sbPanic && sbId){
+      await _sbPanic.from('emergencias').insert({
+        business_id: sbId, business_name: nombre, municipio: municipio,
+        tipo: 'panico_cliente',
+        mensaje: 'ALERTA DE PÁNICO desde el panel del cliente',
+        created_at: ts
+      });
+    }
+  } catch(e){ console.warn('Emergencia Supabase:', e); }
+  // 2. WhatsApp directo a Fenlora sin pasos extra
+  var tel = '573112746813';
+  var msg = encodeURIComponent('🚨 *ALERTA DE PÁNICO* 🚨\n\n*Negocio:* ' + nombre + '\n*Municipio:* ' + municipio + '\n*Hora:* ' + new Date().toLocaleString('es-CO') + '\n\n⚠️ El cliente activó el botón de pánico desde su panel Fenlora. Requiere atención INMEDIATA.');
+  window.open('https://wa.me/' + tel + '?text=' + msg, '_blank');
+  if(btn){ btn.textContent = '✅ Alerta enviada'; btn.style.background = '#1A3A2A'; }
+}
+document.addEventListener('click', function(e){
+  var modal = document.getElementById('panic-modal');
+  var box   = document.getElementById('panic-box');
+  if(modal && modal.classList.contains('show') && box && !box.contains(e.target) && e.target.id !== 'panic-btn'){
+    cerrarPanico();
+  }
+});
+
 
 </script>
 </body>

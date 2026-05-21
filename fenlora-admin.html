@@ -1851,6 +1851,45 @@ function iniciarRealtimeAdmin() {
       }
     });
 
+  // Canal emergencias — alerta de pánico llega al admin en tiempo real
+  _sbAdmin.channel('admin-emergencias-sync')
+    .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'emergencias' }, function(payload) {
+      var r = payload.new;
+      if(!r) return;
+      // Reproducir sonido de alerta
+      try{
+        var ctx = new (window.AudioContext || window.webkitAudioContext)();
+        function beep(freq, dur, t){
+          var o = ctx.createOscillator(); var g = ctx.createGain();
+          o.connect(g); g.connect(ctx.destination);
+          o.frequency.value = freq; o.type = 'square';
+          g.gain.setValueAtTime(0.3, t); g.gain.exponentialRampToValueAtTime(0.001, t+dur);
+          o.start(t); o.stop(t+dur);
+        }
+        var t = ctx.currentTime;
+        beep(880,0.15,t); beep(660,0.15,t+0.2); beep(880,0.15,t+0.4);
+        beep(660,0.15,t+0.6); beep(880,0.3,t+0.8);
+      }catch(e){}
+      // Mostrar alerta visual prominente
+      var hora = new Date(r.created_at||Date.now()).toLocaleTimeString('es-CO',{hour:'2-digit',minute:'2-digit'});
+      var alertDiv = document.createElement('div');
+      alertDiv.style.cssText = 'position:fixed;top:0;left:0;right:0;z-index:99999;background:#B71C1C;color:#fff;padding:18px 24px;display:flex;align-items:center;justify-content:space-between;gap:16px;box-shadow:0 4px 24px rgba(0,0,0,.5);font-family:Instrument Sans,sans-serif;animation:slideDown .3s ease';
+      alertDiv.innerHTML = '<div style="display:flex;align-items:center;gap:14px">'
+        +'<span style="font-size:32px">🚨</span>'
+        +'<div><div style="font-size:16px;font-weight:700">ALERTA DE PÁNICO — '+(r.business_name||'Negocio')+'</div>'
+        +'<div style="font-size:12px;opacity:.85">📍 '+(r.municipio||'—')+' · '+hora+'</div></div></div>'
+        +'<div style="display:flex;gap:10px">'
+        +'<a href="https://wa.me/573112746813?text='+encodeURIComponent('🚨 Respondiendo PÁNICO de '+(r.business_name||'negocio')+' en '+(r.municipio||'—'))+'" target="_blank" style="padding:8px 16px;background:rgba(255,255,255,.15);border-radius:8px;color:#fff;text-decoration:none;font-size:13px;font-weight:600;border:1px solid rgba(255,255,255,.3)">💬 Responder WA</a>'
+        +'<button onclick="this.parentElement.parentElement.remove()" style="padding:8px 14px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.25);border-radius:8px;color:#fff;cursor:pointer;font-size:13px">✕ Cerrar</button>'
+        +'</div>';
+      document.body.insertBefore(alertDiv, document.body.firstChild);
+      // Auto-cerrar después de 30 segundos
+      setTimeout(function(){ try{ alertDiv.remove(); }catch(e){} }, 30000);
+      // Actualizar badge si el módulo de alertas tiene sección de emergencias
+      showNotif('🚨 PÁNICO: ' + (r.business_name||'Negocio') + ' en ' + (r.municipio||'—'));
+    })
+    .subscribe();
+
   // Canal reseñas — nuevas reseñas del mapa aparecen en admin al instante
   _sbAdmin.channel('admin-reviews-sync')
     .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'reviews' }, function(payload) {

@@ -469,6 +469,9 @@ tr:hover td{background:var(--bg3)}
     <div class="nav-section">
       <div class="nav-label">Finanzas</div>
       
+      <div class="nav-item" onclick="showModule('updates',this)">
+        <span class="ni">🚀</span><span>Updates</span>
+      </div>
       <div class="nav-item" onclick="showModule('reportes',this)">
         <span class="ni">📈</span> Reportes
       </div>
@@ -1361,6 +1364,72 @@ tr:hover td{background:var(--bg3)}
         </div>
       </div>
 
+    </div>
+
+
+        <!-- ══════════════ UPDATES ══════════════ -->
+    <div class="module" id="mod-updates">
+      <div class="mod-hdr">
+        <div>
+          <div class="mod-title">🚀 Updates y mantenimiento</div>
+          <div class="mod-sub">Gestiona actualizaciones y modo mantenimiento de la plataforma</div>
+        </div>
+      </div>
+      <!-- ESTADO ACTUAL -->
+      <div id="upd-estado-card" style="border-radius:14px;padding:18px 20px;margin-bottom:20px;border:1px solid var(--border2);background:var(--bg2);display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap">
+        <div style="display:flex;align-items:center;gap:12px">
+          <span id="upd-estado-icon" style="font-size:28px">✅</span>
+          <div>
+            <div id="upd-estado-titulo" style="font-size:15px;font-weight:700;color:var(--text)">Plataforma operativa</div>
+            <div id="upd-estado-desc" style="font-size:12px;color:var(--text3);margin-top:2px">Todo funciona con normalidad</div>
+          </div>
+        </div>
+        <div style="display:flex;gap:10px">
+          <button id="upd-btn-activar" onclick="activarMantenimiento()" class="btn primary" style="background:#C62828;border-color:#C62828">🔧 Activar mantenimiento</button>
+          <button id="upd-btn-desactivar" onclick="desactivarMantenimiento()" class="btn" style="display:none;background:rgba(26,122,74,.2);border-color:rgba(37,211,102,.3);color:#4CAF82">✅ Desactivar</button>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+        <!-- REDACTAR -->
+        <div style="border-radius:14px;padding:20px;border:1px solid var(--border2);background:var(--bg2)">
+          <div style="font-size:14px;font-weight:600;color:var(--text);margin-bottom:14px">📝 Redactar update</div>
+          <div style="margin-bottom:10px">
+            <label style="font-size:11px;color:var(--text3);display:block;margin-bottom:5px">TÍTULO</label>
+            <input id="upd-titulo" type="text" placeholder="ej. Nueva función de menú digital" style="width:100%;padding:9px 12px;background:var(--bg3);border:1px solid var(--border2);border-radius:8px;color:var(--text);font-size:13px;font-family:inherit;box-sizing:border-box">
+          </div>
+          <div style="margin-bottom:10px">
+            <label style="font-size:11px;color:var(--text3);display:block;margin-bottom:5px">DESCRIPCIÓN</label>
+            <textarea id="upd-desc" rows="3" placeholder="Describe qué cambia o mejora..." style="width:100%;padding:9px 12px;background:var(--bg3);border:1px solid var(--border2);border-radius:8px;color:var(--text);font-size:13px;font-family:inherit;resize:vertical;box-sizing:border-box"></textarea>
+          </div>
+          <div style="margin-bottom:14px">
+            <label style="font-size:11px;color:var(--text3);display:block;margin-bottom:5px">HORA ESTIMADA</label>
+            <input id="upd-hora" type="text" placeholder="ej. Esta noche a las 2:00 AM · 30 min" style="width:100%;padding:9px 12px;background:var(--bg3);border:1px solid var(--border2);border-radius:8px;color:var(--text);font-size:13px;font-family:inherit;box-sizing:border-box">
+          </div>
+          <button onclick="guardarUpdate()" class="btn primary" style="width:100%">💾 Guardar update</button>
+        </div>
+        <!-- NOTIFICAR -->
+        <div style="border-radius:14px;padding:20px;border:1px solid var(--border2);background:var(--bg2)">
+          <div style="font-size:14px;font-weight:600;color:var(--text);margin-bottom:14px">📣 Notificar a clientes</div>
+          <div style="margin-bottom:12px">
+            <label style="font-size:11px;color:var(--text3);display:block;margin-bottom:5px">TIPO DE MENSAJE</label>
+            <select id="upd-tipo-msg" onchange="actualizarPreviewUpdate()" style="width:100%;padding:9px 12px;background:var(--bg3);border:1px solid var(--border2);border-radius:8px;color:var(--text);font-size:13px;font-family:inherit;box-sizing:border-box">
+              <option value="mantenimiento">🔧 Aviso de mantenimiento</option>
+              <option value="update">🚀 Nuevo update disponible</option>
+              <option value="mejora">✨ Mejora implementada</option>
+            </select>
+          </div>
+          <div style="margin-bottom:14px">
+            <label style="font-size:11px;color:var(--text3);display:block;margin-bottom:5px">VISTA PREVIA</label>
+            <div id="upd-preview-msg" style="padding:10px 12px;background:var(--bg3);border:1px solid var(--border2);border-radius:8px;font-size:12px;color:var(--text2);line-height:1.6;min-height:80px;white-space:pre-wrap"></div>
+          </div>
+          <button onclick="notificarClientesUpdate()" class="btn" style="width:100%;margin-bottom:8px">💬 Enviar a todos por WhatsApp</button>
+          <div style="font-size:10px;color:var(--text3);text-align:center">Abre WhatsApp uno a uno con el mensaje listo</div>
+          <div style="margin-top:18px;border-top:1px solid var(--border2);padding-top:14px">
+            <div style="font-size:11px;font-weight:600;color:var(--text3);margin-bottom:8px">HISTORIAL</div>
+            <div id="upd-historial" style="font-size:12px;color:var(--text3)">Sin updates aún.</div>
+          </div>
+        </div>
+      </div>
     </div>
 
         <!-- ══════════════ REPORTES ══════════════ -->
@@ -2658,6 +2727,7 @@ function showModule(name,el){
   const titles={dashboard:['Dashboard','Resumen general · Mayo 2026'],clientes:['Clientes','Directorio de suscriptores'],renovaciones:['Renovaciones','Cobros y vencimientos'],alertas:['Alertas y mensajes','Comunicación con suscriptores'],cotizaciones:['Cotizaciones','Leads de turistas'],menus:['Editor de menús','Actualiza precios e ítems en tiempo real'],descuentos:['Descuentos y promos','Gestión de ofertas activas'],totem:['Control tótem','Pantalla Plaza Central · Mariquita'],eventos:['Agenda de eventos','Calendario turístico 2026'],addons:['Add-ons y servicios','Servicios adicionales Fenlora'],reportes:['Reportes','Finanzas y métricas exportables']};
   if(titles[name]){document.getElementById('topbar-title').textContent=titles[name][0];document.getElementById('topbar-sub').textContent=titles[name][1]}
   if(name==='addons') renderAddonGrid();
+  if(name==='updates') initUpdates();
 }
 
 // ── ALERT ──
@@ -5001,6 +5071,150 @@ function actualizarBadges() {
 
 // ── EMERGENCIAS EN TIEMPO REAL ──
 
+
+// ══════════════════════════════════════════════════════
+// 🚀 SISTEMA DE UPDATES Y MANTENIMIENTO
+// ══════════════════════════════════════════════════════
+var _updHistorial = JSON.parse(localStorage.getItem('fenlora_updates_historial')||'[]');
+var _mantActivo = false;
+
+async function initUpdates(){
+  // Leer estado actual de Supabase
+  try{
+    var r = await _sbAdmin.from('config').select('key,value').in('key',['mantenimiento_activo','mantenimiento_titulo','mantenimiento_desc','mantenimiento_hora']);
+    if(r.data){
+      var cfg = {};
+      r.data.forEach(function(row){ cfg[row.key] = row.value; });
+      _mantActivo = cfg['mantenimiento_activo'] === 'true';
+      if(cfg['mantenimiento_titulo']) document.getElementById('upd-titulo').value = cfg['mantenimiento_titulo'];
+      if(cfg['mantenimiento_desc'])   document.getElementById('upd-desc').value   = cfg['mantenimiento_desc'];
+      if(cfg['mantenimiento_hora'])   document.getElementById('upd-hora').value   = cfg['mantenimiento_hora'];
+    }
+  }catch(e){}
+  actualizarEstadoUI();
+  actualizarPreviewUpdate();
+  renderHistorialUpdates();
+}
+
+function actualizarEstadoUI(){
+  var card  = document.getElementById('upd-estado-card');
+  var icon  = document.getElementById('upd-estado-icon');
+  var titulo= document.getElementById('upd-estado-titulo');
+  var desc  = document.getElementById('upd-estado-desc');
+  var btnA  = document.getElementById('upd-btn-activar');
+  var btnD  = document.getElementById('upd-btn-desactivar');
+  if(_mantActivo){
+    card.style.borderColor  = 'rgba(198,40,40,.4)';
+    card.style.background   = 'rgba(198,40,40,.08)';
+    icon.textContent        = '🔧';
+    titulo.textContent      = 'Modo mantenimiento ACTIVO';
+    titulo.style.color      = '#E57373';
+    desc.textContent        = 'El mapa y paneles muestran aviso de mantenimiento a usuarios';
+    btnA.style.display      = 'none';
+    btnD.style.display      = '';
+  } else {
+    card.style.borderColor  = 'var(--border2)';
+    card.style.background   = 'var(--bg2)';
+    icon.textContent        = '✅';
+    titulo.textContent      = 'Plataforma operativa';
+    titulo.style.color      = 'var(--text)';
+    desc.textContent        = 'Todo funciona con normalidad';
+    btnA.style.display      = '';
+    btnD.style.display      = 'none';
+  }
+}
+
+function actualizarPreviewUpdate(){
+  var tipo   = (document.getElementById('upd-tipo-msg')||{}).value || 'mantenimiento';
+  var titulo = (document.getElementById('upd-titulo')||{}).value || '[Título del update]';
+  var hora   = (document.getElementById('upd-hora')||{}).value   || '[hora estimada]';
+  var prev   = document.getElementById('upd-preview-msg');
+  if(!prev) return;
+  var msgs = {
+    mantenimiento: '🔧 *Aviso de mantenimiento — Fenlora*\n\nEstaremos realizando una actualización de la plataforma.\n\n📋 *'+titulo+'*\n⏰ '+hora+'\n\nDurante este tiempo el mapa y los paneles estarán temporalmente fuera de servicio. ¡Gracias por tu comprensión!\n\n_Fenlora Visual Studio_',
+    update: '🚀 *¡Nuevo update en Fenlora!*\n\n📋 *'+titulo+'*\n\nHemos implementado mejoras importantes en tu plataforma. Recarga la página para ver los cambios.\n\n_Fenlora Visual Studio_',
+    mejora: '✨ *Mejora implementada — Fenlora*\n\n📋 *'+titulo+'*\n\nTu plataforma acaba de recibir una mejora. Entra a tu panel para explorar las novedades.\n\n_Fenlora Visual Studio_'
+  };
+  prev.textContent = msgs[tipo] || msgs['mantenimiento'];
+}
+
+async function guardarUpdate(){
+  var titulo = document.getElementById('upd-titulo').value.trim();
+  var desc   = document.getElementById('upd-desc').value.trim();
+  var hora   = document.getElementById('upd-hora').value.trim();
+  if(!titulo){ showNotif('⚠️ Escribe un título'); return; }
+  try{
+    await _sbAdmin.from('config').upsert([
+      {key:'mantenimiento_titulo', value:titulo},
+      {key:'mantenimiento_desc',   value:desc},
+      {key:'mantenimiento_hora',   value:hora}
+    ]);
+    // Guardar en historial local
+    _updHistorial.unshift({titulo:titulo, desc:desc, hora:hora, fecha:new Date().toLocaleDateString('es-CO')});
+    if(_updHistorial.length > 10) _updHistorial.pop();
+    localStorage.setItem('fenlora_updates_historial', JSON.stringify(_updHistorial));
+    renderHistorialUpdates();
+    actualizarPreviewUpdate();
+    showNotif('✅ Update guardado correctamente');
+  }catch(e){ showNotif('⚠️ Error guardando update'); }
+}
+
+async function activarMantenimiento(){
+  if(!confirm('¿Activar modo mantenimiento? El mapa y los paneles mostrarán un aviso a los usuarios.')) return;
+  try{
+    await _sbAdmin.from('config').upsert([{key:'mantenimiento_activo', value:'true'}]);
+    _mantActivo = true;
+    actualizarEstadoUI();
+    showNotif('🔧 Modo mantenimiento activado');
+  }catch(e){ showNotif('⚠️ Error activando mantenimiento'); }
+}
+
+async function desactivarMantenimiento(){
+  try{
+    await _sbAdmin.from('config').upsert([{key:'mantenimiento_activo', value:'false'}]);
+    _mantActivo = false;
+    actualizarEstadoUI();
+    showNotif('✅ Plataforma restaurada — mantenimiento desactivado');
+  }catch(e){ showNotif('⚠️ Error desactivando mantenimiento'); }
+}
+
+async function notificarClientesUpdate(){
+  var tipo   = document.getElementById('upd-tipo-msg').value;
+  var titulo = document.getElementById('upd-titulo').value.trim() || 'Actualización de plataforma';
+  var hora   = document.getElementById('upd-hora').value.trim() || '';
+  if(!CLIENTS.length){ showNotif('⚠️ No hay clientes cargados'); return; }
+  var msgs = {
+    mantenimiento: '🔧 *Aviso de mantenimiento — Fenlora*\n\nEstaremos realizando una actualización.\n\n📋 *'+titulo+'*\n⏰ '+hora+'\n\nDurante este tiempo el mapa estará temporalmente fuera de servicio. ¡Gracias por tu comprensión!\n\n_Fenlora Visual Studio_',
+    update: '🚀 *¡Nuevo update en Fenlora!*\n\n📋 *'+titulo+'*\n\nRecarga la página para ver los cambios.\n\n_Fenlora Visual Studio_',
+    mejora: '✨ *Mejora implementada — Fenlora*\n\n📋 *'+titulo+'*\n\nEntra a tu panel para explorar las novedades.\n\n_Fenlora Visual Studio_'
+  };
+  var msg = msgs[tipo] || msgs['mantenimiento'];
+  var clientes = CLIENTS.filter(function(c){ return c.tel; });
+  if(!clientes.length){ showNotif('⚠️ Ningún cliente tiene teléfono registrado'); return; }
+  var i = 0;
+  function enviarSiguiente(){
+    if(i >= clientes.length){ showNotif('✅ Notificaciones enviadas: '+clientes.length+' clientes'); return; }
+    var c = clientes[i++];
+    var tel = c.tel.replace(/\D/g,'');
+    if(tel.length === 10) tel = '57' + tel;
+    var msgPersonal = '*Hola '+c.nombre+' 👋*\n\n' + msg;
+    window.open('https://wa.me/'+tel+'?text='+encodeURIComponent(msgPersonal), '_blank');
+    setTimeout(enviarSiguiente, 800);
+  }
+  enviarSiguiente();
+}
+
+function renderHistorialUpdates(){
+  var el = document.getElementById('upd-historial');
+  if(!el) return;
+  if(!_updHistorial.length){ el.innerHTML = '<span style="color:var(--text3)">Sin updates aún.</span>'; return; }
+  el.innerHTML = _updHistorial.slice(0,5).map(function(u){
+    return '<div style="padding:6px 0;border-bottom:1px solid var(--border2)">'
+      +'<div style="font-size:12px;color:var(--text);font-weight:500">'+u.titulo+'</div>'
+      +'<div style="font-size:10px;color:var(--text3)">'+u.fecha+(u.hora?' · '+u.hora:'')+'</div>'
+      +'</div>';
+  }).join('');
+}
 
 async function cargarEmergencias() {
   try {

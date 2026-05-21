@@ -1517,6 +1517,38 @@ document.addEventListener('click', function(e){
 });
 
 
+// ── VERIFICAR MODO MANTENIMIENTO ──
+async function verificarMantenimiento(){
+  try{
+    var r = await fetch('https://ikcutinvnkktfasgnanv.supabase.co/rest/v1/config?key=eq.mantenimiento_activo&select=value',{
+      headers:{'apikey':'sb_publishable_G_MCq1M-a_CM77AKPocYvA_KOgmiw7h','Authorization':'Bearer sb_publishable_G_MCq1M-a_CM77AKPocYvA_KOgmiw7h'}
+    });
+    var data = await r.json();
+    if(data && data[0] && data[0].value === 'true'){
+      var r2 = await fetch('https://ikcutinvnkktfasgnanv.supabase.co/rest/v1/config?key=in.(mantenimiento_titulo,mantenimiento_hora)&select=key,value',{
+        headers:{'apikey':'sb_publishable_G_MCq1M-a_CM77AKPocYvA_KOgmiw7h','Authorization':'Bearer sb_publishable_G_MCq1M-a_CM77AKPocYvA_KOgmiw7h'}
+      });
+      var d2 = await r2.json();
+      var cfg = {}; if(Array.isArray(d2)) d2.forEach(function(x){cfg[x.key]=x.value;});
+      mostrarBannerMantenimiento(cfg['mantenimiento_titulo']||'Actualización en curso', cfg['mantenimiento_hora']||'');
+    } else {
+      var b = document.getElementById('mant-banner');
+      if(b){ b.remove(); document.body.style.marginTop=''; }
+    }
+  }catch(e){}
+}
+function mostrarBannerMantenimiento(titulo,hora){
+  if(document.getElementById('mant-banner')) return;
+  var div = document.createElement('div');
+  div.id = 'mant-banner';
+  div.style.cssText = 'position:fixed;top:0;left:0;right:0;z-index:99990;background:#1A1200;border-bottom:2px solid #C8860A;color:#FDF6EC;padding:10px 20px;display:flex;align-items:center;gap:12px;font-family:Instrument Sans,DM Sans,sans-serif;font-size:13px;box-sizing:border-box';
+  div.innerHTML = '<span style="font-size:20px">🔧</span><div><strong>'+titulo+'</strong>'+(hora?' &nbsp;·&nbsp; ⏰ '+hora:'')+'<span style="font-size:11px;opacity:.7;margin-left:8px">— Fenlora Visual Studio</span></div>';
+  document.body.insertBefore(div, document.body.firstChild);
+  document.body.style.paddingTop = '44px';
+}
+// Verificar al cargar y cada 30s
+document.addEventListener('DOMContentLoaded',function(){ verificarMantenimiento(); setInterval(verificarMantenimiento,30000); });
+
 </script>
 </body>
 </html>

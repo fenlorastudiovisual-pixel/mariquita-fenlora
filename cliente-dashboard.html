@@ -1489,15 +1489,17 @@ async function notificarFenlora(){
   var sbId      = n.id        || null;
   var ts        = new Date().toISOString();
   // 1. Guardar en Supabase — admin recibe en tiempo real
+  // No enviamos business_id para evitar error de foreign key si el UUID no coincide
   try{
     var _sbPanic = window.supabase ? window.supabase.createClient(SUPA_URL_CD, SUPA_KEY_CD) : null;
-    if(_sbPanic && sbId){
-      await _sbPanic.from('emergencias').insert({
-        business_id: sbId, business_name: nombre, municipio: municipio,
+    if(_sbPanic){
+      var insertResult = await _sbPanic.from('emergencias').insert({
+        business_name: nombre,
+        municipio: municipio,
         tipo: 'panico_cliente',
-        mensaje: 'ALERTA DE PÁNICO desde el panel del cliente',
-        created_at: ts
+        mensaje: 'ALERTA DE PÁNICO desde el panel del cliente'
       });
+      console.log('[Pánico] Insert Supabase:', JSON.stringify(insertResult));
     }
   } catch(e){ console.warn('Emergencia Supabase:', e); }
   // 2. WhatsApp directo a Fenlora sin pasos extra

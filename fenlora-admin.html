@@ -1909,6 +1909,88 @@ function iniciarRealtimeAdmin() {
     });
 }
 // ══════════════════════════════════════════════════════════
+// 🚨 POLLING EMERGENCIAS — revisa cada 5s si hay pánico nuevo
+// ══════════════════════════════════════════════════════════
+var _ultimaEmergencia = null;
+var _audioDesbloqueado = false;
+
+// Desbloquear audio con primer clic del usuario
+document.addEventListener('click', function(){
+  if(_audioDesbloqueado) return;
+  try{
+    var ctx = new (window.AudioContext||window.webkitAudioContext)();
+    ctx.resume();
+    _audioDesbloqueado = true;
+  }catch(e){}
+}, {once:false});
+
+function sonarAlarma(){
+  try{
+    var ctx = new (window.AudioContext||window.webkitAudioContext)();
+    ctx.resume().then(function(){
+      function beep(freq,dur,t){
+        var o=ctx.createOscillator(),g=ctx.createGain();
+        o.connect(g);g.connect(ctx.destination);
+        o.frequency.value=freq;o.type='square';
+        g.gain.setValueAtTime(0.4,t);
+        g.gain.exponentialRampToValueAtTime(0.001,t+dur);
+        o.start(t);o.stop(t+dur);
+      }
+      var t=ctx.currentTime;
+      beep(880,0.15,t);beep(660,0.15,t+0.2);beep(880,0.15,t+0.4);
+      beep(660,0.15,t+0.6);beep(880,0.3,t+0.8);
+    });
+  }catch(e){}
+}
+
+function mostrarAlertaPanico(r){
+  // Evitar mostrar la misma alerta dos veces
+  if(_ultimaEmergencia === r.id) return;
+  _ultimaEmergencia = r.id;
+  sonarAlarma();
+  var hora = new Date(r.created_at||Date.now()).toLocaleTimeString('es-CO',{hour:'2-digit',minute:'2-digit'});
+  var alertDiv = document.createElement('div');
+  alertDiv.id = 'panico-banner';
+  alertDiv.style.cssText = 'position:fixed;top:0;left:0;right:0;z-index:99999;background:#B71C1C;color:#fff;padding:18px 24px;display:flex;align-items:center;justify-content:space-between;gap:16px;box-shadow:0 4px 24px rgba(0,0,0,.6);font-family:Instrument Sans,sans-serif';
+  alertDiv.innerHTML = '<div style="display:flex;align-items:center;gap:14px">'
+    +'<span style="font-size:36px;animation:panic-pulse 1s infinite">🚨</span>'
+    +'<div><div style="font-size:17px;font-weight:700">ALERTA DE PÁNICO — '+(r.business_name||'Negocio')+'</div>'
+    +'<div style="font-size:12px;opacity:.85">📍 '+(r.municipio||'—')+' · '+hora+'</div></div></div>'
+    +'<div style="display:flex;gap:10px">'
+    +'<a href="https://wa.me/573112746813?text='+encodeURIComponent('🚨 Respondiendo PÁNICO de '+(r.business_name||'negocio')+' en '+(r.municipio||'—'))+'" target="_blank" style="padding:9px 18px;background:rgba(255,255,255,.15);border-radius:8px;color:#fff;text-decoration:none;font-size:13px;font-weight:600;border:1px solid rgba(255,255,255,.3);white-space:nowrap">💬 Responder WA</a>'
+    +'<button onclick="var b=document.getElementById(&quot;panico-banner&quot;);if(b)b.remove()" style="padding:9px 14px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.25);border-radius:8px;color:#fff;cursor:pointer;font-size:13px">✕</button>'
+    +'</div>';
+  // Quitar banner anterior si existe
+  var prev = document.getElementById('panico-banner');
+  if(prev) prev.remove();
+  document.body.insertBefore(alertDiv, document.body.firstChild);
+  setTimeout(function(){ var b=document.getElementById('panico-banner'); if(b) b.remove(); }, 60000);
+  showNotif('🚨 PÁNICO: '+(r.business_name||'Negocio')+' en '+(r.municipio||'—'));
+}
+
+async function pollEmergencias(){
+  try{
+    // Buscar emergencias de los últimos 2 minutos
+    var hace2min = new Date(Date.now() - 2*60*1000).toISOString();
+    var result = await _sbAdmin.from('emergencias')
+      .select('id,business_name,municipio,created_at')
+      .eq('tipo','panico_cliente')
+      .gte('created_at', hace2min)
+      .order('created_at', {ascending:false})
+      .limit(1);
+    if(result.data && result.data.length > 0){
+      mostrarAlertaPanico(result.data[0]);
+    }
+  }catch(e){}
+}
+
+// Iniciar polling cada 5 segundos
+setTimeout(function(){
+  pollEmergencias();
+  setInterval(pollEmergencias, 5000);
+}, 2000);
+
+// ══════════════════════════════════════════════════════════
 // 🔧 AUTO-LIMPIEZA DE DATOS CORRUPTOS (arrays vacíos)
 // Corre ANTES de inicializar cualquier variable — sin necesidad de localStorage.clear() manual
 // ══════════════════════════════════════════════════════════

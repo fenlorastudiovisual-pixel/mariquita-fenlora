@@ -2789,6 +2789,7 @@ var MENU_CATS_DEFAULT = ['Platos fuertes','Sopas','Bebidas','Postres'];
 var MENU_ICONS = {'Platos fuertes':'🍽️','Sopas':'🥣','Bebidas':'🥤','Postres':'🍮'};
 
 var menuCurrentBiz = null;   // nombre del negocio activo
+var menuCurrentSbId = null;  // UUID Supabase del negocio activo
 var menuCurrentCat = 'Platos fuertes';  // categoría activa
 
 // ── LISTAR NEGOCIOS EN EL PANEL IZQUIERDO ──
@@ -2800,7 +2801,7 @@ function buildMenuClientsList(query){
   });
   list.innerHTML = clients.map(function(c, i){
     var active = i===0;
-    return '<div class="menu-client-item" onclick="selectMenuClient(this,\''+c.nombre.replace(/'/g,"\\'")+'\',\''+c.catLabel+'\')" '
+    return '<div class="menu-client-item" onclick="selectMenuClient(this,\''+c.nombre.replace(/'/g,"\\'")+'\',\''+c.catLabel+'\',\''+c.sbId+'\')" '
       +'style="padding:8px 10px;border-radius:7px;cursor:pointer;background:'+(active?'var(--gold-dim)':'var(--bg3)')+';border:1px solid '+(active?'var(--gold-dim)':'transparent')+'">'
       +'<div style="font-size:12.5px;font-weight:500;color:'+(active?'var(--gold)':'var(--text)')+'">'+c.nombre+'</div>'
       +'<div style="font-size:10.5px;color:var(--text3)">'+c.catLabel+' · '+c.plan+' · '+c.dir+'</div>'
@@ -2808,13 +2809,14 @@ function buildMenuClientsList(query){
   }).join('');
   if(clients.length > 0){
     var firstEl = list.firstElementChild;
-    if(firstEl) selectMenuClient(firstEl, clients[0].nombre, clients[0].catLabel);
+    if(firstEl) selectMenuClient(firstEl, clients[0].nombre, clients[0].catLabel, clients[0].sbId);
   }
 }
 function filterMenuClients(q){ buildMenuClientsList(q); }
 
 // ── SELECCIONAR NEGOCIO ──
-function selectMenuClient(el, name, catLabel){
+function selectMenuClient(el, name, catLabel, sbId){
+  menuCurrentSbId = sbId || null;
   document.querySelectorAll('.menu-client-item').forEach(function(e){
     e.style.background='var(--bg3)'; e.style.border='1px solid transparent';
     var d=e.querySelector('div'); if(d) d.style.color='var(--text)';
@@ -2827,8 +2829,31 @@ function selectMenuClient(el, name, catLabel){
   var title = document.getElementById('menu-client-title');
   if(title) title.textContent = name + ' · Editor de menú';
 
-  // Si no tiene datos guardados, inicializar con plantilla base
-  if(!MENUS_ALL[name]){
+  // Cargar menú desde Supabase si el negocio tiene sbId
+  if(menuCurrentSbId && !MENUS_ALL[name]){
+    _sbAdmin.from('businesses').select('menu').eq('id', menuCurrentSbId).single()
+      .then(function(r){
+        if(r.data && r.data.menu && r.data.menu.cats && r.data.menu.cats.length){
+          // Convertir formato mapa → formato admin
+          var m = r.data.menu;
+          var biz = {};
+          (m.cats||[]).forEach(function(cat){ biz[cat] = []; });
+          (m.items||[]).forEach(function(item){
+            if(!biz[item.cat]) biz[item.cat] = [];
+            biz[item.cat].push({nombre:item.name||'', precio:item.price||'$0', desc:item.desc||'', img:item.img||'', badge:item.badge||''});
+          });
+          if(m.promo) biz.__promo__ = m.promo;
+          MENUS_ALL[name] = biz;
+        } else {
+          MENUS_ALL[name] = JSON.parse(JSON.stringify(MENU_DEFAULT));
+        }
+        renderMenuCats(); renderMenuItems();
+        // Cargar promo
+        var promo = (MENUS_ALL[name]||{}).__promo__ || {};
+        var big = document.getElementById('menu-promo-big'); if(big) big.value = promo.big||'';
+        var sub = document.getElementById('menu-promo-sub'); if(sub) sub.value = promo.sub||'';
+      }).catch(function(){ MENUS_ALL[name] = JSON.parse(JSON.stringify(MENU_DEFAULT)); renderMenuCats(); renderMenuItems(); });
+  } else if(!MENUS_ALL[name]){
     MENUS_ALL[name] = JSON.parse(JSON.stringify(MENU_DEFAULT));
   }
 
@@ -2939,16 +2964,51 @@ function nuevaCategoriaMenu(){
 }
 
 // ── GUARDAR MENÚ ──
-function guardarMenu(){
-  // Guardar promo del día junto con el menú
-  if(menuCurrentBiz){
-    if(!MENUS_ALL[menuCurrentBiz]) MENUS_ALL[menuCurrentBiz] = {};
-    var promoBig = (document.getElementById('menu-promo-big')||{}).value||'';
-    var promoSub = (document.getElementById('menu-promo-sub')||{}).value||'';
-    MENUS_ALL[menuCurrentBiz].__promo__ = {big: promoBig, sub: promoSub};
-  }
+async function guardarMenu(){
+  if(!menuCurrentBiz){ showNotif('⚠️ Selecciona un negocio primero'); return; }
+  // Guardar promo del día en memoria
+  if(!MENUS_ALL[menuCurrentBiz]) MENUS_ALL[menuCurrentBiz] = {};
+  var promoBig = (document.getElementById('menu-promo-big')||{}).value||'';
+  var promoSub = (document.getElementById('menu-promo-sub')||{}).value||'';
+  MENUS_ALL[menuCurrentBiz].__promo__ = {big: promoBig, sub: promoSub};
   localStorage.setItem('fenlora_menus', JSON.stringify(MENUS_ALL));
-  showNotif('✅ Menú guardado para '+menuCurrentBiz);
+
+  // Convertir formato admin → formato que lee el mapa
+  // Admin: {cat:[{nombre,precio}], __promo__:{big,sub}}
+  // Mapa:  {promo:{big,sub,badge}, cats:[], items:[{cat,name,price,desc,img,badge}]}
+  var biz = MENUS_ALL[menuCurrentBiz] || {};
+  var cats = Object.keys(biz).filter(function(k){ return k !== '__promo__'; });
+  var items = [];
+  cats.forEach(function(cat){
+    var arr = biz[cat] || [];
+    arr.forEach(function(item){
+      items.push({
+        cat:   cat,
+        name:  item.nombre || item.name || '',
+        price: item.precio || item.price || '$0',
+        desc:  item.desc   || '',
+        img:   item.img    || '',
+        badge: item.badge  || ''
+      });
+    });
+  });
+  var promo = biz.__promo__ || {};
+  var menuPayload = {
+    promo: { big: promo.big||'', sub: promo.sub||'', badge: promo.badge||'' },
+    cats:  cats,
+    items: items
+  };
+
+  // Guardar en Supabase
+  if(menuCurrentSbId){
+    try{
+      var r = await _sbAdmin.from('businesses').update({ menu: menuPayload, tiene_menu: items.length > 0 }).eq('id', menuCurrentSbId);
+      if(r.error){ showNotif('⚠️ Error Supabase: '+r.error.message); return; }
+      showNotif('✅ Menú guardado y visible en el mapa — '+menuCurrentBiz);
+    }catch(e){ showNotif('⚠️ Error guardando en Supabase: '+e.message); }
+  } else {
+    showNotif('⚠️ No se encontró el ID del negocio en Supabase');
+  }
 }
 
 // ── compatibilidad con funciones antiguas ──

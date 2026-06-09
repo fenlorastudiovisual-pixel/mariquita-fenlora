@@ -950,53 +950,7 @@ tr:hover td{background:var(--bg3)}
             <div id="menu-cat-title" style="font-size:11px;font-weight:600;color:var(--gold);letter-spacing:.5px;text-transform:uppercase;margin:12px 0 8px">🍽️ PLATOS FUERTES</div>
 
             <!-- Items: cada uno tiene data-item-cat, se muestran/ocultan según tab activo -->
-            <div id="menu-items-list">
-              <div class="menu-item-row" data-item-cat="Platos fuertes">
-                <div class="menu-item-name">Viudo de bocachico</div>
-                <input class="price-input" value="$25.000">
-                <button class="btn-sm" onclick="this.closest('.menu-item-row').remove()">🗑️</button>
-              </div>
-              <div class="menu-item-row" data-item-cat="Platos fuertes">
-                <div class="menu-item-name">Lechona tolimense</div>
-                <input class="price-input" value="$22.000">
-                <button class="btn-sm" onclick="this.closest('.menu-item-row').remove()">🗑️</button>
-              </div>
-              <div class="menu-item-row" data-item-cat="Platos fuertes">
-                <div class="menu-item-name">Churrasco a la brasa</div>
-                <input class="price-input" value="$32.000">
-                <button class="btn-sm" onclick="this.closest('.menu-item-row').remove()">🗑️</button>
-              </div>
-              <div class="menu-item-row" data-item-cat="Sopas" style="display:none">
-                <div class="menu-item-name">Sancocho de gallina</div>
-                <input class="price-input" value="$18.000">
-                <button class="btn-sm" onclick="this.closest('.menu-item-row').remove()">🗑️</button>
-              </div>
-              <div class="menu-item-row" data-item-cat="Sopas" style="display:none">
-                <div class="menu-item-name">Sopa de mondongo</div>
-                <input class="price-input" value="$16.000">
-                <button class="btn-sm" onclick="this.closest('.menu-item-row').remove()">🗑️</button>
-              </div>
-              <div class="menu-item-row" data-item-cat="Bebidas" style="display:none">
-                <div class="menu-item-name">Jugo de mangostino</div>
-                <input class="price-input" value="$6.000">
-                <button class="btn-sm" onclick="this.closest('.menu-item-row').remove()">🗑️</button>
-              </div>
-              <div class="menu-item-row" data-item-cat="Bebidas" style="display:none">
-                <div class="menu-item-name">Limonada de coco</div>
-                <input class="price-input" value="$7.000">
-                <button class="btn-sm" onclick="this.closest('.menu-item-row').remove()">🗑️</button>
-              </div>
-              <div class="menu-item-row" data-item-cat="Postres" style="display:none">
-                <div class="menu-item-name">Postre de mangostino</div>
-                <input class="price-input" value="$9.000">
-                <button class="btn-sm" onclick="this.closest('.menu-item-row').remove()">🗑️</button>
-              </div>
-              <div class="menu-item-row" data-item-cat="Postres" style="display:none">
-                <div class="menu-item-name">Tres leches</div>
-                <input class="price-input" value="$8.000">
-                <button class="btn-sm" onclick="this.closest('.menu-item-row').remove()">🗑️</button>
-              </div>
-            </div>
+            <div id="menu-items-list"></div>
             <button class="btn" style="width:100%;margin-top:12px;justify-content:center" onclick="addMenuItemTab()">+ Agregar ítem a esta categoría</button>
           </div>
         </div>
@@ -2780,7 +2734,7 @@ var MENUS_ALL = JSON.parse(localStorage.getItem('fenlora_menus') || '{}');
 
 // Plantilla base para nuevos negocios
 var MENU_DEFAULT = {
-  'Platos fuertes': [{nombre:'Viudo de bocachico',precio:'$25.000'},{nombre:'Lechona tolimense',precio:'$22.000'},{nombre:'Churrasco a la brasa',precio:'$32.000'}],
+  'Platos fuertes': [],
   'Sopas':   [{nombre:'Sancocho de gallina',precio:'$18.000'},{nombre:'Sopa de mondongo',precio:'$16.000'}],
   'Bebidas': [{nombre:'Jugo de mangostino',precio:'$6.000'},{nombre:'Limonada de coco',precio:'$7.000'},{nombre:'Agua panela con limón',precio:'$4.000'}],
   'Postres': [{nombre:'Postre de mangostino',precio:'$9.000'},{nombre:'Tres leches',precio:'$8.000'}]

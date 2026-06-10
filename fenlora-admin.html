@@ -2871,15 +2871,33 @@ function renderMenuItems(){
     return '<div class="menu-item-row">'
       +'<div style="flex:1"><div class="menu-item-name">'+item.nombre+'</div>'
       +'<div class="menu-item-cat">'+menuCurrentCat+'</div></div>'
-      +'<input class="price-input" value="'+item.precio+'" onchange="updateMenuPrice('+i+',this.value)">'
+      +'<input class="price-input" value="'+item.precio+'" oninput="this.value=formatPrecioInput(this.value)" onchange="updateMenuPrice('+i+',this.value)">'
       +'<button class="btn-sm" onclick="deleteMenuItemAt('+i+')">🗑️</button>'
       +'</div>';
   }).join('');
 }
 
+
+// ── FORMATEO DE PRECIOS ──
+function formatPrecioInput(val){
+  // Quitar todo excepto dígitos
+  var digits = val.replace(/[^0-9]/g, '');
+  if(!digits) return '';
+  // Formatear con puntos de miles
+  var num = parseInt(digits, 10);
+  return '$' + num.toLocaleString('es-CO');
+}
+function parsePrecio(val){
+  // Convertir '$12.000' → 12000
+  return parseInt((val||'0').replace(/[^0-9]/g,''), 10) || 0;
+}
 function updateMenuPrice(idx, val){
   if(MENUS_ALL[menuCurrentBiz] && MENUS_ALL[menuCurrentBiz][menuCurrentCat]){
-    MENUS_ALL[menuCurrentBiz][menuCurrentCat][idx].precio = val;
+    var formatted = formatPrecioInput(val);
+    MENUS_ALL[menuCurrentBiz][menuCurrentCat][idx].precio = formatted;
+    // Actualizar el input con el valor formateado
+    var inputs = document.querySelectorAll('.price-input');
+    if(inputs[idx]) inputs[idx].value = formatted;
   }
 }
 function deleteMenuItemAt(idx){
@@ -2894,10 +2912,11 @@ function addMenuItemTab(){
   if(!menuCurrentBiz){ showNotif('⚠ Selecciona un negocio primero'); return; }
   var nombre = prompt('Nombre del ítem (ej. Ajiaco, Cerveza, Brownie):', '');
   if(!nombre || !nombre.trim()) return;
-  var precio = prompt('Precio (ej. $12.000):', '$0.000');
+  var precioRaw = prompt('Precio (solo números, ej. 12000):', '');
+  var precio = precioRaw ? formatPrecioInput(precioRaw) : '$0';
   if(!MENUS_ALL[menuCurrentBiz]) MENUS_ALL[menuCurrentBiz] = {};
   if(!MENUS_ALL[menuCurrentBiz][menuCurrentCat]) MENUS_ALL[menuCurrentBiz][menuCurrentCat] = [];
-  MENUS_ALL[menuCurrentBiz][menuCurrentCat].push({nombre:nombre.trim(), precio:precio||'$0.000'});
+  MENUS_ALL[menuCurrentBiz][menuCurrentCat].push({nombre:nombre.trim(), precio:precio||'$0'});
   renderMenuItems();
   showNotif('✅ "'+nombre.trim()+'" agregado a '+menuCurrentCat);
 }

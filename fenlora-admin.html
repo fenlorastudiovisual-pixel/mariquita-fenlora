@@ -2783,8 +2783,8 @@ function selectMenuClient(el, name, catLabel, sbId){
   var title = document.getElementById('menu-client-title');
   if(title) title.textContent = name + ' · Editor de menú';
 
-  // Cargar menú desde Supabase si el negocio tiene sbId
-  if(menuCurrentSbId && !MENUS_ALL[name]){
+  // Cargar menú desde Supabase SIEMPRE (no usar cache localStorage)
+  if(menuCurrentSbId){
     _sbAdmin.from('businesses').select('menu').eq('id', menuCurrentSbId).single()
       .then(function(r){
         if(r.data && r.data.menu && r.data.menu.cats && r.data.menu.cats.length){
@@ -2799,14 +2799,17 @@ function selectMenuClient(el, name, catLabel, sbId){
           if(m.promo) biz.__promo__ = m.promo;
           MENUS_ALL[name] = biz;
         } else {
-          MENUS_ALL[name] = JSON.parse(JSON.stringify(MENU_DEFAULT));
+          // Sin menú en Supabase — inicializar vacío con categorías por defecto
+          MENUS_ALL[name] = {
+            'Platos fuertes': [], 'Sopas': [], 'Bebidas': [], 'Postres': []
+          };
         }
         renderMenuCats(); renderMenuItems();
         // Cargar promo
         var promo = (MENUS_ALL[name]||{}).__promo__ || {};
         var big = document.getElementById('menu-promo-big'); if(big) big.value = promo.big||'';
         var sub = document.getElementById('menu-promo-sub'); if(sub) sub.value = promo.sub||'';
-      }).catch(function(){ MENUS_ALL[name] = JSON.parse(JSON.stringify(MENU_DEFAULT)); renderMenuCats(); renderMenuItems(); });
+      }).catch(function(){ MENUS_ALL[name] = {'Platos fuertes':[],'Sopas':[],'Bebidas':[],'Postres':[]}; renderMenuCats(); renderMenuItems(); });
   } else if(!MENUS_ALL[name]){
     MENUS_ALL[name] = JSON.parse(JSON.stringify(MENU_DEFAULT));
   }

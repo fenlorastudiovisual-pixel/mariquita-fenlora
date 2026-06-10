@@ -2733,6 +2733,32 @@ function sendAlert(){
 var MENUS_ALL = JSON.parse(localStorage.getItem('fenlora_menus') || '{}');
 
 // Plantilla base para nuevos negocios
+
+// ── CATEGORÍAS POR DEFECTO SEGÚN TIPO DE NEGOCIO ──
+function getCatsDefault(catLabel){
+  var c = (catLabel||'').toLowerCase();
+  if(c.includes('hotel') || c.includes('airbnb') || c.includes('finca') || c.includes('alojamiento') || c.includes('cabaña') || c.includes('hostal')){
+    return ['Habitaciones', 'Servicios', 'Tarifas', 'Paquetes'];
+  }
+  if(c.includes('bar') || c.includes('discoteca') || c.includes('nocturno')){
+    return ['Cócteles', 'Cervezas', 'Licores', 'Sin alcohol', 'Piqueos'];
+  }
+  if(c.includes('spa') || c.includes('salud') || c.includes('belleza') || c.includes('peluquería')){
+    return ['Tratamientos', 'Masajes', 'Paquetes', 'Productos'];
+  }
+  if(c.includes('café') || c.includes('cafe') || c.includes('panadería') || c.includes('panaderia') || c.includes('heladería')){
+    return ['Bebidas calientes', 'Bebidas frías', 'Panes y pastelería', 'Helados'];
+  }
+  if(c.includes('tienda') || c.includes('comercio') || c.includes('salsamentaria') || c.includes('supermer')){
+    return ['Productos', 'Carnes', 'Lácteos', 'Abarrotes'];
+  }
+  if(c.includes('restaurante') || c.includes('fritanga') || c.includes('asadero')){
+    return ['Platos fuertes', 'Sopas', 'Bebidas', 'Postres'];
+  }
+  // Por defecto genérico
+  return ['Productos', 'Servicios', 'Bebidas', 'Otros'];
+}
+
 var MENU_DEFAULT = {
   'Platos fuertes': [],
   'Sopas':   [{nombre:'Sancocho de gallina',precio:'$18.000'},{nombre:'Sopa de mondongo',precio:'$16.000'}],
@@ -2745,6 +2771,7 @@ var MENU_ICONS = {'Platos fuertes':'🍽️','Sopas':'🥣','Bebidas':'🥤','Po
 var menuCurrentBiz = null;   // nombre del negocio activo
 var menuCurrentSbId = null;  // UUID Supabase del negocio activo
 var menuCurrentCat = 'Platos fuertes';  // categoría activa
+var menuCurrentCatLabel = '';           // tipo de negocio activo
 
 // ── LISTAR NEGOCIOS EN EL PANEL IZQUIERDO ──
 function buildMenuClientsList(query){
@@ -2771,6 +2798,7 @@ function filterMenuClients(q){ buildMenuClientsList(q); }
 // ── SELECCIONAR NEGOCIO ──
 function selectMenuClient(el, name, catLabel, sbId){
   menuCurrentSbId = sbId || null;
+  menuCurrentCatLabel = catLabel || '';
   document.querySelectorAll('.menu-client-item').forEach(function(e){
     e.style.background='var(--bg3)'; e.style.border='1px solid transparent';
     var d=e.querySelector('div'); if(d) d.style.color='var(--text)';
@@ -2779,7 +2807,7 @@ function selectMenuClient(el, name, catLabel, sbId){
   var d=el.querySelector('div'); if(d) d.style.color='var(--gold)';
 
   menuCurrentBiz = name;
-  menuCurrentCat = 'Platos fuertes';
+  menuCurrentCat = getCatsDefault(catLabel)[0];
   var title = document.getElementById('menu-client-title');
   if(title) title.textContent = name + ' · Editor de menú';
 
@@ -2800,18 +2828,25 @@ function selectMenuClient(el, name, catLabel, sbId){
           MENUS_ALL[name] = biz;
         } else {
           // Sin menú en Supabase — inicializar vacío con categorías por defecto
-          MENUS_ALL[name] = {
-            'Platos fuertes': [], 'Sopas': [], 'Bebidas': [], 'Postres': []
-          };
+          var defCats = getCatsDefault(menuCurrentCatLabel);
+          var defObj = {}; defCats.forEach(function(c){ defObj[c]=[]; });
+          MENUS_ALL[name] = defObj;
         }
         renderMenuCats(); renderMenuItems();
         // Cargar promo
         var promo = (MENUS_ALL[name]||{}).__promo__ || {};
         var big = document.getElementById('menu-promo-big'); if(big) big.value = promo.big||'';
         var sub = document.getElementById('menu-promo-sub'); if(sub) sub.value = promo.sub||'';
-      }).catch(function(){ MENUS_ALL[name] = {'Platos fuertes':[],'Sopas':[],'Bebidas':[],'Postres':[]}; renderMenuCats(); renderMenuItems(); });
+      }).catch(function(){
+        var defCats = getCatsDefault(menuCurrentCatLabel);
+        var defObj = {}; defCats.forEach(function(c){ defObj[c]=[]; });
+        MENUS_ALL[name] = defObj;
+        renderMenuCats(); renderMenuItems();
+      });
   } else if(!MENUS_ALL[name]){
-    MENUS_ALL[name] = JSON.parse(JSON.stringify(MENU_DEFAULT));
+    var defCats = getCatsDefault(menuCurrentCatLabel);
+    var defObj = {}; defCats.forEach(function(c){ defObj[c]=[]; });
+    MENUS_ALL[name] = defObj;
   }
 
   // Resetear tabs al primero

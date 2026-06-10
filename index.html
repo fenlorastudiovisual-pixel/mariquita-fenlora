@@ -1016,10 +1016,22 @@ function suscribirCambiosEnVivo() {
           } else {
             if (markerObj) markerObj.mk.setIcon(makeIcon(p));
           }
+          // Sincronizar menú digital si cambió
+          if (updated.menu !== undefined) {
+            PUNTOS[idx].menu = updated.menu;
+            PUNTOS[idx].tiene_menu = updated.tiene_menu || false;
+          }
           // Si el panel está abierto mostrando este punto, refrescarlo
           if (currentPunto && String(currentPunto.id) === String(updated.id)) {
             currentPunto.disponible = updated.disponible;
+            currentPunto.menu = updated.menu || currentPunto.menu;
+            currentPunto.tiene_menu = updated.tiene_menu || false;
             openPanel(currentPunto);
+            // Si el menú digital está abierto, actualizarlo en tiempo real
+            var menuModal = document.getElementById('menu-modal');
+            if (menuModal && menuModal.style.display !== 'none') {
+              openMenu(currentPunto);
+            }
           }
         }
       })

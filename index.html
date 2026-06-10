@@ -1965,7 +1965,7 @@ function openMenu(){
   if(!currentPunto?.menu) return;
   const m=currentPunto.menu;
   const p=currentPunto;
-  document.getElementById('menu-hero-img').src=p.fotos[0].url;
+  document.getElementById('menu-hero-img').src=(p.fotos && p.fotos[0] && p.fotos[0].url) ? p.fotos[0].url : '';
   document.getElementById('menu-hero-name').textContent=p.nombre;
   document.getElementById('menu-hero-sub').textContent=p.sub;
   document.getElementById('promo-big').textContent=m.promo.big;

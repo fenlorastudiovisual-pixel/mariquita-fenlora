@@ -350,6 +350,7 @@ footer{background:var(--dark);padding:20px;text-align:center;margin-top:8px}
   <div class="divider"></div>
 
   <!-- RENOVACIÓN Y PAGO -->
+  <div id="cd-estado-negocio"></div>
   <div class="section" id="renewal-section">
     <div class="sec-title">Renovar suscripción</div>
     <div class="sec-sub" id="renewal-sub">Mantén tu negocio visible en el mapa</div>
@@ -587,6 +588,7 @@ function render(){
   document.getElementById('mes-label').textContent = `Resumen de ${n.mesReporte}`;
 
   // Status
+  try{ renderToggleAbierto(); }catch(e){}
   renderStatus();
 
   // Métricas
@@ -1437,6 +1439,7 @@ function iniciarRealtimeCD(){
             || row.plan_fenlora;
         }
         NEGOCIO.activo = row.is_active !== false;
+        if(typeof row.is_open !== 'undefined'){ NEGOCIO.is_open = row.is_open; try{renderToggleAbierto();}catch(e){} }
         var fvStr = ao.fecha_vencimiento || '';
         if(fvStr && fvStr !== '—'){
           var p = fvStr.split('-');
@@ -1516,6 +1519,37 @@ document.addEventListener('click', function(e){
   }
 });
 
+
+
+// ── TOGGLE ABIERTO/CERRADO ──
+async function toggleAbiertoCerrado(){
+  var btn = document.getElementById('cd-toggle-open');
+  var isOpen = btn && btn.dataset.open === 'true';
+  var nuevoEstado = !isOpen;
+  try{
+    var _sbToggle = window.supabase ? window.supabase.createClient(SUPA_URL_CD, SUPA_KEY_CD) : null;
+    if(_sbToggle && NEGOCIO && NEGOCIO.id){
+      await _sbToggle.from('businesses').update({is_open: nuevoEstado}).eq('id', NEGOCIO.id);
+      NEGOCIO.is_open = nuevoEstado;
+      renderToggleAbierto();
+      showToast(nuevoEstado ? '✅ Tu negocio figura como ABIERTO en el mapa' : '🔴 Tu negocio figura como CERRADO en el mapa', nuevoEstado ? 'success' : 'warn');
+    }
+  }catch(e){ console.warn('toggleAbiertoCerrado error:', e); }
+}
+
+function renderToggleAbierto(){
+  var el = document.getElementById('cd-estado-negocio');
+  if(!el) return;
+  var isOpen = NEGOCIO && NEGOCIO.is_open !== false;
+  el.innerHTML = '<div style="display:flex;align-items:center;justify-content:space-between;padding:14px 16px;background:'+(isOpen?'rgba(26,122,74,.12)':'rgba(198,40,40,.1)')+';border:1px solid '+(isOpen?'rgba(37,211,102,.25)':'rgba(198,40,40,.3)')+';border-radius:12px;margin-bottom:16px">'
+    +'<div style="display:flex;align-items:center;gap:10px">'
+    +'<span style="font-size:22px">'+(isOpen?'🟢':'🔴')+'</span>'
+    +'<div><div style="font-size:14px;font-weight:600;color:'+(isOpen?'#4CAF82':'#E57373')+'">'+(isOpen?'Abierto ahora':'Cerrado ahora')+'</div>'
+    +'<div style="font-size:11px;color:#888;margin-top:1px">Los turistas ven tu negocio como '+(isOpen?'disponible':'cerrado')+' en el mapa</div></div></div>'
+    +'<button id="cd-toggle-open" data-open="'+(isOpen?'true':'false')+'" onclick="toggleAbiertoCerrado()" style="padding:8px 16px;border-radius:8px;border:none;cursor:pointer;font-size:12px;font-weight:600;background:'+(isOpen?'rgba(198,40,40,.15)':'rgba(26,122,74,.2)')+';color:'+(isOpen?'#E57373':'#4CAF82')+'">'
+    +(isOpen?'Marcar como cerrado':'Marcar como abierto')+'</button>'
+    +'</div>';
+}
 
 // ── VERIFICAR MODO MANTENIMIENTO ──
 async function verificarMantenimiento(){

@@ -408,6 +408,18 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Instru
           <label>Horario de atención *</label>
           <input type="text" id="f-horario" placeholder="ej. Lun–Dom · 7:00 am – 9:00 pm">
         </div>
+        <div class="field-row col2">
+          <div class="field">
+            <label>🕐 Hora de apertura</label>
+            <input type="time" id="f-hora-apertura" placeholder="07:00" style="font-family:inherit">
+            <div style="font-size:10px;color:var(--text3);margin-top:3px">El pin se activa automáticamente a esta hora</div>
+          </div>
+          <div class="field">
+            <label>🕐 Hora de cierre</label>
+            <input type="time" id="f-hora-cierre" placeholder="21:00" style="font-family:inherit">
+            <div style="font-size:10px;color:var(--text3);margin-top:3px">El pin se pone rojo automáticamente a esta hora</div>
+          </div>
+        </div>
       </div>
 
       <!-- SECCIÓN CONDUCTOR — solo visible para categorías de transporte -->
@@ -791,6 +803,9 @@ function sbRowToPoint(row) {
     tel: row.phone || '',
     email: row.email || '',
     horario: row.horario || '',
+    hora_apertura: row.hora_apertura || '',
+    hora_cierre: row.hora_cierre || '',
+    is_open: row.is_open !== false,
     coords: (row.latitude && row.longitude) ? [parseFloat(row.latitude), parseFloat(row.longitude)] : [5.2012, -74.9030],
     gmaps: row.google_maps_url || '',
     video: row.video || null,
@@ -817,6 +832,8 @@ function pointToSbRow(p) {
     phone: p.tel,
     email: p.email,
     horario: p.horario,
+    hora_apertura: p.hora_apertura || '',
+    hora_cierre: p.hora_cierre || '',
     latitude: p.coords ? p.coords[0] : null,
     longitude: p.coords ? p.coords[1] : null,
     google_maps_url: p.gmaps,
@@ -1013,6 +1030,8 @@ function loadEditor(p) {
   document.getElementById('f-tel').value = p.tel || '';
   document.getElementById('f-email').value = p.email || '';
   document.getElementById('f-horario').value = p.horario || '';
+  document.getElementById('f-hora-apertura').value = p.hora_apertura || '';
+  document.getElementById('f-hora-cierre').value = p.hora_cierre || '';
   document.getElementById('f-plan').value = p.plan || 'basic';
   buildPlanSelect('f-plan', p.plan || 'basic');
   document.getElementById('f-notas').value = p.notas || '';
@@ -1456,6 +1475,8 @@ async function savePoint() {
   selected.tel = document.getElementById('f-tel').value.trim();
   selected.email = document.getElementById('f-email').value.trim();
   selected.horario = document.getElementById('f-horario').value.trim();
+  selected.hora_apertura = document.getElementById('f-hora-apertura').value.trim();
+  selected.hora_cierre = document.getElementById('f-hora-cierre').value.trim();
   selected.plan = document.getElementById('f-plan').value;
   selected.notas = document.getElementById('f-notas').value.trim();
   selected.inicio = document.getElementById('f-inicio').value;
@@ -1519,7 +1540,7 @@ function saveToStorage() {
 async function addNew() {
   const newPoint = {
     cat: 'hist', nombre: 'Nuevo punto',
-    sub: '', desc: '', fotos: [], tel: '', email: '', horario: '',
+    sub: '', desc: '', fotos: [], tel: '', email: '', horario: '', hora_apertura: '', hora_cierre: '', is_open: true,
     coords: [5.2012, -74.9030], gmaps: 'https://maps.google.com/?q=5.2012,-74.9030',
     video: null, plan: 'basic', activo: false, notas: '',
     menu: { cats: ['Platos', 'Bebidas'], items: [], promo: { big: '', sub: '' } }

@@ -922,6 +922,9 @@ function sbRowToPunto(row) {
     menu:       row.menu || {},
     tiene_menu: row.tiene_menu || false,
     disponible: row.disponible === true,
+    is_open: row.is_open !== false,
+    hora_apertura: row.hora_apertura || '',
+    hora_cierre: row.hora_cierre || '',
     municipio:  row.municipio || 'mariquita',
     docs:       row.docs || {},
   };
@@ -977,6 +980,10 @@ function suscribirCambiosEnVivo() {
           // Sincronizar is_active — pausa/reactivación desde el admin
           if (typeof updated.is_active !== 'undefined') {
             PUNTOS[idx].activo = updated.is_active;
+          }
+          if (typeof updated.is_open !== 'undefined') {
+            PUNTOS[idx].is_open = updated.is_open;
+            if (markerObj) markerObj.mk.setIcon(makeIcon(PUNTOS[idx]));
           }
           const markerObj = markers.find(function(m){ return String(m.id) === String(updated.id); });
           const p = PUNTOS[idx];
@@ -1201,10 +1208,15 @@ function makeIcon(p){
   // Pin estándar (rombo) para el resto
   const img=p.fotos[0]?.url;
   const disponibleDot=p.disponible?'<div class="mpin-disponible"></div>':'';
+  // Pin rojo cuando el negocio está cerrado
+  const cerrado = p.is_open === false;
+  const pinBg = cerrado ? '#C62828' : c.color;
+  const cerradoDot = cerrado ? '<div style="position:absolute;top:-4px;right:-4px;width:12px;height:12px;background:#C62828;border-radius:50%;border:2.5px solid #fff;z-index:10"></div>' : '';
+  const cerradoOverlay = cerrado ? '<div style="position:absolute;inset:0;background:rgba(198,40,40,0.35);border-radius:inherit;display:flex;align-items:center;justify-content:center;font-size:10px">🔴</div>' : '';
   const inner=img
-    ?`<img src="${img}" loading="lazy" alt="" style="width:100%;height:100%;object-fit:cover"/>`
+    ?`<img src="${img}" loading="lazy" alt="" style="width:100%;height:100%;object-fit:cover;${cerrado?'filter:grayscale(60%)':''}"/>`
     :`<span class="ico">${c.emoji}</span>`;
-  const html=`<div class="mpin" style="background:${c.color}">${inner}${disponibleDot}</div>`;
+  const html=`<div class="mpin" style="background:${pinBg};position:relative">${inner}${cerradoOverlay}${disponibleDot}</div>`;
   return L.divIcon({className:'',html,iconSize:[32,32],iconAnchor:[16,32],popupAnchor:[0,-36]});
 }
 
@@ -1401,6 +1413,10 @@ let currentPunto=null;
 let reviewRating=0;
 
 function openPanel(p){
+  // Badge cerrado en el panel
+  var cerradoBadge = p.is_open === false
+    ? '<span style="background:#C62828;color:#fff;font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;margin-left:8px;vertical-align:middle">CERRADO</span>'
+    : '';
   // GA: trackear apertura de panel
   if(typeof gtag==='function') gtag('event','view_point',{event_category:'mapa',event_label:p.nombre,point_category:p.cat,municipio:p.municipio||'mariquita'});
   currentPunto=p;
@@ -1410,7 +1426,8 @@ function openPanel(p){
   badge.style.color=c.color;
   badge.querySelector('.d').style.background=c.color;
   document.getElementById('pbtext').textContent=c.label;
-  document.getElementById('pname').textContent=(currentLang==='en'&&p.nombre_en)?p.nombre_en:p.nombre;
+  var pnameText = (currentLang==='en'&&p.nombre_en)?p.nombre_en:p.nombre;
+  document.getElementById('pname').innerHTML = pnameText + cerradoBadge;
   // Descripción: usar desc_en si existe, sino desc (español) con nota en inglés
   const descEl = document.getElementById('pdesc');
   if(currentLang === 'en'){

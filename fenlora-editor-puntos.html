@@ -845,7 +845,9 @@ function pointToSbRow(p) {
     plan_fenlora: p.plan || 'basic',
     is_active: p.activo !== false,
     notas_admin: p.notas || '',
-    menu: p.menu || {},
+    // ⚠ BLINDAJE: el campo `menu` (la carta/platos) se edita SOLO en el panel admin → Editor de menús.
+    // El editor de puntos NUNCA lo sobreescribe al actualizar, para no borrar la carta de un negocio existente.
+    // (En savePoint se añade un menú vacío solo cuando se CREA un negocio nuevo.)
     tiene_menu: p.tiene_menu === true,
     addons: Object.assign({}, p.addons || {}, {
       fecha_inicio: p.inicio || '',
@@ -1525,7 +1527,9 @@ async function savePoint() {
       const { error } = await _sb.from('businesses').update(row).eq('id', selected.sbId);
       if (error) throw error;
     } else {
-      // Insertar nuevo registro
+      // Insertar nuevo registro — aquí SÍ creamos un menú vacío inicial (estructura base).
+      // La carta real se carga después en el panel admin → Editor de menús.
+      row.menu = (selected.menu && selected.menu.items) ? selected.menu : { cats: ['Platos', 'Bebidas'], items: [], promo: { big: '', sub: '' } };
       const { data, error } = await _sb.from('businesses').insert(row).select().single();
       if (error) throw error;
       selected.sbId = data.id;

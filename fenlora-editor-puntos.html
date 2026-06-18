@@ -329,6 +329,9 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Instru
     </div>
   </div>
 
+  <div id="presencia-banner" style="display:none"></div>
+  <div id="conflicto-banner" style="display:none"></div>
+
   <div class="editor-tabs" id="editor-tabs" style="display:none">
     <div class="etab active" onclick="showTab('info')">📋 Información</div>
     <div class="etab" onclick="showTab('fotos')">📸 Fotos</div>
@@ -877,6 +880,7 @@ async function init() {
   await loadFromSupabase();
   renderList();
   iniciarRealtime();
+  iniciarPresencia();
 }
 
 function iniciarRealtime() {
@@ -894,14 +898,17 @@ function iniciarRealtime() {
     .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'businesses' }, function(payload) {
       var actualizado = sbRowToPoint(payload.new);
       var idx = points.findIndex(function(p){ return p.id === actualizado.id; });
-      if(idx !== -1){
-        // Si es el punto seleccionado actualmente, no reemplazar el form (el usuario puede estar editando)
-        var estaSeleccionado = selected && selected.id === actualizado.id;
-        points[idx] = actualizado;
-        renderList();
-        if(estaSeleccionado){
-          showToast('⚠️ Este punto fue modificado por otro usuario', 'info');
-        }
+      if(idx === -1) return;
+      var estaSeleccionado = selected && selected.id === actualizado.id;
+      // ¿Es el eco de mi propio guardado? (Supabase me devuelve mi propio UPDATE)
+      var esEcoPropio = String(actualizado.id) === _ultimoGuardado.id && (Date.now() - _ultimoGuardado.t) < 4000;
+      // Actualizamos los datos en memoria SIEMPRE, pero NUNCA reemplazamos el formulario abierto.
+      points[idx] = actualizado;
+      renderList();
+      if(estaSeleccionado && !esEcoPropio){
+        // Cambio real de otro usuario en el punto que tengo abierto → aviso sin bloquear
+        var quien = (presenciaOtros[String(actualizado.id)] && presenciaOtros[String(actualizado.id)][0]) || 'El otro usuario';
+        mostrarConflicto(quien);
       }
     })
     .on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'businesses' }, function(payload) {
@@ -968,7 +975,7 @@ function renderList() {
     : filtered.map(p => {
         const c = CAT_META[p.cat];
         const thumb = p.fotos?.[0]?.url;
-        return `<div class="punto-row${selected?.id===p.id?' selected':''}" onclick="selectPoint('${p.id}')">
+        return `<div class="punto-row${selected?.id===p.id?' selected':''}" data-pid="${p.id}" onclick="selectPoint('${p.id}')">
           ${thumb
             ? `<img class="punto-thumb" src="${thumb}" alt="" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">`
             : ''}
@@ -989,6 +996,7 @@ function renderList() {
   document.getElementById('stat-total').textContent = filtered.length;
   document.getElementById('stat-active').textContent = filtered.filter(p=>p.activo!==false).length;
   document.getElementById('stat-inactive').textContent = filtered.filter(p=>p.activo===false).length;
+  if (typeof pintarPresencia === 'function') pintarPresencia();
 }
 
 function filterList(q) {
@@ -1009,6 +1017,9 @@ function toggleFilter(el) {
 function selectPoint(id) {
   selected = points.find(p => String(p.id) === String(id));
   if (!selected) return;
+  var cb = document.getElementById('conflicto-banner');
+  if (cb) cb.style.display = 'none';
+  if (typeof presenciaTrack === 'function') presenciaTrack(id);
   renderList();
   loadEditor(selected);
   showTab('info');
@@ -1506,6 +1517,7 @@ async function savePoint() {
   selected.activo = document.getElementById('status-toggle').classList.contains('on');
 
   showToast('Guardando…', 'info');
+  _ultimoGuardado = { id: String(selected.id), t: Date.now() };
   try {
     const row = pointToSbRow(selected);
     if (selected.sbId) {
@@ -1518,6 +1530,7 @@ async function savePoint() {
       if (error) throw error;
       selected.sbId = data.id;
       selected.id = data.id;
+      _ultimoGuardado = { id: String(selected.id), t: Date.now() };
     }
     const idx = points.findIndex(p => String(p.id) === String(selected.id));
     if (idx >= 0) points[idx] = selected;
@@ -1583,6 +1596,7 @@ async function doDelete() {
     points = points.filter(p => p.id !== selected.id);
     closeConfirm();
     selected = null;
+    if (typeof presenciaTrack === 'function') presenciaTrack(null);
     document.getElementById('editor-tabs').style.display = 'none';
     document.getElementById('head-actions').style.display = 'none';
     document.getElementById('editor-title').textContent = 'Selecciona un negocio';
@@ -1688,6 +1702,103 @@ function showToast(msg, type='info') {
   toastTimer = setTimeout(()=>t.classList.remove('show'), 3200);
 }
 
+// ═══════════════════════════════════════════════
+// PRESENCIA + CONFLICTOS (trabajo simultáneo de 2 admins)
+// ═══════════════════════════════════════════════
+const EP_NOMBRES = { admin1: 'Sebastián', admin2: 'Socio' };
+function epRole(){ return sessionStorage.getItem('ep_role') || 'admin1'; }
+function epNombre(){ return EP_NOMBRES[epRole()] || 'Admin'; }
+// ID único por pestaña/sesión (para que la presencia distinga quién es quién)
+const EP_SESSION_ID = 'ep_' + Math.random().toString(36).slice(2,10);
+
+let _ultimoGuardado = { id:null, t:0 };   // sella mi propio guardado para ignorar su eco
+let presenciaOtros = {};                  // { pointId: [nombre, ...] } de OTRAS sesiones
+let _presenciaCh = null;
+
+function iniciarPresencia(){
+  _presenciaCh = _sb.channel('editor-presencia', {
+    config: { presence: { key: EP_SESSION_ID } }
+  });
+  _presenciaCh.on('presence', { event: 'sync' }, function(){
+    const state = _presenciaCh.presenceState();
+    presenciaOtros = {};
+    Object.keys(state).forEach(function(k){
+      if(k === EP_SESSION_ID) return;        // ignorar mi propia sesión
+      (state[k] || []).forEach(function(meta){
+        if(!meta || !meta.point_id) return;
+        const pid = String(meta.point_id);
+        (presenciaOtros[pid] = presenciaOtros[pid] || []).push(meta.name || 'Alguien');
+      });
+    });
+    pintarPresencia();
+  });
+  _presenciaCh.subscribe(function(status){
+    if(status === 'SUBSCRIBED'){
+      _presenciaCh.track({ name: epNombre(), role: epRole(), point_id: null });
+      console.log('[Editor] Presencia activa —', epNombre());
+    }
+  });
+}
+
+// Anuncia en qué punto estoy (o null si no tengo ninguno abierto)
+function presenciaTrack(pointId){
+  if(_presenciaCh){
+    _presenciaCh.track({ name: epNombre(), role: epRole(), point_id: pointId ? String(pointId) : null });
+  }
+}
+
+// Pinta los indicadores 🟢 en la lista y el banner del editor
+function pintarPresencia(){
+  document.querySelectorAll('.punto-row').forEach(function(r){
+    r.classList.remove('editando-otro');
+    const b = r.querySelector('.presencia-badge'); if(b) b.remove();
+  });
+  Object.keys(presenciaOtros).forEach(function(pid){
+    const row = document.querySelector('.punto-row[data-pid="'+pid+'"]');
+    if(row){
+      row.classList.add('editando-otro');
+      const badge = document.createElement('div');
+      badge.className = 'presencia-badge';
+      badge.textContent = '🟢 ' + presenciaOtros[pid][0];
+      row.appendChild(badge);
+    }
+  });
+  const banner = document.getElementById('presencia-banner');
+  if(banner){
+    if(selected && presenciaOtros[String(selected.id)]){
+      banner.style.display = 'block';
+      banner.innerHTML = '🟢 <strong>' + presenciaOtros[String(selected.id)].join(', ')
+        + '</strong> también está en este punto ahora mismo. Coordínense para no pisarse los cambios.';
+    } else {
+      banner.style.display = 'none';
+    }
+  }
+}
+
+// Aviso (NO bloqueante) cuando el otro usuario guarda el punto que tengo abierto
+function mostrarConflicto(quien){
+  const cb = document.getElementById('conflicto-banner');
+  if(!cb) return;
+  cb.style.display = 'block';
+  cb.innerHTML = '⚠️ <strong>' + quien + '</strong> acaba de guardar cambios en este punto. '
+    + 'Tu formulario sigue como lo tienes — si guardas, tus datos se quedan. '
+    + '<button class="cb-btn" onclick="recargarPuntoActual()">Ver sus cambios</button>'
+    + '<button class="cb-btn ghost" onclick="this.parentElement.style.display=\'none\'">Seguir editando</button>';
+}
+
+// Recarga el formulario con la versión más reciente (la del otro usuario)
+function recargarPuntoActual(){
+  if(!selected){ return; }
+  const fresh = points.find(p => String(p.id) === String(selected.id));
+  if(fresh){
+    selected = fresh;
+    loadEditor(selected);
+  }
+  const cb = document.getElementById('conflicto-banner');
+  if(cb) cb.style.display = 'none';
+  showToast('🔄 Punto recargado con los cambios más recientes', 'success');
+}
+
 // ── LOGIN ──
 const EP_PASS   = localStorage.getItem('fenlora_admin_pass')   || 'Fenlora2026';
 const EP_PASS_2 = localStorage.getItem('fenlora_admin_pass_2') || 'Fenlora2B';
@@ -1752,6 +1863,17 @@ document.addEventListener('DOMContentLoaded', function(){
   .two-col, .three-col{grid-template-columns:1fr !important}
   .photo-grid{grid-template-columns:repeat(2,1fr)}
 }
+</style>
+
+<style>
+/* ── PRESENCIA + CONFLICTOS (multi-admin) ── */
+.punto-row{position:relative}
+.punto-row.editando-otro{box-shadow:inset 3px 0 0 #34d399}
+.presencia-badge{position:absolute;top:5px;right:7px;font-size:9px;font-weight:700;color:#34d399;background:rgba(52,211,153,.13);border:1px solid rgba(52,211,153,.4);padding:1px 7px;border-radius:20px;white-space:nowrap;pointer-events:none;letter-spacing:.2px}
+#presencia-banner{margin:0 14px 10px;padding:8px 11px;font-size:11px;line-height:1.5;color:#a7f3d0;background:rgba(52,211,153,.08);border:1px solid rgba(52,211,153,.3);border-radius:8px}
+#conflicto-banner{margin:0 14px 10px;padding:9px 11px;font-size:11px;line-height:1.55;color:#fde68a;background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.38);border-radius:8px}
+#conflicto-banner .cb-btn{font-family:inherit;font-size:10px;font-weight:700;padding:4px 10px;margin:6px 6px 0 0;border-radius:6px;border:none;cursor:pointer;background:var(--gold,#e0a82e);color:#1a1a1a}
+#conflicto-banner .cb-btn.ghost{background:transparent;color:#fde68a;border:1px solid rgba(245,158,11,.45)}
 </style>
 </body>
 </html>

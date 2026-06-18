@@ -20,6 +20,19 @@
   var deferredPrompt = null;
   var cfg = {};
 
+  // Captura el evento de instalación lo más temprano posible (no perderlo)
+  window.addEventListener('beforeinstallprompt', function (e) {
+    e.preventDefault();
+    deferredPrompt = e;
+    var b = document.getElementById('fpwa-install');
+    if (b) b.style.display = '';
+  });
+  window.addEventListener('appinstalled', function () {
+    deferredPrompt = null;
+    var b = document.getElementById('fpwa-install');
+    if (b) b.style.display = 'none';
+  });
+
   // ── Detección de plataforma ──
   function isIOS() {
     return /iphone|ipad|ipod/i.test(navigator.userAgent) ||
@@ -149,8 +162,7 @@
       'transition:transform .12s,box-shadow .12s}' +
       '.fpwa-btn:active{transform:scale(.97)}' +
       '.fpwa-after{width:calc(100% - 40px);margin:14px 20px 4px}' +
-      '.fpwa-float{position:fixed;left:14px;bottom:16px;z-index:1500}' +
-      '@media(min-width:700px){.fpwa-float{left:auto;right:18px}}' +
+      '.fpwa-float{position:fixed;left:12px;bottom:90px;z-index:1500;font-size:13px;padding:11px 16px}' +
       /* Guía iOS */
       '#fpwa-ios{display:none;position:fixed;inset:0;z-index:9999;background:rgba(10,9,28,.86);backdrop-filter:blur(4px);align-items:center;justify-content:center;padding:24px}' +
       '#fpwa-ios.show{display:flex}' +
@@ -174,6 +186,26 @@
     return b;
   }
 
+  function positionFloat(btn, aboveSel) {
+    function place() {
+      var t = aboveSel ? document.getElementById(aboveSel) : null;
+      if (t) {
+        var r = t.getBoundingClientRect();
+        btn.style.left = Math.max(12, r.left) + 'px';
+        btn.style.right = 'auto';
+        btn.style.bottom = (window.innerHeight - r.top + 10) + 'px';
+      } else {
+        btn.style.left = '12px';
+        btn.style.right = 'auto';
+        btn.style.bottom = '90px';
+      }
+    }
+    place();
+    window.addEventListener('resize', place);
+    window.addEventListener('orientationchange', place);
+    setTimeout(place, 600); // por si la leyenda carga un instante después
+  }
+
   function mountButton(btnCfg) {
     if (isStandalone()) return; // ya instalada → no mostrar
     styles();
@@ -186,9 +218,10 @@
         return;
       }
     }
-    // por defecto: flotante
+    // por defecto: flotante, anclado encima de un elemento si se indica
     b.classList.add('fpwa-float');
     document.body.appendChild(b);
+    positionFloat(b, btnCfg && btnCfg.above);
   }
 
   // ── Guía para iPhone ──
@@ -220,21 +253,14 @@
     var icons = resolveIcons(cfg.icon);
     cfg._icons = icons;
 
-    try { injectManifest(cfg, icons); } catch (e) {}
+    // Si la página ya tiene un manifiesto estático (más confiable), no inyectamos blob
+    if (!cfg.skipManifest) {
+      try { injectManifest(cfg, icons); } catch (e) {}
+    }
 
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register(cfg.sw || 'sw.js').catch(function () {});
     }
-
-    window.addEventListener('beforeinstallprompt', function (e) {
-      e.preventDefault();
-      deferredPrompt = e;
-    });
-    window.addEventListener('appinstalled', function () {
-      deferredPrompt = null;
-      var b = document.getElementById('fpwa-install');
-      if (b) b.style.display = 'none';
-    });
 
     if (cfg.button) mountButton(cfg.button);
   };
@@ -249,6 +275,31 @@
     } else {
       showAndroidFallback();
     }
+  };
+
+  // ── Mapa de nicho → emoji (mismo que el editor de puntos) ──
+  FenloraPWA.NICHO_EMOJI = {
+    // Gastronomía
+    rest:'🍽️', fritanga:'🍖', tipico:'🥘', cafe:'☕', helado:'🍦', jugo:'🥤',
+    // Alojamiento
+    hotel:'🏨', finca:'🌿', airbnb:'🏠',
+    // Transporte
+    taxi:'🚕', moto:'🏍️', chiva:'🚌', alqmoto:'🛵', alqbici:'🚲', vereda:'🛻', fletero:'📦',
+    // Comercio
+    licorera:'🍾', salsamen:'🥩', tienda:'🛒', panaderia:'🥖', fruteria:'🍎',
+    // Nocturna
+    bar:'🍺', disco:'🎶',
+    // Turismo
+    agencia:'✈️', guia:'🧭', aventura:'🧗', pesca:'🎣',
+    // Salud
+    farmacia:'💊', medico:'🏥', spa:'💆', barber:'✂️',
+    // Histórico
+    hist:'🏛️', iglesia:'⛪', pub:'🏢',
+    // Servicios
+    serv:'🔧'
+  };
+  FenloraPWA.nichoEmoji = function (cat) {
+    return FenloraPWA.NICHO_EMOJI[cat] || '🏪';
   };
 
   window.FenloraPWA = FenloraPWA;

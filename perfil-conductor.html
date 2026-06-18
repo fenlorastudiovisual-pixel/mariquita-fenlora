@@ -359,14 +359,13 @@ function renderPerfil(d) {
 
   // ── PWA: guardar este panel como app (ícono = emoji del vehículo) ──
   if (window.FenloraPWA) {
-    var EMOJIS_PWA = { taxi:'🚕', moto:'🏍️', chiva:'🚌', alqmoto:'🏍️', alqbici:'🚲', vereda:'🚐', fletero:'🚛' };
     FenloraPWA.init({
       name: (d.name || 'Conductor') + ' · Fenlora',
       shortName: (d.name || 'Conductor').slice(0, 12),
       id: '/rutas-conductor' + location.search,
       startUrl: location.pathname + location.search,
       theme: '#c8860a',
-      icon: { mode: 'emoji', emoji: (EMOJIS_PWA[d.category] || '🚗') },
+      icon: { mode: 'emoji', emoji: FenloraPWA.nichoEmoji(d.category) },
       button: { mode: 'after', anchor: 'nombre', text: '📲 Guardar mi panel como app' }
     });
   }

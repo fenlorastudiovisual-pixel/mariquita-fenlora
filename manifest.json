@@ -1,0 +1,16 @@
+{
+  "id": "/rutas-mapa",
+  "name": "Rutas Fenlora",
+  "short_name": "Rutas",
+  "start_url": "/index.html",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0a091c",
+  "theme_color": "#c8860a",
+  "icons": [
+    { "src": "fenlora-icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "fenlora-icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "fenlora-icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

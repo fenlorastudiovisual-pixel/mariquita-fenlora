@@ -577,7 +577,7 @@ function render(){
   document.getElementById('hero-name').textContent = n.nombre;
   document.getElementById('hero-sub').textContent = n.sub;
 
-  // ── PWA: guardar este panel como app (ícono = foto del negocio) ──
+  // ── PWA: guardar este panel como app (ícono = emoji del nicho) ──
   if (window.FenloraPWA) {
     FenloraPWA.init({
       name: n.nombre,
@@ -585,7 +585,7 @@ function render(){
       id: '/rutas-negocio' + location.search,
       startUrl: location.pathname + location.search,
       theme: '#c8860a',
-      icon: { mode: 'photo', url: n.foto, text: n.nombre },
+      icon: { mode: 'emoji', emoji: FenloraPWA.nichoEmoji(n.catKey) },
       button: { mode: 'after', anchor: 'hero', text: '📲 Guardar mi panel como app' }
     });
   }

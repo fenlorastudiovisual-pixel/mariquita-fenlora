@@ -17,6 +17,13 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Mangostino">
 <title>Ruta del Mangostino · Mariquita</title>
+<!-- PWA: manifiesto estático (instalación nativa confiable) -->
+<link rel="manifest" href="manifest.json">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Rutas Fenlora">
+<meta name="theme-color" content="#c8860a">
+<link rel="apple-touch-icon" href="fenlora-icon-192.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=DM+Sans:wght@300;400;500&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
@@ -2513,8 +2520,8 @@ document.addEventListener('DOMContentLoaded',function(){ verificarMantenimiento(
     id: '/rutas-mapa',
     startUrl: '/index.html',
     theme: '#c8860a',
-    icon: { mode: 'static', url: 'fenlora-icon-512.png', url192: 'fenlora-icon-192.png' },
-    button: { mode: 'float', text: '📲 Guardar app' }
+    skipManifest: true,
+    button: { mode: 'float', above: 'legend', text: '📲 Guardar app' }
   });
 </script>
 </body>

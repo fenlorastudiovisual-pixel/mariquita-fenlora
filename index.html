@@ -2504,5 +2504,18 @@ function mostrarBannerMantenimiento(titulo,hora){
 document.addEventListener('DOMContentLoaded',function(){ verificarMantenimiento(); setInterval(verificarMantenimiento,30000); });
 
 </script>
+<!-- ── PWA: Guardar mapa como app (turistas) ── -->
+<script src="fenlora-pwa.js"></script>
+<script>
+  FenloraPWA.init({
+    name: 'Rutas Fenlora',
+    shortName: 'Rutas',
+    id: '/rutas-mapa',
+    startUrl: '/index.html',
+    theme: '#c8860a',
+    icon: { mode: 'static', url: 'fenlora-icon-512.png', url192: 'fenlora-icon-192.png' },
+    button: { mode: 'float', text: '📲 Guardar app' }
+  });
+</script>
 </body>
 </html>

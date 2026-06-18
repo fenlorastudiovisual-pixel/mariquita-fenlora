@@ -576,6 +576,19 @@ function render(){
   document.getElementById('hero-img').alt = n.nombre;
   document.getElementById('hero-name').textContent = n.nombre;
   document.getElementById('hero-sub').textContent = n.sub;
+
+  // ── PWA: guardar este panel como app (ícono = foto del negocio) ──
+  if (window.FenloraPWA) {
+    FenloraPWA.init({
+      name: n.nombre,
+      shortName: (n.nombre || 'Mi negocio').slice(0, 12),
+      id: '/rutas-negocio' + location.search,
+      startUrl: location.pathname + location.search,
+      theme: '#c8860a',
+      icon: { mode: 'photo', url: n.foto, text: n.nombre },
+      button: { mode: 'after', anchor: 'hero', text: '📲 Guardar mi panel como app' }
+    });
+  }
   document.getElementById('hero-cat-label').textContent = n.catLabel;
   const heroBadge = document.getElementById('hero-badge');
   heroBadge.querySelector('.hb-dot').style.background = n.catColor;
@@ -1584,5 +1597,6 @@ function mostrarBannerMantenimiento(titulo,hora){
 document.addEventListener('DOMContentLoaded',function(){ verificarMantenimiento(); setInterval(verificarMantenimiento,30000); });
 
 </script>
+<script src="fenlora-pwa.js"></script>
 </body>
 </html>

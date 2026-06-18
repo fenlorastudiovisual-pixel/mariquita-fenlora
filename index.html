@@ -981,12 +981,12 @@ function suscribirCambiosEnVivo() {
           if (typeof updated.is_active !== 'undefined') {
             PUNTOS[idx].activo = updated.is_active;
           }
+          const markerObj = markers.find(function(m){ return String(m.id) === String(updated.id); });
+          const p = PUNTOS[idx];
           if (typeof updated.is_open !== 'undefined') {
             PUNTOS[idx].is_open = updated.is_open;
             if (markerObj) markerObj.mk.setIcon(makeIcon(PUNTOS[idx]));
           }
-          const markerObj = markers.find(function(m){ return String(m.id) === String(updated.id); });
-          const p = PUNTOS[idx];
           // Si el negocio fue pausado — quitar pin del mapa inmediatamente
           if (p.activo === false) {
             if (markerObj) {
@@ -1991,25 +1991,34 @@ function selectSearch(id){
 // ═══════════════════════════════════════════════
 function openMenu(){
   if(typeof gtag==='function') gtag('event','open_menu',{event_category:'menu',event_label:currentPunto?.nombre});
-  if(!currentPunto?.menu) return;
-  const m=currentPunto.menu;
+  if(!currentPunto) return;
   const p=currentPunto;
+  const m=currentPunto.menu || {};
+  const promo = m.promo || {big:'',sub:'',badge:''};
+  const items = Array.isArray(m.items) ? m.items : [];
+  let cats = (Array.isArray(m.cats) && m.cats.length) ? m.cats : [...new Set(items.map(i=>i.cat))];
   document.getElementById('menu-hero-img').src=(p.fotos && p.fotos[0] && p.fotos[0].url) ? p.fotos[0].url : '';
   document.getElementById('menu-hero-name').textContent=p.nombre;
-  document.getElementById('menu-hero-sub').textContent=p.sub;
-  document.getElementById('promo-big').textContent=m.promo.big;
-  document.getElementById('promo-sub').textContent=m.promo.sub;
-  document.getElementById('promo-badge').textContent=m.promo.badge;
+  document.getElementById('menu-hero-sub').textContent=p.sub||'';
+  document.getElementById('promo-big').textContent=promo.big||'';
+  document.getElementById('promo-sub').textContent=promo.sub||'';
+  document.getElementById('promo-badge').textContent=promo.badge||'';
   const catsEl=document.getElementById('menu-cats');
   catsEl.innerHTML='';
-  m.cats.forEach((cat,i)=>{
+  // Si todavía no hay platos cargados, mostrar aviso amable en vez de fallar
+  if(items.length===0){
+    document.getElementById('menu-items').innerHTML='<div style="padding:44px 20px;text-align:center;color:#999;font-size:14px;line-height:1.6">📋 Este negocio aún no ha publicado su carta.<br>Vuelve pronto.</div>';
+    document.getElementById('menu-modal').classList.add('show');
+    return;
+  }
+  cats.forEach((cat,i)=>{
     const btn=document.createElement('button');
     btn.className='mcat'+(i===0?' on':'');
     btn.textContent=cat;
     btn.onclick=()=>{ document.querySelectorAll('.mcat').forEach(b=>b.classList.remove('on')); btn.classList.add('on'); renderMenuItems(cat); };
     catsEl.appendChild(btn);
   });
-  renderMenuItems(m.cats[0]);
+  renderMenuItems(cats[0]);
   document.getElementById('menu-modal').classList.add('show');
 }
 function renderMenuItems(cat){

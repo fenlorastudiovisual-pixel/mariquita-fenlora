@@ -113,7 +113,7 @@
       name: c.name,
       short_name: c.shortName || (c.name || 'Fenlora').slice(0, 12),
       start_url: c.startUrl || (location.pathname + location.search),
-      scope: '/',
+      scope: c.scope || location.pathname,
       display: 'standalone',
       orientation: 'portrait',
       background_color: c.bg || '#0a091c',

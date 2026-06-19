@@ -4,6 +4,13 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Fenlora · Editor de Puntos del Mapa</title>
+<!-- PWA: acceso admin independiente (editor) -->
+<link rel="manifest" href="manifest-editor.json">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Editor Fenlora">
+<meta name="theme-color" content="#c8860a">
+<link rel="apple-touch-icon" href="fenlora-icon-192.png">
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@400;500&family=Instrument+Sans:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -1879,5 +1886,18 @@ document.addEventListener('DOMContentLoaded', function(){
 #conflicto-banner .cb-btn{font-family:inherit;font-size:10px;font-weight:700;padding:4px 10px;margin:6px 6px 0 0;border-radius:6px;border:none;cursor:pointer;background:var(--gold,#e0a82e);color:#1a1a1a}
 #conflicto-banner .cb-btn.ghost{background:transparent;color:#fde68a;border:1px solid rgba(245,158,11,.45)}
 </style>
+<script src="fenlora-pwa.js"></script>
+<script>
+  FenloraPWA.init({
+    name: 'Editor Fenlora',
+    shortName: 'Editor',
+    id: '/rutas-editor',
+    startUrl: '/fenlora-editor-puntos.html',
+    scope: '/fenlora-editor-puntos.html',
+    theme: '#c8860a',
+    skipManifest: true,
+    button: { mode: 'float', text: '📲 Guardar editor' }
+  });
+</script>
 </body>
 </html>

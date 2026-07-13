@@ -3022,9 +3022,6 @@ async function guardarMenu(){
   }
 }
 
-// ── compatibilidad con funciones antiguas ──
-function selMenuCat(chip){ switchMenuTab(chip); }
-
 // ── TOAST ──
 let toastTimeout;
 function showNotif(msg){
@@ -4354,18 +4351,11 @@ function tieneMalaPalabra(texto){
 
 // ══════════════════════════════════════════════
 // GESTIÓN CATEGORÍAS DE MENÚ
+// (editarCategoria / eliminarCategoria se definen UNA sola vez más arriba,
+//  junto a agregarCategoria. Se eliminaron los duplicados que había aquí:
+//  la versión duplicada de editarCategoria no actualizaba el texto visible
+//  del chip al renombrar.)
 // ══════════════════════════════════════════════
-function editarCategoria(btn){
-  var chip = btn.parentElement;
-  var actual = chip.dataset.cat || chip.textContent.replace('✏️','').replace('✕','').trim();
-  var nuevo = prompt('Nuevo nombre para "'+actual+'":', actual);
-  if(nuevo && nuevo.trim()) { chip.dataset.cat = nuevo.trim(); showNotif('Renombrado a: '+nuevo.trim()); }
-}
-function eliminarCategoria(btn){
-  var chip = btn.parentElement;
-  var nombre = chip.dataset.cat || chip.textContent.replace('✏️','').replace('✕','').trim();
-  if(confirm('¿Eliminar categoría "'+nombre+'"?')){ chip.remove(); showNotif('Categoría eliminada'); }
-}
 
 // ══════════════════════════════════════════════
 // LOGIN

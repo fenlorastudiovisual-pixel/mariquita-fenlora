@@ -2870,11 +2870,16 @@ function selectMenuClient(el, name, catLabel, sbId){
 function rebuildMenuTabs(){
   var bar = document.getElementById('menu-cats-bar');
   if(!bar || !menuCurrentBiz) return;
-  var cats = Object.keys(MENUS_ALL[menuCurrentBiz] || {});
-  if(!cats.length) cats = MENU_CATS_DEFAULT;
+  var cats = Object.keys(MENUS_ALL[menuCurrentBiz] || {}).filter(function(k){ return k !== '__promo__'; });
+  if(!cats.length) cats = MENU_CATS_DEFAULT.slice();
   bar.innerHTML = cats.map(function(cat, i){
     var icon = MENU_ICONS[cat] || '📋';
-    return '<button class="menu-tab'+(i===0?' active':'')+'" data-cat="'+cat+'" onclick="switchMenuTab(this)">'+icon+' '+cat+'</button>';
+    var safe = cat.replace(/'/g, "\\'");
+    return '<button class="menu-tab'+(i===0?' active':'')+'" data-cat="'+cat+'" onclick="switchMenuTab(this)">'
+      + icon + ' ' + cat
+      + ' <span onclick="event.stopPropagation();renombrarCatMenu(\''+safe+'\')" title="Renombrar categoría" style="margin-left:6px;opacity:.55;font-size:10px;cursor:pointer">✏️</span>'
+      + '<span onclick="event.stopPropagation();eliminarCatMenu(\''+safe+'\')" title="Eliminar categoría" style="margin-left:3px;opacity:.55;font-size:10px;cursor:pointer">✕</span>'
+      + '</button>';
   }).join('')
   + '<button class="menu-tab" data-cat="__nueva__" onclick="nuevaCategoriaMenu()" style="border-style:dashed;opacity:.6">+ Nueva</button>';
   menuCurrentCat = cats[0] || 'Platos fuertes';
@@ -2972,6 +2977,44 @@ function nuevaCategoriaMenu(){
     tabs.forEach(function(t){ if(t.dataset.cat === nombre.trim()) switchMenuTab(t); });
   }
   showNotif('Categoría "'+nombre.trim()+'" creada');
+}
+
+// ── RENOMBRAR CATEGORÍA (pestaña real del menú) ──
+function renombrarCatMenu(cat){
+  if(!menuCurrentBiz){ showNotif('⚠ Selecciona un negocio primero'); return; }
+  var m = MENUS_ALL[menuCurrentBiz] || {};
+  var nuevo = prompt('Nuevo nombre para la categoría "'+cat+'":', cat);
+  if(!nuevo || !nuevo.trim()) return;
+  nuevo = nuevo.trim();
+  if(nuevo === cat) return;
+  if(m[nuevo]){ showNotif('⚠ Ya existe una categoría "'+nuevo+'"'); return; }
+  // Renombrar la clave conservando el orden y los ítems
+  var reordenado = {};
+  Object.keys(m).forEach(function(k){ reordenado[k===cat ? nuevo : k] = m[k]; });
+  MENUS_ALL[menuCurrentBiz] = reordenado;
+  if(menuCurrentCat === cat) menuCurrentCat = nuevo;
+  rebuildMenuTabs();
+  var bar = document.getElementById('menu-cats-bar');
+  if(bar){ bar.querySelectorAll('.menu-tab').forEach(function(t){ if(t.dataset.cat === nuevo) switchMenuTab(t); }); }
+  showNotif('Categoría renombrada a "'+nuevo+'" · recuerda 💾 Guardar');
+}
+
+// ── ELIMINAR CATEGORÍA (pestaña real del menú) ──
+function eliminarCatMenu(cat){
+  if(!menuCurrentBiz){ showNotif('⚠ Selecciona un negocio primero'); return; }
+  var m = MENUS_ALL[menuCurrentBiz] || {};
+  var n = (m[cat] || []).length;
+  var msg = n ? '¿Eliminar la categoría "'+cat+'" y sus '+n+' ítem(s)?' : '¿Eliminar la categoría "'+cat+'"?';
+  if(!confirm(msg)) return;
+  delete m[cat];
+  MENUS_ALL[menuCurrentBiz] = m;
+  if(menuCurrentCat === cat){
+    var restantes = Object.keys(m).filter(function(k){ return k !== '__promo__'; });
+    menuCurrentCat = restantes[0] || '';
+  }
+  rebuildMenuTabs();
+  renderMenuItems();
+  showNotif('Categoría "'+cat+'" eliminada · recuerda 💾 Guardar');
 }
 
 // ── GUARDAR MENÚ ──
@@ -3596,43 +3639,10 @@ showModule = function(name, el){
   if(name==='clientes')     { try{ renderClients(filteredClients); }catch(e){} }
 };
 
-function selMenuCat(chip){
-  document.querySelectorAll('#menu-cats-bar .chip').forEach(function(c){
-    c.style.background=''; c.style.borderColor=''; c.style.color='';
-  });
-  chip.style.background='var(--gold-dim)';
-  chip.style.borderColor='var(--gold)';
-  chip.style.color='var(--gold)';
-}
-function agregarCategoria(){
-  var nombre = prompt('Nombre de la nueva categoría:','');
-  if(!nombre||!nombre.trim()) return;
-  var bar = document.getElementById('menu-cats-bar');
-  var chip = document.createElement('div');
-  chip.className='chip'; chip.dataset.cat=nombre.trim(); chip.style.cursor='pointer';
-  chip.innerHTML = nombre.trim()
-    + ' <span onclick="event.stopPropagation();editarCategoria(this)" style="margin-left:4px;opacity:.6;font-size:10px">✏️</span>'
-    + '<span onclick="event.stopPropagation();eliminarCategoria(this)" style="margin-left:2px;opacity:.6;font-size:10px">✕</span>';
-  chip.onclick = function(){ selMenuCat(chip); };
-  bar.insertBefore(chip, bar.lastElementChild);
-  showNotif('Categoría "'+nombre.trim()+'" agregada');
-}
-
-function editarCategoria(span){
-  var chip = span.parentElement;
-  var actual = chip.dataset.cat || chip.textContent.replace(/✏️|✕/g,'').trim();
-  var nuevo = prompt('Nuevo nombre:', actual);
-  if(nuevo && nuevo.trim() && nuevo !== actual){
-    chip.dataset.cat = nuevo.trim();
-    chip.childNodes[0].textContent = nuevo.trim()+' ';
-    showNotif('Categoría renombrada');
-  }
-}
-function eliminarCategoria(span){
-  var chip = span.parentElement;
-  var nombre = chip.dataset.cat || chip.textContent.replace(/✏️|✕/g,'').trim();
-  if(confirm('¿Eliminar categoría "'+nombre+'"?')){ chip.remove(); showNotif('Categoría eliminada'); }
-}
+// ── (Sistema viejo de "chips" de categorías ELIMINADO: era código muerto,
+//     no estaba conectado a ningún botón. Las categorías del menú se manejan
+//     con las pestañas reales: rebuildMenuTabs / switchMenuTab /
+//     nuevaCategoriaMenu / renombrarCatMenu / eliminarCatMenu.) ──
 
 // ── DESCUENTOS ──
 var descTipoActual = 'pct';
@@ -4351,10 +4361,12 @@ function tieneMalaPalabra(texto){
 
 // ══════════════════════════════════════════════
 // GESTIÓN CATEGORÍAS DE MENÚ
-// (editarCategoria / eliminarCategoria se definen UNA sola vez más arriba,
-//  junto a agregarCategoria. Se eliminaron los duplicados que había aquí:
-//  la versión duplicada de editarCategoria no actualizaba el texto visible
-//  del chip al renombrar.)
+// Se maneja con las pestañas reales del editor de menú:
+//   rebuildMenuTabs()  → dibuja las pestañas (con ✏️ y ✕)
+//   nuevaCategoriaMenu() → agregar categoría
+//   renombrarCatMenu()   → renombrar categoría
+//   eliminarCatMenu()    → eliminar categoría
+// (El sistema viejo de "chips" se eliminó por completo: era código muerto.)
 // ══════════════════════════════════════════════
 
 // ══════════════════════════════════════════════

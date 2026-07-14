@@ -1993,18 +1993,20 @@ function mostrarAlertaPanico(r){
 
 async function pollEmergencias(){
   try{
-    // Buscar emergencias de los últimos 2 minutos
-    var hace2min = new Date(Date.now() - 2*60*1000).toISOString();
+    // Buscar emergencias recientes (últimos 5 minutos)
+    var desde = new Date(Date.now() - 5*60*1000).toISOString();
     var result = await _sbAdmin.from('emergencias')
-      .select('id,business_name,municipio,created_at')
+      .select('id,business_name,municipio,created_at,tipo')
       .eq('tipo','panico_cliente')
-      .gte('created_at', hace2min)
+      .gte('created_at', desde)
       .order('created_at', {ascending:false})
       .limit(1);
+    if(result.error){ console.warn('[PANICO] Error al leer emergencias:', result.error.message || result.error); return; }
+    console.log('[PANICO] poll -> filas:', (result.data ? result.data.length : 0), result.data || []);
     if(result.data && result.data.length > 0){
       mostrarAlertaPanico(result.data[0]);
     }
-  }catch(e){}
+  }catch(e){ console.warn('[PANICO] Excepcion en poll:', e); }
 }
 
 // Iniciar polling cada 5 segundos

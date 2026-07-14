@@ -2834,7 +2834,7 @@ function selectMenuClient(el, name, catLabel, sbId){
           var defObj = {}; defCats.forEach(function(c){ defObj[c]=[]; });
           MENUS_ALL[name] = defObj;
         }
-        renderMenuCats(); renderMenuItems();
+        rebuildMenuTabs(); renderMenuItems();
         // Cargar promo
         var promo = (MENUS_ALL[name]||{}).__promo__ || {};
         var big = document.getElementById('menu-promo-big'); if(big) big.value = promo.big||'';
@@ -2843,7 +2843,7 @@ function selectMenuClient(el, name, catLabel, sbId){
         var defCats = getCatsDefault(menuCurrentCatLabel);
         var defObj = {}; defCats.forEach(function(c){ defObj[c]=[]; });
         MENUS_ALL[name] = defObj;
-        renderMenuCats(); renderMenuItems();
+        rebuildMenuTabs(); renderMenuItems();
       });
   } else if(!MENUS_ALL[name]){
     var defCats = getCatsDefault(menuCurrentCatLabel);
@@ -3141,7 +3141,7 @@ function renderRutasList(){
 function toggleRutaActiva(id,el){
   const r=RUTAS_DATA.find(x=>x.id===id);if(!r)return;
   r.activa=!r.activa;el.classList.toggle('on',r.activa);
-  saveRutasData();showToast(r.nombre+(r.activa?' activada':' desactivada'));
+  saveRutasData();showNotif(r.nombre+(r.activa?' activada':' desactivada'));
 }
 function editRuta(id){
   editingRuta=RUTAS_DATA.find(r=>r.id===id);if(!editingRuta)return;
@@ -3200,7 +3200,7 @@ function saveRuta(){
   editingRuta.desc=document.getElementById('re-desc').value;
   editingRuta.bg=document.getElementById('re-bg').value;
   saveRutasData();renderRutasList();
-  showToast('✅ Ruta guardada · Exporta JSON para actualizar el mapa');
+  showNotif('✅ Ruta guardada · Exporta JSON para actualizar el mapa');
 }
 function deleteRuta(id){
   if(!confirm('¿Eliminar esta ruta?'))return;
@@ -3240,8 +3240,8 @@ function renderReviewsAdmin(){
   const badge=document.getElementById('badge-resenas');
   if(badge)badge.textContent=pending||'';
 }
-function aprobarReview(i){REVIEWS_ADMIN[i].aprobada=true;renderReviewsAdmin();showToast('Reseña aprobada ✓');}
-function eliminarReview(i){REVIEWS_ADMIN.splice(i,1);renderReviewsAdmin();showToast('Reseña eliminada');}
+function aprobarReview(i){REVIEWS_ADMIN[i].aprobada=true;renderReviewsAdmin();showNotif('Reseña aprobada ✓');}
+function eliminarReview(i){REVIEWS_ADMIN.splice(i,1);renderReviewsAdmin();showNotif('Reseña eliminada');}
 
 // ══════════════════════════════════════════════
 // MÓDULO: TRADUCCIONES
@@ -3279,7 +3279,7 @@ function saveTranslation(id){
   const val=document.getElementById('trans-'+id)?.value.trim();
   if(val)p.desc_en=val;
   renderTransPoints(document.getElementById('trans-filter')?.value||'all');
-  showToast('✅ Traducción guardada. Exporta JSON para actualizar el mapa.');
+  showNotif('✅ Traducción guardada. Exporta JSON para actualizar el mapa.');
 }
 
 // ══════════════════════════════════════════════
@@ -3310,7 +3310,7 @@ async function refreshClima(){
     tempEl.textContent=Math.round(c.temperature_2m)+'°C';
     labelEl.textContent=WMO_L_ADM[code]||'--';
     humEl.textContent='Humedad: '+c.relative_humidity_2m+'% · Precipitación: '+c.precipitation+'mm';
-    showToast('Clima actualizado ✓');
+    showNotif('Clima actualizado ✓');
   }catch(e){if(iconEl)iconEl.textContent='❌';}
 }
 
@@ -3324,7 +3324,7 @@ function toggleAlertaClima(){
 function saveAlertaClima(){
   const texto=document.getElementById('alerta-texto')?.value;
   localStorage.setItem('alerta_clima_texto',texto||'');
-  showToast(alertaClimaActiva?'✅ Alerta guardada. Actualiza el mapa para mostrarla.':'Alerta guardada (desactivada).');
+  showNotif(alertaClimaActiva?'✅ Alerta guardada. Actualiza el mapa para mostrarla.':'Alerta guardada (desactivada).');
 }
 
 // ══════════════════════════════════════════════
@@ -3542,7 +3542,7 @@ function guardarIntro(){
   editingIntro.activa=true;
   INTROS_DATA.forEach(i=>{if(i.id!==editingIntro.id)i.activa=false;});
   saveIntrosData();renderIntrosList();
-  showToast('✅ Intro "'+editingIntro.titulo.slice(0,28)+'" guardada y activada');
+  showNotif('✅ Intro "'+editingIntro.titulo.slice(0,28)+'" guardada y activada');
 }
 
 function toggleIntroActiva(id,el){
@@ -3551,7 +3551,7 @@ function toggleIntroActiva(id,el){
   if(intro.activa)INTROS_DATA.forEach(i=>{if(i.id!==id)i.activa=false;});
   el.classList.toggle('on',intro.activa);
   saveIntrosData();renderIntrosList();
-  showToast(intro.activa?'● Intro activada en el mapa':'Intro desactivada');
+  showNotif(intro.activa?'● Intro activada en el mapa':'Intro desactivada');
 }
 
 function eliminarIntro(id){

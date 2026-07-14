@@ -789,7 +789,7 @@ function mostrarPantallaEmergencia(conductor, id, hora) {
     <div id="emerg-status" style="margin-bottom:18px;padding:12px 22px;background:rgba(255,255,255,.12);border:2px solid rgba(255,255,255,.4);border-radius:14px;font-size:14px;font-weight:800;color:#fff;text-align:center;letter-spacing:.5px;animation:pulse-emerg 1.4s infinite">🚨 ENVIANDO ALERTA A FENLORA…</div>
     <div id="emerg-gps" style="font-size:11px;color:rgba(255,255,255,.6);text-align:center;margin-bottom:28px;min-height:36px"></div>
     <button onclick="llamarEmergencias()" style="width:100%;max-width:320px;padding:18px;background:#fff;border:none;border-radius:16px;font-size:18px;font-weight:800;color:#8B0000;cursor:pointer;margin-bottom:14px">📞 Llamar al 123 ahora</button>
-    <button onclick="enviarWSPEmergencia('${conductor}','${id}','${hora}')" id="btn-wsp-emerg" style="width:100%;max-width:320px;padding:16px;background:rgba(255,255,255,.15);border:2px solid rgba(255,255,255,.4);border-radius:16px;font-size:15px;font-weight:700;color:#fff;cursor:pointer;margin-bottom:14px" disabled>💬 Notificar a Fenlora (obteniendo GPS...)</button>
+    <button onclick="enviarWSPEmergencia('${conductor}','${id}','${hora}')" id="btn-wsp-emerg" style="width:100%;max-width:320px;padding:18px;background:#25D366;border:none;border-radius:16px;font-size:16px;font-weight:800;color:#fff;cursor:pointer;margin-bottom:14px;box-shadow:0 4px 16px rgba(0,0,0,.3)" disabled>💬 Enviar mi ubicación por WhatsApp (cargando GPS…)</button>
     <button onclick="cerrarEmergencia()" style="font-size:12px;color:rgba(255,255,255,.5);background:none;border:none;cursor:pointer;margin-top:8px">Cerrar (solo si fue un error)</button>
   `;
   document.body.appendChild(over);
@@ -815,7 +815,7 @@ function mostrarPantallaEmergencia(conductor, id, hora) {
         const btn = document.getElementById('btn-wsp-emerg');
         if (btn) {
           btn.disabled = false;
-          btn.textContent = '💬 Notificar a Fenlora con ubicación';
+          btn.textContent = '💬 ENVIAR MI UBICACIÓN POR WHATSAPP';
           btn.dataset.lat = lat;
           btn.dataset.lng = lng;
           btn.dataset.maps = mapsUrl;
@@ -838,7 +838,7 @@ function mostrarPantallaEmergencia(conductor, id, hora) {
       () => {
         document.getElementById('emerg-gps').innerHTML = '⚠️ No se pudo obtener GPS. Comparte tu ubicación manualmente.';
         const btn = document.getElementById('btn-wsp-emerg');
-        if (btn) { btn.disabled = false; btn.textContent = '💬 Notificar a Fenlora (sin GPS)'; }
+        if (btn) { btn.disabled = false; btn.textContent = '💬 NOTIFICAR A FENLORA POR WHATSAPP'; }
         // Registrar emergencia sin GPS
         try {
           _sb.from('businesses').update({
@@ -857,7 +857,7 @@ function mostrarPantallaEmergencia(conductor, id, hora) {
   } else {
     document.getElementById('emerg-gps').textContent = '⚠️ GPS no disponible en este dispositivo.';
     const btn = document.getElementById('btn-wsp-emerg');
-    if (btn) { btn.disabled = false; btn.textContent = '💬 Notificar a Fenlora'; }
+    if (btn) { btn.disabled = false; btn.textContent = '💬 NOTIFICAR A FENLORA POR WHATSAPP'; }
     // Enviar la alerta aunque no haya GPS
     try {
       _sb.from('businesses').update({ emergencia_activa: true, emergencia_data: { conductor, hora, lat: null, lng: null } }).eq('id', conductorId);

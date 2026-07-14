@@ -1896,6 +1896,8 @@ function iniciarRealtimeAdmin() {
       }catch(e){}
       // Alerta visual
       var hora = new Date(r.created_at||Date.now()).toLocaleTimeString('es-CO',{hour:'2-digit',minute:'2-digit'});
+      var _m = (r.mensaje||'').match(/https?:\/\/[^\s]+/);
+      var locBtn = _m ? '<a href="'+_m[0]+'" target="_blank" style="padding:8px 16px;background:#fff;border-radius:8px;color:#B71C1C;text-decoration:none;font-size:13px;font-weight:800;white-space:nowrap">📍 Ver ubicación</a>' : '';
       var alertDiv = document.createElement('div');
       alertDiv.style.cssText = 'position:fixed;top:0;left:0;right:0;z-index:99999;background:#B71C1C;color:#fff;padding:18px 24px;display:flex;align-items:center;justify-content:space-between;gap:16px;box-shadow:0 4px 24px rgba(0,0,0,.5);font-family:Instrument Sans,sans-serif';
       alertDiv.innerHTML = '<div style="display:flex;align-items:center;gap:14px">'
@@ -1903,6 +1905,7 @@ function iniciarRealtimeAdmin() {
         +'<div><div style="font-size:16px;font-weight:700">ALERTA DE PÁNICO — '+(r.business_name||'Negocio')+'</div>'
         +'<div style="font-size:12px;opacity:.85">📍 '+(r.municipio||'—')+' · '+hora+'</div></div></div>'
         +'<div style="display:flex;gap:10px">'
+        +locBtn
         +'<a href="https://wa.me/573112746813?text='+encodeURIComponent('🚨 Respondiendo PÁNICO de '+(r.business_name||'negocio')+' en '+(r.municipio||'—'))+'" target="_blank" style="padding:8px 16px;background:rgba(255,255,255,.15);border-radius:8px;color:#fff;text-decoration:none;font-size:13px;font-weight:600;border:1px solid rgba(255,255,255,.3)">💬 Responder WA</a>'
         +'<button onclick="this.parentElement.parentElement.remove()" style="padding:8px 14px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.25);border-radius:8px;color:#fff;cursor:pointer;font-size:13px">✕ Cerrar</button>'
         +'</div>';
@@ -1972,6 +1975,8 @@ function mostrarAlertaPanico(r){
   _ultimaEmergencia = r.id;
   sonarAlarma();
   var hora = new Date(r.created_at||Date.now()).toLocaleTimeString('es-CO',{hour:'2-digit',minute:'2-digit'});
+  var _m = (r.mensaje||'').match(/https?:\/\/[^\s]+/);
+  var locBtn = _m ? '<a href="'+_m[0]+'" target="_blank" style="padding:9px 18px;background:#fff;border-radius:8px;color:#B71C1C;text-decoration:none;font-size:13px;font-weight:800;white-space:nowrap">📍 Ver ubicación</a>' : '';
   var alertDiv = document.createElement('div');
   alertDiv.id = 'panico-banner';
   alertDiv.style.cssText = 'position:fixed;top:0;left:0;right:0;z-index:99999;background:#B71C1C;color:#fff;padding:18px 24px;display:flex;align-items:center;justify-content:space-between;gap:16px;box-shadow:0 4px 24px rgba(0,0,0,.6);font-family:Instrument Sans,sans-serif';
@@ -1980,6 +1985,7 @@ function mostrarAlertaPanico(r){
     +'<div><div style="font-size:17px;font-weight:700">ALERTA DE PÁNICO — '+(r.business_name||'Negocio')+'</div>'
     +'<div style="font-size:12px;opacity:.85">📍 '+(r.municipio||'—')+' · '+hora+'</div></div></div>'
     +'<div style="display:flex;gap:10px">'
+    +locBtn
     +'<a href="https://wa.me/573112746813?text='+encodeURIComponent('🚨 Respondiendo PÁNICO de '+(r.business_name||'negocio')+' en '+(r.municipio||'—'))+'" target="_blank" style="padding:9px 18px;background:rgba(255,255,255,.15);border-radius:8px;color:#fff;text-decoration:none;font-size:13px;font-weight:600;border:1px solid rgba(255,255,255,.3);white-space:nowrap">💬 Responder WA</a>'
     +'<button onclick="var b=document.getElementById(&quot;panico-banner&quot;);if(b)b.remove()" style="padding:9px 14px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.25);border-radius:8px;color:#fff;cursor:pointer;font-size:13px">✕</button>'
     +'</div>';
@@ -1996,7 +2002,7 @@ async function pollEmergencias(){
     // Buscar emergencias recientes (últimos 5 minutos)
     var desde = new Date(Date.now() - 5*60*1000).toISOString();
     var result = await _sbAdmin.from('emergencias')
-      .select('id,business_name,municipio,created_at,tipo')
+      .select('id,business_name,municipio,created_at,tipo,mensaje')
       .in('tipo',['panico_cliente','panico_conductor'])
       .gte('created_at', desde)
       .order('created_at', {ascending:false})

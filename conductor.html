@@ -761,6 +761,22 @@ Tengo una sugerencia para mejorar el servicio:`
   window.open(`https://wa.me/573112746813?text=${msg}`, '_blank');
 }
 
+function marcarAlertaEnviada(ok){
+  var st = document.getElementById('emerg-status');
+  if(!st) return;
+  if(ok){
+    st.innerHTML = '✅ ALERTA ENVIADA A FENLORA';
+    st.style.background = 'rgba(46,160,90,.28)';
+    st.style.borderColor = 'rgba(120,230,160,.75)';
+    st.style.animation = 'none';
+  } else {
+    st.innerHTML = '⚠️ No se pudo enviar — usa WhatsApp o llama al 123';
+    st.style.background = 'rgba(255,180,0,.18)';
+    st.style.borderColor = 'rgba(255,210,90,.7)';
+    st.style.animation = 'none';
+  }
+}
+
 function mostrarPantallaEmergencia(conductor, id, hora) {
   // Crear overlay de emergencia
   const over = document.createElement('div');
@@ -769,8 +785,9 @@ function mostrarPantallaEmergencia(conductor, id, hora) {
   over.innerHTML = `
     <div style="font-size:60px;margin-bottom:16px;animation:pulse-emerg 1s infinite">🚨</div>
     <div style="font-family:Syne,sans-serif;font-size:22px;font-weight:800;color:#fff;text-align:center;margin-bottom:8px">EMERGENCIA ACTIVADA</div>
-    <div style="font-size:13px;color:rgba(255,255,255,.8);text-align:center;margin-bottom:32px">Obteniendo tu ubicación GPS...</div>
-    <div id="emerg-gps" style="font-size:11px;color:rgba(255,255,255,.6);text-align:center;margin-bottom:32px;min-height:36px"></div>
+    <div style="font-size:13px;color:rgba(255,255,255,.8);text-align:center;margin-bottom:16px">Obteniendo tu ubicación GPS...</div>
+    <div id="emerg-status" style="margin-bottom:18px;padding:12px 22px;background:rgba(255,255,255,.12);border:2px solid rgba(255,255,255,.4);border-radius:14px;font-size:14px;font-weight:800;color:#fff;text-align:center;letter-spacing:.5px;animation:pulse-emerg 1.4s infinite">🚨 ENVIANDO ALERTA A FENLORA…</div>
+    <div id="emerg-gps" style="font-size:11px;color:rgba(255,255,255,.6);text-align:center;margin-bottom:28px;min-height:36px"></div>
     <button onclick="llamarEmergencias()" style="width:100%;max-width:320px;padding:18px;background:#fff;border:none;border-radius:16px;font-size:18px;font-weight:800;color:#8B0000;cursor:pointer;margin-bottom:14px">📞 Llamar al 123 ahora</button>
     <button onclick="enviarWSPEmergencia('${conductor}','${id}','${hora}')" id="btn-wsp-emerg" style="width:100%;max-width:320px;padding:16px;background:rgba(255,255,255,.15);border:2px solid rgba(255,255,255,.4);border-radius:16px;font-size:15px;font-weight:700;color:#fff;cursor:pointer;margin-bottom:14px" disabled>💬 Notificar a Fenlora (obteniendo GPS...)</button>
     <button onclick="cerrarEmergencia()" style="font-size:12px;color:rgba(255,255,255,.5);background:none;border:none;cursor:pointer;margin-top:8px">Cerrar (solo si fue un error)</button>
@@ -810,12 +827,13 @@ function mostrarPantallaEmergencia(conductor, id, hora) {
             emergencia_data: { conductor, hora, lat, lng, maps: mapsUrl }
           }).eq('id', conductorId);
           // También en 'emergencias' para que el admin reciba la ALARMA (sonido + banner)
-          await _sb.from('emergencias').insert({
+          var _insE = await _sb.from('emergencias').insert({
             business_name: conductor,
             tipo: 'panico_conductor',
             mensaje: 'PANICO de conductor - Ubicacion: ' + mapsUrl
           });
-        } catch(e) { console.warn('No se pudo registrar emergencia en Supabase', e); }
+          marcarAlertaEnviada(!(_insE && _insE.error));
+        } catch(e) { console.warn('No se pudo registrar emergencia en Supabase', e); marcarAlertaEnviada(false); }
       },
       () => {
         document.getElementById('emerg-gps').innerHTML = '⚠️ No se pudo obtener GPS. Comparte tu ubicación manualmente.';
@@ -831,8 +849,8 @@ function mostrarPantallaEmergencia(conductor, id, hora) {
             business_name: conductor,
             tipo: 'panico_conductor',
             mensaje: 'PANICO de conductor - sin GPS'
-          });
-        } catch(e) {}
+          }).then(function(r){ marcarAlertaEnviada(!(r && r.error)); });
+        } catch(e) { marcarAlertaEnviada(false); }
       },
       { timeout: 8000, enableHighAccuracy: true }
     );
@@ -840,6 +858,11 @@ function mostrarPantallaEmergencia(conductor, id, hora) {
     document.getElementById('emerg-gps').textContent = '⚠️ GPS no disponible en este dispositivo.';
     const btn = document.getElementById('btn-wsp-emerg');
     if (btn) { btn.disabled = false; btn.textContent = '💬 Notificar a Fenlora'; }
+    // Enviar la alerta aunque no haya GPS
+    try {
+      _sb.from('businesses').update({ emergencia_activa: true, emergencia_data: { conductor, hora, lat: null, lng: null } }).eq('id', conductorId);
+      _sb.from('emergencias').insert({ business_name: conductor, tipo: 'panico_conductor', mensaje: 'PANICO de conductor - sin GPS' }).then(function(r){ marcarAlertaEnviada(!(r && r.error)); });
+    } catch(e) { marcarAlertaEnviada(false); }
   }
 }
 

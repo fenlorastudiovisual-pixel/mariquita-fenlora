@@ -809,6 +809,12 @@ function mostrarPantallaEmergencia(conductor, id, hora) {
             emergencia_activa: true,
             emergencia_data: { conductor, hora, lat, lng, maps: mapsUrl }
           }).eq('id', conductorId);
+          // También en 'emergencias' para que el admin reciba la ALARMA (sonido + banner)
+          await _sb.from('emergencias').insert({
+            business_name: conductor,
+            tipo: 'panico_conductor',
+            mensaje: 'PANICO de conductor - Ubicacion: ' + mapsUrl
+          });
         } catch(e) { console.warn('No se pudo registrar emergencia en Supabase', e); }
       },
       () => {
@@ -821,6 +827,11 @@ function mostrarPantallaEmergencia(conductor, id, hora) {
             emergencia_activa: true,
             emergencia_data: { conductor, hora, lat: null, lng: null }
           }).eq('id', conductorId);
+          _sb.from('emergencias').insert({
+            business_name: conductor,
+            tipo: 'panico_conductor',
+            mensaje: 'PANICO de conductor - sin GPS'
+          });
         } catch(e) {}
       },
       { timeout: 8000, enableHighAccuracy: true }

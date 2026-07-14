@@ -309,6 +309,8 @@ tr:hover td{background:var(--bg3)}
 .tip-badge-mes{font-size:9px;background:rgba(26,122,74,.25);color:#4CAF82;border-radius:4px;padding:1px 5px}
 .tip-badge-uno{font-size:9px;background:rgba(200,134,10,.25);color:#EFA030;border-radius:4px;padding:1px 5px}
 </style>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 </head>
 <body>
 <div id="plan-tooltip"></div>
@@ -1896,8 +1898,8 @@ function iniciarRealtimeAdmin() {
       }catch(e){}
       // Alerta visual
       var hora = new Date(r.created_at||Date.now()).toLocaleTimeString('es-CO',{hour:'2-digit',minute:'2-digit'});
-      var _m = (r.mensaje||'').match(/https?:\/\/[^\s]+/);
-      var locBtn = _m ? '<a href="'+_m[0]+'" target="_blank" style="padding:8px 16px;background:#fff;border-radius:8px;color:#B71C1C;text-decoration:none;font-size:13px;font-weight:800;white-space:nowrap">📍 Ver ubicación</a>' : '';
+      var _c = _coordsDeMensaje(r.mensaje);
+      var locBtn = _c ? '<button onclick="verUbicacionEmergencia(\''+_c.lat+'\',\''+_c.lng+'\',\''+String(r.business_name||'').replace(/'/g,"") + '\')" style="padding:8px 16px;background:#fff;border:none;border-radius:8px;color:#B71C1C;font-size:13px;font-weight:800;white-space:nowrap;cursor:pointer">📍 Ver ubicación</button>' : '';
       var alertDiv = document.createElement('div');
       alertDiv.style.cssText = 'position:fixed;top:0;left:0;right:0;z-index:99999;background:#B71C1C;color:#fff;padding:18px 24px;display:flex;align-items:center;justify-content:space-between;gap:16px;box-shadow:0 4px 24px rgba(0,0,0,.5);font-family:Instrument Sans,sans-serif';
       alertDiv.innerHTML = '<div style="display:flex;align-items:center;gap:14px">'
@@ -1969,14 +1971,60 @@ function sonarAlarma(){
   }catch(e){}
 }
 
+// ── MODAL: ubicación de la emergencia en mapa propio ──
+function verUbicacionEmergencia(lat, lng, nombre){
+  lat = parseFloat(lat); lng = parseFloat(lng);
+  if(isNaN(lat) || isNaN(lng)){ showNotif('⚠ Esta alerta no trae ubicación GPS'); return; }
+  var prev = document.getElementById('emerg-map-modal'); if(prev) prev.remove();
+  var maps = 'https://maps.google.com/?q='+lat+','+lng;
+  var ov = document.createElement('div');
+  ov.id = 'emerg-map-modal';
+  ov.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;z-index:100000;background:rgba(0,0,0,.72);display:flex;align-items:center;justify-content:center;padding:24px;font-family:Instrument Sans,sans-serif';
+  ov.innerHTML = '<div style="background:#15151A;border:1px solid #33333D;border-radius:16px;width:100%;max-width:840px;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.6)">'
+    +'<div style="background:#B71C1C;color:#fff;padding:14px 20px;display:flex;align-items:center;justify-content:space-between;gap:12px">'
+      +'<div style="display:flex;align-items:center;gap:10px"><span style="font-size:22px">🚨</span>'
+      +'<div><div style="font-size:15px;font-weight:800">Ubicación de la emergencia</div>'
+      +'<div style="font-size:12px;opacity:.85">'+(nombre||'—')+' · '+lat.toFixed(6)+', '+lng.toFixed(6)+'</div></div></div>'
+      +'<button onclick="cerrarUbicacionEmergencia()" style="background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.3);color:#fff;border-radius:8px;padding:7px 12px;cursor:pointer;font-size:13px">✕ Cerrar</button>'
+    +'</div>'
+    +'<div id="emerg-map-canvas" style="height:420px;width:100%;background:#0E0E12"></div>'
+    +'<div style="padding:12px 20px;display:flex;gap:10px;justify-content:flex-end;background:#101014;border-top:1px solid #2A2A33">'
+      +'<button onclick="navigator.clipboard&&navigator.clipboard.writeText(\''+maps+'\');showNotif(\'📋 Link de ubicación copiado\')" style="padding:9px 16px;background:#22222A;border:1px solid #3A3A45;border-radius:8px;color:#EDEDF0;cursor:pointer;font-size:13px;font-weight:600">📋 Copiar link</button>'
+      +'<a href="'+maps+'" target="_blank" style="padding:9px 18px;background:#EDA034;border-radius:8px;color:#1A1A1F;text-decoration:none;font-size:13px;font-weight:800">🧭 Cómo llegar</a>'
+    +'</div>'
+  +'</div>';
+  document.body.appendChild(ov);
+  ov.addEventListener('click', function(e){ if(e.target===ov) cerrarUbicacionEmergencia(); });
+  try{
+    var m = L.map('emerg-map-canvas').setView([lat,lng], 16);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {maxZoom:19, attribution:'© OpenStreetMap'}).addTo(m);
+    L.circle([lat,lng], {radius:40, color:'#B71C1C', fillColor:'#B71C1C', fillOpacity:.25}).addTo(m);
+    L.marker([lat,lng]).addTo(m).bindPopup('<b>🚨 '+(nombre||'Emergencia')+'</b>').openPopup();
+    setTimeout(function(){ try{ m.invalidateSize(); }catch(e){} }, 120);
+    window._emergMap = m;
+  }catch(e){
+    var c = document.getElementById('emerg-map-canvas');
+    if(c) c.innerHTML = '<div style="color:#EDEDF0;padding:24px;text-align:center;font-size:13px">No se pudo cargar el mapa.<br>Usa “🧭 Cómo llegar”.</div>';
+  }
+}
+function cerrarUbicacionEmergencia(){
+  try{ if(window._emergMap){ window._emergMap.remove(); window._emergMap=null; } }catch(e){}
+  var el = document.getElementById('emerg-map-modal'); if(el) el.remove();
+}
+// Extrae {lat,lng} del mensaje de la emergencia (viene como .../?q=lat,lng)
+function _coordsDeMensaje(msg){
+  var m = (msg||'').match(/q=(-?\d+(?:\.\d+)?),\s*(-?\d+(?:\.\d+)?)/);
+  return m ? {lat:m[1], lng:m[2]} : null;
+}
+
 function mostrarAlertaPanico(r){
   // Evitar mostrar la misma alerta dos veces
   if(_ultimaEmergencia === r.id) return;
   _ultimaEmergencia = r.id;
   sonarAlarma();
   var hora = new Date(r.created_at||Date.now()).toLocaleTimeString('es-CO',{hour:'2-digit',minute:'2-digit'});
-  var _m = (r.mensaje||'').match(/https?:\/\/[^\s]+/);
-  var locBtn = _m ? '<a href="'+_m[0]+'" target="_blank" style="padding:9px 18px;background:#fff;border-radius:8px;color:#B71C1C;text-decoration:none;font-size:13px;font-weight:800;white-space:nowrap">📍 Ver ubicación</a>' : '';
+  var _c = _coordsDeMensaje(r.mensaje);
+  var locBtn = _c ? '<button onclick="verUbicacionEmergencia(\''+_c.lat+'\',\''+_c.lng+'\',\''+String(r.business_name||'').replace(/'/g,"") + '\')" style="padding:9px 18px;background:#fff;border:none;border-radius:8px;color:#B71C1C;font-size:13px;font-weight:800;white-space:nowrap;cursor:pointer">📍 Ver ubicación</button>' : '';
   var alertDiv = document.createElement('div');
   alertDiv.id = 'panico-banner';
   alertDiv.style.cssText = 'position:fixed;top:0;left:0;right:0;z-index:99999;background:#B71C1C;color:#fff;padding:18px 24px;display:flex;align-items:center;justify-content:space-between;gap:16px;box-shadow:0 4px 24px rgba(0,0,0,.6);font-family:Instrument Sans,sans-serif';

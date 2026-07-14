@@ -1882,38 +1882,8 @@ function iniciarRealtimeAdmin() {
       var r = payload.new;
       if(!r) return;
       console.log('[Admin] PÁNICO recibido:', r.business_name);
-      // Sonido de alerta
-      try{
-        var ctx = new (window.AudioContext || window.webkitAudioContext)();
-        function beep(freq, dur, t){
-          var o = ctx.createOscillator(); var g = ctx.createGain();
-          o.connect(g); g.connect(ctx.destination);
-          o.frequency.value = freq; o.type = 'square';
-          g.gain.setValueAtTime(0.3, t); g.gain.exponentialRampToValueAtTime(0.001, t+dur);
-          o.start(t); o.stop(t+dur);
-        }
-        var t = ctx.currentTime;
-        beep(880,0.15,t); beep(660,0.15,t+0.2); beep(880,0.15,t+0.4);
-        beep(660,0.15,t+0.6); beep(880,0.3,t+0.8);
-      }catch(e){}
-      // Alerta visual
-      var hora = new Date(r.created_at||Date.now()).toLocaleTimeString('es-CO',{hour:'2-digit',minute:'2-digit'});
-      var _c = _coordsDeMensaje(r.mensaje);
-      var locBtn = _c ? '<button onclick="verUbicacionEmergencia(\''+_c.lat+'\',\''+_c.lng+'\',\''+String(r.business_name||'').replace(/'/g,"") + '\')" style="padding:8px 16px;background:#fff;border:none;border-radius:8px;color:#B71C1C;font-size:13px;font-weight:800;white-space:nowrap;cursor:pointer">📍 Ver ubicación</button>' : '';
-      var alertDiv = document.createElement('div');
-      alertDiv.style.cssText = 'position:fixed;top:0;left:0;right:0;z-index:99999;background:#B71C1C;color:#fff;padding:18px 24px;display:flex;align-items:center;justify-content:space-between;gap:16px;box-shadow:0 4px 24px rgba(0,0,0,.5);font-family:Instrument Sans,sans-serif';
-      alertDiv.innerHTML = '<div style="display:flex;align-items:center;gap:14px">'
-        +'<span style="font-size:32px">🚨</span>'
-        +'<div><div style="font-size:16px;font-weight:700">ALERTA DE PÁNICO — '+(r.business_name||'Negocio')+'</div>'
-        +'<div style="font-size:12px;opacity:.85">📍 '+(r.municipio||'—')+' · '+hora+'</div></div></div>'
-        +'<div style="display:flex;gap:10px">'
-        +locBtn
-        +'<a href="https://wa.me/573112746813?text='+encodeURIComponent('🚨 Respondiendo PÁNICO de '+(r.business_name||'negocio')+' en '+(r.municipio||'—'))+'" target="_blank" style="padding:8px 16px;background:rgba(255,255,255,.15);border-radius:8px;color:#fff;text-decoration:none;font-size:13px;font-weight:600;border:1px solid rgba(255,255,255,.3)">💬 Responder WA</a>'
-        +'<button onclick="this.parentElement.parentElement.remove()" style="padding:8px 14px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.25);border-radius:8px;color:#fff;cursor:pointer;font-size:13px">✕ Cerrar</button>'
-        +'</div>';
-      document.body.insertBefore(alertDiv, document.body.firstChild);
-      setTimeout(function(){ try{ alertDiv.remove(); }catch(e){} }, 30000);
-      showNotif('🚨 PÁNICO: ' + (r.business_name||'Negocio') + ' en ' + (r.municipio||'—'));
+      // Usa la MISMA función que el poll: suena, evita duplicados y trae "Ver ubicación"
+      mostrarAlertaPanico(r);
     })
     .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'reviews' }, function(payload) {
       var r = payload.new;
@@ -1940,35 +1910,56 @@ function iniciarRealtimeAdmin() {
 // 🚨 POLLING EMERGENCIAS — revisa cada 5s si hay pánico nuevo
 // ══════════════════════════════════════════════════════════
 var _ultimaEmergencia = null;
-var _audioDesbloqueado = false;
+var _audioCtx = null;
 
-// Desbloquear audio con primer clic del usuario
-document.addEventListener('click', function(){
-  if(_audioDesbloqueado) return;
+// Un ÚNICO AudioContext para toda la página (los navegadores permiten ~6 como máximo)
+function _getAudioCtx(){
   try{
-    var ctx = new (window.AudioContext||window.webkitAudioContext)();
-    ctx.resume();
-    _audioDesbloqueado = true;
-  }catch(e){}
-}, {once:false});
+    if(!_audioCtx){
+      var AC = window.AudioContext || window.webkitAudioContext;
+      if(!AC) return null;
+      _audioCtx = new AC();
+    }
+    return _audioCtx;
+  }catch(e){ console.warn('[PANICO] No se pudo crear el audio:', e); return null; }
+}
+
+// Desbloquear el audio con la primera interacción del usuario (regla del navegador)
+['click','keydown','touchstart'].forEach(function(ev){
+  document.addEventListener(ev, function(){
+    var ctx = _getAudioCtx();
+    if(ctx && ctx.state === 'suspended'){ ctx.resume(); }
+  }, {passive:true});
+});
 
 function sonarAlarma(){
-  try{
-    var ctx = new (window.AudioContext||window.webkitAudioContext)();
-    ctx.resume().then(function(){
+  var ctx = _getAudioCtx();
+  if(!ctx){ return; }
+  function _tocar(){
+    try{
       function beep(freq,dur,t){
-        var o=ctx.createOscillator(),g=ctx.createGain();
-        o.connect(g);g.connect(ctx.destination);
-        o.frequency.value=freq;o.type='square';
+        var o=ctx.createOscillator(), g=ctx.createGain();
+        o.connect(g); g.connect(ctx.destination);
+        o.frequency.value=freq; o.type='square';
         g.gain.setValueAtTime(0.4,t);
         g.gain.exponentialRampToValueAtTime(0.001,t+dur);
-        o.start(t);o.stop(t+dur);
+        o.start(t); o.stop(t+dur);
       }
-      var t=ctx.currentTime;
-      beep(880,0.15,t);beep(660,0.15,t+0.2);beep(880,0.15,t+0.4);
-      beep(660,0.15,t+0.6);beep(880,0.3,t+0.8);
+      var t = ctx.currentTime + 0.02;
+      // Dos rondas para que se note como alarma
+      beep(880,0.15,t);     beep(660,0.15,t+0.2); beep(880,0.15,t+0.4);
+      beep(660,0.15,t+0.6); beep(880,0.3,t+0.8);
+      beep(880,0.15,t+1.3); beep(660,0.15,t+1.5); beep(880,0.35,t+1.7);
+    }catch(e){ console.warn('[PANICO] No se pudo reproducir el sonido:', e); }
+  }
+  if(ctx.state === 'suspended'){
+    ctx.resume().then(_tocar).catch(function(){
+      console.warn('[PANICO] Audio bloqueado por el navegador: haz un clic en la página para habilitar el sonido.');
+      try{ showNotif('🔇 Haz clic en la página para habilitar el sonido de alarma'); }catch(e){}
     });
-  }catch(e){}
+  } else {
+    _tocar();
+  }
 }
 
 // ── MODAL: ubicación de la emergencia en mapa propio ──

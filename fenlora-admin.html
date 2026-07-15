@@ -1416,7 +1416,11 @@ tr:hover td{background:var(--bg3)}
           <div class="mod-title">🛡️ Gestión del Riesgo</div>
           <div class="mod-sub">Información oficial de prevención que ven los visitantes en el mapa</div>
         </div>
-        <button onclick="guardarRiesgo()" class="btn primary">💾 Guardar cambios</button>
+        <button onclick="guardarRiesgo()" class="btn primary" id="rg-save-btn">💾 Guardar cambios</button>
+      </div>
+
+      <div id="rg-dirty" style="display:none;background:rgba(200,134,10,.12);border:1px solid var(--gold);border-radius:9px;padding:9px 13px;margin-bottom:12px;font-size:11.5px;color:var(--gold)">
+        ✏️ Tienes cambios sin guardar — nada se ve en el mapa hasta que toques <b>💾 Guardar cambios</b>.
       </div>
 
       <div style="background:rgba(198,40,40,.08);border:1px solid rgba(198,40,40,.28);border-radius:11px;padding:11px 14px;margin-bottom:16px;font-size:11.5px;color:#FFB4B4;line-height:1.55">
@@ -3271,6 +3275,7 @@ function cargarPlantillaRiesgo(){
   d.camara   = JSON.parse(JSON.stringify(p.camara));
   d.telefonos= JSON.parse(JSON.stringify(p.telefonos));
   renderRiesgoForm();
+  riesgoMarcarSucio();
   showNotif('📋 Plantilla cargada · revisa los niveles y completa los puntos de encuentro');
 }
 
@@ -3293,6 +3298,7 @@ function toggleRiesgoSwitch(b){
   b.style.border = '1px solid ' + (on?'rgba(37,211,102,.4)':'var(--border)');
   b.style.background = on ? 'rgba(26,122,74,.22)' : 'var(--bg2)';
   b.style.color = on ? '#4CAF82' : 'var(--text3)';
+  riesgoMarcarSucio();
 }
 function _bloque(t, s, inner){
   return '<div style="border:1px solid var(--border2);border-radius:13px;background:var(--bg2);padding:16px;margin-bottom:14px">'
@@ -3382,6 +3388,19 @@ function renderRiesgoForm(){
     + _btnAdd('+ Agregar indicación', "riesgoAdd('pasos')"));
 
   document.getElementById('riesgo-form').innerHTML = H;
+  // Marcar cambios sin guardar
+  var f = document.getElementById('riesgo-form');
+  if(f && !f._dirtyHook){
+    f._dirtyHook = true;
+    f.addEventListener('input', riesgoMarcarSucio);
+    f.addEventListener('change', riesgoMarcarSucio);
+  }
+}
+function riesgoMarcarSucio(){
+  var d = document.getElementById('rg-dirty'); if(d) d.style.display = '';
+}
+function riesgoLimpiarSucio(){
+  var d = document.getElementById('rg-dirty'); if(d) d.style.display = 'none';
 }
 
 function riesgoAdd(tipo){
@@ -3429,27 +3448,36 @@ function leerRiesgoForm(){
 
 async function guardarRiesgo(){
   leerRiesgoForm();
-  var d = RIESGO_DATA[riesgoActual];
-  // Validación honesta antes de publicar
-  if(d.activa){
+  // Validar TODOS los municipios que estén marcados para publicar
+  var errores = [];
+  RIESGO_MUNS.forEach(function(m){
+    var d = RIESGO_DATA[m.slug]; if(!d || !d.activa) return;
     var faltan = [];
-    if(!(d.amenazas||[]).length)  faltan.push('al menos una amenaza');
-    if(!(d.puntos||[]).length)    faltan.push('al menos un punto de encuentro');
-    if(!(d.telefonos||[]).length) faltan.push('al menos un teléfono');
+    if(!(d.amenazas||[]).length)  faltan.push('una amenaza');
+    if(!(d.puntos||[]).length)    faltan.push('un punto de encuentro');
+    if(!(d.telefonos||[]).length) faltan.push('un teléfono');
     var malas = (d.puntos||[]).filter(function(p){ return !p.n || isNaN(parseFloat(p.lat)) || isNaN(parseFloat(p.lng)); });
     if(malas.length) faltan.push('coordenadas válidas en todos los puntos');
-    if(faltan.length){
-      showNotif('⚠ Para publicar falta: ' + faltan.join(', '));
-      return;
-    }
-    if(!d.datos_oficiales){
-      if(!confirm('Vas a PUBLICAR esta sección, pero los datos NO están marcados como validados.\n\nSe mostrará el aviso de "datos de ejemplo". ¿Continuar?')) return;
-    }
+    if(faltan.length) errores.push(m.nombre + ': falta ' + faltan.join(', '));
+  });
+  if(errores.length){ showNotif('⚠ ' + errores.join(' · ')); return; }
+
+  var sinValidar = RIESGO_MUNS.filter(function(m){
+    var d = RIESGO_DATA[m.slug]; return d && d.activa && !d.datos_oficiales;
+  }).map(function(m){ return m.nombre; });
+  if(sinValidar.length){
+    if(!confirm('Vas a PUBLICAR ' + sinValidar.join(' y ') + ', pero los datos NO están marcados como validados.\n\nSe mostrará el aviso de "datos en revisión". ¿Continuar?')) return;
   }
+
   try{
-    var r = await _sbAdmin.from('config').upsert([{ key:'riesgo_'+riesgoActual, value: JSON.stringify(d) }], {onConflict:'key'});
+    var filas = RIESGO_MUNS.filter(function(m){ return RIESGO_DATA[m.slug]; })
+      .map(function(m){ return { key:'riesgo_'+m.slug, value: JSON.stringify(RIESGO_DATA[m.slug]) }; });
+    var r = await _sbAdmin.from('config').upsert(filas, {onConflict:'key'});
     if(r.error) throw r.error;
-    showNotif('✅ Guardado · ' + (d.activa ? 'la sección está VISIBLE en el mapa' : 'la sección está oculta'));
+    var publicados = RIESGO_MUNS.filter(function(m){ return RIESGO_DATA[m.slug] && RIESGO_DATA[m.slug].activa; })
+                                .map(function(m){ return m.nombre; });
+    showNotif('✅ Guardado · ' + (publicados.length ? ('visible en el mapa: ' + publicados.join(', ')) : 'ningún municipio publicado'));
+    riesgoLimpiarSucio();
     renderRiesgoTabs();
   }catch(e){
     console.warn('[Riesgo] Error al guardar:', e);

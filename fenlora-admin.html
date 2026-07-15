@@ -1345,6 +1345,24 @@ tr:hover td{background:var(--bg3)}
           <button id="upd-btn-desactivar" onclick="desactivarMantenimiento()" class="btn" style="display:none;background:rgba(26,122,74,.2);border-color:rgba(37,211,102,.3);color:#4CAF82">✅ Desactivar</button>
         </div>
       </div>
+      <!-- FUNCIONES EN DESARROLLO (activar / desactivar) -->
+      <div style="border-radius:14px;padding:18px 20px;margin-bottom:20px;border:1px solid var(--border2);background:var(--bg2)">
+        <div style="font-size:14px;font-weight:700;color:var(--text);margin-bottom:4px">🧪 Funciones en desarrollo</div>
+        <div style="font-size:12px;color:var(--text3);margin-bottom:14px">Actívalas cuando estén listas. Se aplican al instante en los paneles de negocios y conductores.</div>
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;padding:14px 16px;border:1px solid var(--border);border-radius:11px;background:var(--bg3)">
+          <div style="display:flex;align-items:center;gap:12px">
+            <span style="font-size:24px">🚨</span>
+            <div>
+              <div style="font-size:13.5px;font-weight:700;color:var(--text)">Botón de pánico</div>
+              <div style="font-size:11.5px;color:var(--text3);margin-top:2px">Alerta de emergencia con GPS en los paneles de negocio y conductor</div>
+            </div>
+          </div>
+          <div style="display:flex;align-items:center;gap:12px">
+            <span id="ff-panico-estado" style="font-size:11px;font-weight:800;letter-spacing:.5px;padding:5px 11px;border-radius:20px;background:rgba(140,140,150,.18);color:var(--text3);border:1px solid var(--border)">— CARGANDO</span>
+            <button id="ff-panico-btn" onclick="toggleFeaturePanico()" class="btn primary" disabled>Activar</button>
+          </div>
+        </div>
+      </div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
         <!-- REDACTAR -->
         <div style="border-radius:14px;padding:20px;border:1px solid var(--border2);background:var(--bg2)">
@@ -5214,6 +5232,61 @@ async function initUpdates(){
   actualizarEstadoUI();
   actualizarPreviewUpdate();
   renderHistorialUpdates();
+  cargarFeaturePanico();
+}
+
+// ── FEATURE FLAG: botón de pánico ──
+var _ffPanico = false;
+async function cargarFeaturePanico(){
+  try{
+    var r = await _sbAdmin.from('config').select('key,value').eq('key','feature_panico').limit(1);
+    _ffPanico = !!(r.data && r.data[0] && r.data[0].value === 'true');
+  }catch(e){ console.warn('[FF] No se pudo leer feature_panico:', e); }
+  pintarFeaturePanico();
+}
+function pintarFeaturePanico(){
+  var est = document.getElementById('ff-panico-estado');
+  var btn = document.getElementById('ff-panico-btn');
+  if(!est || !btn) return;
+  btn.disabled = false;
+  if(_ffPanico){
+    est.textContent = '● ACTIVA';
+    est.style.background = 'rgba(26,122,74,.22)';
+    est.style.color = '#4CAF82';
+    est.style.borderColor = 'rgba(37,211,102,.35)';
+    btn.textContent = 'Desactivar';
+    btn.className = 'btn';
+    btn.style.background = 'rgba(198,40,40,.16)';
+    btn.style.borderColor = 'rgba(198,40,40,.4)';
+    btn.style.color = '#FF8A80';
+  } else {
+    est.textContent = '○ INACTIVA';
+    est.style.background = 'rgba(140,140,150,.18)';
+    est.style.color = 'var(--text3)';
+    est.style.borderColor = 'var(--border)';
+    btn.textContent = 'Activar';
+    btn.className = 'btn primary';
+    btn.style.background = '';
+    btn.style.borderColor = '';
+    btn.style.color = '';
+  }
+}
+async function toggleFeaturePanico(){
+  var nuevo = !_ffPanico;
+  if(nuevo && !confirm('¿Activar el botón de pánico para TODOS los negocios y conductores?')) return;
+  if(!nuevo && !confirm('¿Desactivar el botón de pánico? Dejará de verse en los paneles.')) return;
+  var btn = document.getElementById('ff-panico-btn');
+  if(btn){ btn.disabled = true; btn.textContent = 'Guardando…'; }
+  try{
+    var r = await _sbAdmin.from('config').upsert([{key:'feature_panico', value: nuevo ? 'true':'false'}], {onConflict:'key'});
+    if(r.error) throw r.error;
+    _ffPanico = nuevo;
+    showNotif(nuevo ? '🚨 Botón de pánico ACTIVADO en todos los paneles' : '○ Botón de pánico desactivado');
+  }catch(e){
+    console.warn('[FF] Error al guardar:', e);
+    showNotif('⚠ No se pudo guardar el cambio');
+  }
+  pintarFeaturePanico();
 }
 
 function actualizarEstadoUI(){

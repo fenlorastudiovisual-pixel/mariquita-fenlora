@@ -217,7 +217,7 @@ footer{background:var(--dark);padding:20px;text-align:center;margin-top:8px}
 <body>
 
 <!-- BOTÓN DE PÁNICO — siempre visible -->
-<button id="panic-btn" onclick="abrirPanico()" title="Emergencia">🚨</button>
+<button id="panic-btn" onclick="abrirPanico()" title="Emergencia" style="display:none">🚨</button>
 
 <!-- MODAL DE PÁNICO -->
 <div id="panic-modal">
@@ -1497,6 +1497,20 @@ function cerrarPanico(){
 function llamarEmergencia(){
   window.location.href = 'tel:123';
 }
+// ── El botón de pánico solo aparece si Fenlora activó la función (admin > Updates) ──
+async function _checkFeaturePanico(){
+  try{
+    const res = await fetch(SUPA_URL_CD + '/rest/v1/config?key=eq.feature_panico&select=value', {
+      headers: { 'apikey': SUPA_KEY_CD, 'Authorization': 'Bearer ' + SUPA_KEY_CD }
+    });
+    const rows = await res.json();
+    const activo = Array.isArray(rows) && rows[0] && rows[0].value === 'true';
+    const btn = document.getElementById('panic-btn');
+    if(btn) btn.style.display = activo ? '' : 'none';
+  }catch(e){ console.warn('[FF] feature_panico:', e); }
+}
+_checkFeaturePanico();
+
 async function notificarFenlora(){
   var btn = document.getElementById('panic-notif-btn');
   if(btn){ btn.textContent = '⏳ Enviando alerta…'; btn.disabled = true; }

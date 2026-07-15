@@ -453,6 +453,63 @@ html,body{width:100%;height:100%;overflow:hidden;font-family:DM Sans,sans-serif;
  #portada .pt-tagline i{width:30px}
 }
 </style>
+<style id="segura-css">
+#seg-fab{position:fixed;bottom:44px;right:14px;z-index:460;width:44px;height:44px;border-radius:50%;
+  background:var(--dark);border:1.5px solid rgba(200,134,10,.35);color:var(--gold);font-size:19px;cursor:pointer;
+  box-shadow:0 4px 16px rgba(0,0,0,.45);display:none;align-items:center;justify-content:center;transition:transform .2s}
+#seg-fab:hover{transform:scale(1.09);border-color:var(--gold)}
+#seg-fab .seg-dot{position:absolute;top:2px;right:2px;width:10px;height:10px;border-radius:50%;background:#1A7A4A;border:2px solid var(--dark)}
+#seg-panel{position:fixed;top:0;left:0;right:0;bottom:0;z-index:9500;background:var(--dark);overflow-y:auto;display:none;
+  font-family:'Poppins',system-ui,Arial,sans-serif;color:var(--cream);text-align:left}
+#seg-panel.seg-open{display:block}
+#seg-panel *{box-sizing:border-box}
+#seg-panel .seg-head{position:sticky;top:0;z-index:5;background:rgba(28,18,8,.97);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);
+  border-bottom:1px solid rgba(200,134,10,.22);padding:15px 17px;display:flex;align-items:center;justify-content:space-between;gap:12px}
+#seg-panel .seg-title{font-family:'Space Grotesk',sans-serif;font-size:18px;font-weight:700;color:var(--cream);display:flex;align-items:center;gap:9px;margin:0}
+#seg-panel .seg-sub{font-size:11px;color:#A99678;margin-top:2px}
+#seg-panel .seg-x{background:rgba(255,255,255,.06);border:1px solid rgba(200,134,10,.22);color:var(--cream);border-radius:9px;padding:8px 13px;cursor:pointer;font-size:13px;font-family:inherit}
+#seg-panel .seg-body{max-width:940px;margin:0 auto;padding:18px 15px 60px}
+#seg-panel .seg-card{background:#241809;border:1px solid rgba(200,134,10,.22);border-radius:15px;padding:17px;margin-bottom:14px}
+#seg-panel .seg-t{font-family:'Space Grotesk',sans-serif;font-size:14.5px;font-weight:700;color:var(--cream);margin:0 0 3px;display:flex;align-items:center;gap:8px}
+#seg-panel .seg-s{font-size:11.5px;color:#A99678;margin-bottom:13px}
+#seg-panel .seg-fuente{font-size:10.5px;color:#A99678;margin-top:10px;line-height:1.6}
+#seg-panel .seg-fuente b{color:var(--gold)}
+#seg-panel .seg-fuente a{color:var(--gold)}
+#seg-panel .seg-semaforo{display:flex;align-items:center;gap:15px;flex-wrap:wrap}
+#seg-panel .seg-luz{width:66px;height:66px;border-radius:50%;flex:none;display:flex;align-items:center;justify-content:center;font-size:28px;box-shadow:0 0 0 5px rgba(255,255,255,.05)}
+#seg-panel .seg-sem-i{flex:1;min-width:180px}
+#seg-panel .seg-nivel{font-family:'Space Grotesk',sans-serif;font-size:21px;font-weight:700;line-height:1.1}
+#seg-panel .seg-desc{font-size:12.5px;color:#A99678;margin-top:4px;line-height:1.45}
+#seg-panel .seg-escala{display:flex;gap:5px;margin-top:13px}
+#seg-panel .seg-paso-luz{flex:1;height:6px;border-radius:4px;background:rgba(255,255,255,.09)}
+#seg-panel .seg-cam{position:relative;width:100%;aspect-ratio:16/9;border-radius:11px;overflow:hidden;background:#0B0805;
+  border:1px solid rgba(200,134,10,.22);display:flex;align-items:center;justify-content:center;text-align:center;padding:18px}
+#seg-panel .seg-cam iframe{width:100%;height:100%;border:0}
+#seg-panel .seg-btn{display:inline-block;padding:10px 18px;border-radius:9px;font-size:13px;font-weight:600;cursor:pointer;text-decoration:none;border:none;background:var(--gold);color:#1C1208;font-family:inherit}
+#seg-panel .seg-sismo{display:flex;align-items:center;gap:12px;padding:11px 0;border-bottom:1px solid rgba(200,134,10,.10)}
+#seg-panel .seg-sismo:last-child{border-bottom:none}
+#seg-panel .seg-mag{width:43px;height:43px;border-radius:11px;flex:none;display:flex;align-items:center;justify-content:center;
+  font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:15px;background:rgba(200,134,10,.14);color:var(--gold);border:1px solid rgba(200,134,10,.22)}
+#seg-panel .seg-si{flex:1;min-width:0}
+#seg-panel .seg-sl{font-size:13px;font-weight:600}
+#seg-panel .seg-sd{font-size:11px;color:#A99678;margin-top:2px}
+#seg-evac-map{height:300px;border-radius:11px;border:1px solid rgba(200,134,10,.22);margin-top:6px}
+#seg-panel .seg-leyenda{display:flex;gap:15px;flex-wrap:wrap;margin-top:11px;font-size:11.5px;color:#A99678}
+#seg-panel .seg-leyenda i{display:inline-block;width:11px;height:11px;border-radius:3px;margin-right:5px;vertical-align:middle}
+#seg-panel .seg-paso{display:flex;gap:12px;padding:9px 0;align-items:flex-start}
+#seg-panel .seg-paso-n{width:25px;height:25px;border-radius:50%;flex:none;background:rgba(200,134,10,.16);color:var(--gold);
+  display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;font-family:'Space Grotesk',sans-serif}
+#seg-panel .seg-paso-t{font-size:13px;line-height:1.5;color:#E8DCC8}
+#seg-panel .seg-tels{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+#seg-panel .seg-tel{display:flex;align-items:center;gap:11px;padding:12px;border-radius:11px;background:rgba(255,255,255,.04);
+  border:1px solid rgba(200,134,10,.22);text-decoration:none;color:var(--cream)}
+#seg-panel .seg-tel:hover{border-color:var(--gold)}
+#seg-panel .seg-tn{font-size:12.5px;font-weight:600}
+#seg-panel .seg-td{font-size:10.5px;color:#A99678}
+#seg-panel .seg-aviso{background:rgba(198,40,40,.09);border:1px solid rgba(198,40,40,.3);border-radius:11px;padding:13px 15px;font-size:11.5px;color:#E8B4B4;line-height:1.55}
+#seg-panel .seg-demo{background:rgba(200,134,10,.10);border:1px dashed var(--gold);border-radius:9px;padding:9px 12px;font-size:11px;color:var(--gold);margin-bottom:13px}
+@media(max-width:640px){#seg-panel .seg-body{padding:14px 12px 50px}#seg-panel .seg-luz{width:54px;height:54px;font-size:23px}}
+</style>
 </head>
 <body>
 
@@ -2630,5 +2687,200 @@ document.addEventListener('DOMContentLoaded',function(){ verificarMantenimiento(
     button: { mode: 'float', above: 'legend', text: '📲 Guardar app' }
   });
 </script>
+
+<!-- ===== MARIQUITA SEGURA ===== -->
+<button id="seg-fab" onclick="abrirSegura()" title="Mariquita Segura">🛡️<span class="seg-dot" id="seg-fab-dot"></span></button>
+<div id="seg-panel">
+  <div class="seg-head">
+    <div>
+      <div class="seg-title">🛡️ Mariquita Segura</div>
+      <div class="seg-sub">Información oficial de prevención · Para conocer, no para alarmarse</div>
+    </div>
+    <button class="seg-x" onclick="cerrarSegura()">✕ Cerrar</button>
+  </div>
+  <div class="seg-body">
+    <div class="seg-demo" id="seg-demo-aviso">👀 Datos de ejemplo — pendientes de validación con la Alcaldía y el SGC.</div>
+
+    <div class="seg-card">
+      <div class="seg-t">🌋 Estado del volcán Nevado del Ruiz</div>
+      <div class="seg-s">Nivel de actividad según el Servicio Geológico Colombiano</div>
+      <div class="seg-semaforo">
+        <div class="seg-luz" id="seg-luz">⚠️</div>
+        <div class="seg-sem-i">
+          <div class="seg-nivel" id="seg-nivel">—</div>
+          <div class="seg-desc" id="seg-desc">—</div>
+          <div class="seg-escala" id="seg-escala"></div>
+        </div>
+      </div>
+      <div class="seg-fuente">📌 Fuente: <b>Servicio Geológico Colombiano (SGC)</b> · Actualizado: <span id="seg-hora">—</span> · <a href="https://www.sgc.gov.co/" target="_blank" rel="noopener">Ver fuente oficial ↗</a></div>
+    </div>
+
+    <div class="seg-card">
+      <div class="seg-t">📹 Cámara en vivo del volcán</div>
+      <div class="seg-s">Transmisión 24/7 del SGC desde el Observatorio de Manizales, a ~30 km del cráter Arenas</div>
+      <div class="seg-cam" id="seg-cam"></div>
+      <div class="seg-fuente">📌 Transmisión oficial del <b>SGC</b> · La imagen depende del clima y la visibilidad</div>
+    </div>
+
+    <div class="seg-card">
+      <div class="seg-t">📊 Sismos recientes cerca de Mariquita</div>
+      <div class="seg-s">Últimos movimientos registrados en la región</div>
+      <div id="seg-sismos"></div>
+      <div class="seg-fuente">📌 Fuente: <b>SGC</b> · <a href="https://www.sgc.gov.co/sismos" target="_blank" rel="noopener">Ver todos los sismos ↗</a></div>
+    </div>
+
+    <div class="seg-card">
+      <div class="seg-t">🗺️ Zonas y puntos de encuentro</div>
+      <div class="seg-s">Dónde ir en caso de una eventualidad. Conócelos antes de necesitarlos.</div>
+      <div id="seg-evac-map"></div>
+      <div class="seg-leyenda">
+        <span><i style="background:rgba(198,40,40,.65)"></i>Zona de influencia</span>
+        <span><i style="background:rgba(26,122,74,.75)"></i>Punto de encuentro</span>
+        <span><i style="background:rgba(200,134,10,.8)"></i>Ruta de evacuación</span>
+      </div>
+      <div class="seg-fuente">📌 Fuente: <b>Alcaldía de Mariquita · Gestión del Riesgo</b> — <i>pendiente de validación</i></div>
+    </div>
+
+    <div class="seg-card">
+      <div class="seg-t">✅ Qué hacer en caso de emergencia</div>
+      <div class="seg-s">Recomendaciones básicas de preparación</div>
+      <div class="seg-paso"><div class="seg-paso-n">1</div><div class="seg-paso-t">Mantén la calma y aléjate de ríos y quebradas.</div></div>
+      <div class="seg-paso"><div class="seg-paso-n">2</div><div class="seg-paso-t">Dirígete al punto de encuentro más cercano por las rutas señaladas.</div></div>
+      <div class="seg-paso"><div class="seg-paso-n">3</div><div class="seg-paso-t">Ten a la mano tu documento, agua, linterna y medicamentos.</div></div>
+      <div class="seg-paso"><div class="seg-paso-n">4</div><div class="seg-paso-t">Sigue únicamente las indicaciones de las autoridades. No difundas rumores.</div></div>
+      <div class="seg-paso"><div class="seg-paso-n">5</div><div class="seg-paso-t">Si hay caída de ceniza, cúbrete nariz y boca y protege los ojos.</div></div>
+      <div class="seg-fuente">📌 Contenido pendiente de validar con <b>Gestión del Riesgo · Alcaldía de Mariquita</b></div>
+    </div>
+
+    <div class="seg-card">
+      <div class="seg-t">📞 Teléfonos de emergencia</div>
+      <div class="seg-s">Toca para llamar</div>
+      <div class="seg-tels">
+        <a class="seg-tel" href="tel:123"><span style="font-size:20px">🚨</span><span><span class="seg-tn">123</span><br><span class="seg-td">Línea de emergencias</span></span></a>
+        <a class="seg-tel" href="tel:119"><span style="font-size:20px">🚒</span><span><span class="seg-tn">119</span><br><span class="seg-td">Bomberos</span></span></a>
+        <a class="seg-tel" href="#"><span style="font-size:20px">🏥</span><span><span class="seg-tn">Hospital</span><br><span class="seg-td">[por confirmar]</span></span></a>
+        <a class="seg-tel" href="#"><span style="font-size:20px">🛡️</span><span><span class="seg-tn">Gestión del Riesgo</span><br><span class="seg-td">[por confirmar]</span></span></a>
+      </div>
+    </div>
+
+    <div class="seg-aviso">
+      ⚠️ <b>Importante:</b> Colombia en Ruta es una plataforma <b>informativa</b>. No es un sistema de alerta temprana y no reemplaza a las autoridades. Toda la información aquí proviene de fuentes oficiales (SGC, Alcaldía de Mariquita, Gestión del Riesgo). En una emergencia, atiende siempre las indicaciones de las autoridades y de la sirena municipal.
+    </div>
+  </div>
+</div>
+<!-- ===== FIN MARIQUITA SEGURA ===== -->
+
+<script>
+/* ═══════ MARIQUITA SEGURA — configuración ═══════ */
+// (1) Ponlo en true SOLO cuando la Alcaldía valide los datos oficiales.
+var SEGURA_ACTIVA = false;
+// (2) Pega el ID del video en vivo del SGC (de la URL: watch?v=ESTE_ID). Vacío = muestra botón al canal.
+var SGC_LIVE_ID = '';
+var SGC_CANAL = 'https://www.youtube.com/@ServicioGeologicoC/live';
+// (3) Nivel del volcán — debe copiarse del SGC. colores: verde | amarillo | naranja | rojo
+var NIVEL_VOLCAN = { color:'amarillo', nombre:'Nivel Amarillo (III)',
+  desc:'Cambios en el comportamiento de la actividad volcánica. El volcán está siendo monitoreado permanentemente.' };
+var SEG_COLORES = { verde:'#1A7A4A', amarillo:'#C8860A', naranja:'#D4580A', rojo:'#C62828' };
+// (4) Sismos — de ejemplo hasta conectar el feed del SGC
+var SEG_SISMOS = [
+  {mag:'2.4', lugar:'Villahermosa, Tolima', dist:'18 km de Mariquita', hace:'hace 3 horas', prof:'Prof. 5 km'},
+  {mag:'1.8', lugar:'Casabianca, Tolima',   dist:'27 km de Mariquita', hace:'hace 9 horas', prof:'Prof. 3 km'},
+  {mag:'3.1', lugar:'Manizales, Caldas',    dist:'42 km de Mariquita', hace:'ayer',         prof:'Prof. 8 km'}
+];
+// (5) Puntos de encuentro — REEMPLAZAR con los oficiales de la Alcaldía
+var SEG_PUNTOS = [
+  {n:'Parque principal',  lat:5.1990, lng:-74.8930},
+  {n:'Estadio municipal', lat:5.2035, lng:-74.8975},
+  {n:'Coliseo cubierto',  lat:5.1955, lng:-74.8880}
+];
+var SEG_DATOS_OFICIALES = false; // true cuando ya no sean de ejemplo (oculta el aviso amarillo)
+
+/* ═══════ Lógica ═══════ */
+function abrirSegura(){
+  var p = document.getElementById('seg-panel');
+  if(!p) return;
+  p.classList.add('seg-open');
+  document.body.style.overflow = 'hidden';
+  setTimeout(initEvacMap, 130);
+}
+function cerrarSegura(){
+  var p = document.getElementById('seg-panel');
+  if(p) p.classList.remove('seg-open');
+  document.body.style.overflow = '';
+}
+function _segPintarCamara(){
+  var box = document.getElementById('seg-cam'); if(!box) return;
+  if(SGC_LIVE_ID){
+    box.innerHTML = '<iframe src="https://www.youtube.com/embed/'+SGC_LIVE_ID+'" allowfullscreen title="Camara en vivo del Nevado del Ruiz"></iframe>';
+  } else {
+    box.innerHTML = '<div><div style="font-size:32px;margin-bottom:8px">📹</div>'
+      +'<div style="font-size:13px;font-weight:600;margin-bottom:5px">Cámara en vivo del Nevado del Ruiz</div>'
+      +'<div style="font-size:11.5px;color:#A99678;margin-bottom:13px;max-width:380px">Transmisión oficial del SGC, 24 horas.</div>'
+      +'<a class="seg-btn" href="'+SGC_CANAL+'" target="_blank" rel="noopener">▶ Ver en el canal del SGC</a></div>';
+  }
+}
+function _segPintarSemaforo(){
+  var c = SEG_COLORES[NIVEL_VOLCAN.color] || SEG_COLORES.verde;
+  var luz = document.getElementById('seg-luz'); if(luz) luz.style.background = c;
+  var niv = document.getElementById('seg-nivel'); if(niv){ niv.style.color = c; niv.textContent = NIVEL_VOLCAN.nombre; }
+  var des = document.getElementById('seg-desc'); if(des) des.textContent = NIVEL_VOLCAN.desc;
+  var orden = ['verde','amarillo','naranja','rojo'];
+  var idx = orden.indexOf(NIVEL_VOLCAN.color);
+  var esc = document.getElementById('seg-escala');
+  if(esc) esc.innerHTML = orden.map(function(k,i){
+    return '<div class="seg-paso-luz" style="background:'+(i<=idx ? SEG_COLORES[k] : 'rgba(255,255,255,.09)')+'"></div>';
+  }).join('');
+  var f = new Date();
+  var h = document.getElementById('seg-hora');
+  if(h) h.textContent = f.toLocaleDateString('es-CO',{day:'2-digit',month:'short'})+' · '+f.toLocaleTimeString('es-CO',{hour:'2-digit',minute:'2-digit'});
+  var dot = document.getElementById('seg-fab-dot'); if(dot) dot.style.background = c;
+}
+function _segPintarSismos(){
+  var el = document.getElementById('seg-sismos'); if(!el) return;
+  el.innerHTML = SEG_SISMOS.map(function(s){
+    return '<div class="seg-sismo"><div class="seg-mag">'+s.mag+'</div>'
+      +'<div class="seg-si"><div class="seg-sl">'+s.lugar+'</div><div class="seg-sd">'+s.dist+' · '+s.prof+'</div></div>'
+      +'<div class="seg-sd" style="text-align:right;white-space:nowrap">'+s.hace+'</div></div>';
+  }).join('');
+}
+var _evacMap = null;
+function initEvacMap(){
+  if(_evacMap){ try{ _evacMap.invalidateSize(); }catch(e){} return; }
+  if(typeof L === 'undefined') return;
+  try{
+    _evacMap = L.map('seg-evac-map',{scrollWheelZoom:false}).setView([5.1990,-74.8930], 14);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'© OpenStreetMap'}).addTo(_evacMap);
+    L.circle([5.1990,-74.8930], {radius:900, color:'#C62828', fillColor:'#C62828', fillOpacity:.10, weight:1.5, dashArray:'6,6'})
+      .addTo(_evacMap).bindPopup('<b>Zona de ejemplo</b><br>Pendiente de datos oficiales');
+    L.polyline([[5.1955,-74.8880],[5.1990,-74.8930],[5.2035,-74.8975]], {color:'#C8860A', weight:4, dashArray:'8,7', opacity:.85})
+      .addTo(_evacMap).bindPopup('Ruta de ejemplo');
+    var ico = L.divIcon({className:'', html:'<div style="background:#1A7A4A;width:28px;height:28px;border-radius:50%;border:2.5px solid #FDF6EC;display:flex;align-items:center;justify-content:center;font-size:14px;box-shadow:0 2px 8px rgba(0,0,0,.5)">🏳️</div>', iconSize:[28,28], iconAnchor:[14,14]});
+    SEG_PUNTOS.forEach(function(p){
+      L.marker([p.lat,p.lng],{icon:ico}).addTo(_evacMap)
+        .bindPopup('<b>🏳️ '+p.n+'</b><br><span style="font-size:11px;color:#666">Punto de encuentro</span>');
+    });
+    setTimeout(function(){ try{ _evacMap.invalidateSize(); }catch(e){} }, 150);
+  }catch(e){ console.warn('[Segura] mapa evacuación:', e); }
+}
+// El escudo solo aparece en Mariquita y solo si la sección está activada
+function _segActualizarFab(){
+  var f = document.getElementById('seg-fab'); if(!f) return;
+  var esMariquita = (typeof municipioActual !== 'undefined') && municipioActual === 'mariquita';
+  f.style.display = (SEGURA_ACTIVA && esMariquita) ? 'flex' : 'none';
+}
+// Engancharse a los cambios de municipio sin modificar las funciones originales
+['seleccionarMunicipio','elegirDesdePortada'].forEach(function(fn){
+  if(typeof window[fn] === 'function'){
+    var _orig = window[fn];
+    window[fn] = function(){ var r = _orig.apply(this, arguments); setTimeout(_segActualizarFab, 20); return r; };
+  }
+});
+(function initSegura(){
+  var d = document.getElementById('seg-demo-aviso');
+  if(d && SEG_DATOS_OFICIALES) d.style.display = 'none';
+  _segPintarCamara(); _segPintarSemaforo(); _segPintarSismos(); _segActualizarFab();
+})();
+</script>
+
 </body>
 </html>

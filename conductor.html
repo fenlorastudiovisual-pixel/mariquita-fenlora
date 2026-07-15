@@ -285,7 +285,7 @@ html,body{height:100%;overflow-x:hidden;font-family:'DM Sans',sans-serif;backgro
         <div class="asist-opt-ico">👤</div>
         <div><span class="asist-opt-lbl">Situación con un cliente</span><span class="asist-opt-desc">Inconveniente, conflicto o comportamiento irregular de un turista</span></div>
       </div>
-      <div class="asist-opt" onclick="enviarAsistencia('emergencia')">
+      <div class="asist-opt" id="asist-opt-emergencia" onclick="enviarAsistencia('emergencia')" style="display:none">
         <div class="asist-opt-ico">🚨</div>
         <div><span class="asist-opt-lbl">Emergencia</span><span class="asist-opt-desc">Accidente, seguridad o situación urgente que requiere atención inmediata</span></div>
       </div>
@@ -760,6 +760,17 @@ Tengo una sugerencia para mejorar el servicio:`
   const msg = encodeURIComponent(mensajes[tipo] || 'Hola Fenlora, necesito asistencia.');
   window.open(`https://wa.me/573112746813?text=${msg}`, '_blank');
 }
+
+// ── La opción de Emergencia solo aparece si Fenlora activó la función (admin > Updates) ──
+async function _checkFeaturePanico(){
+  try{
+    const r = await _sb.from('config').select('value').eq('key','feature_panico').limit(1);
+    const activo = !!(r.data && r.data[0] && r.data[0].value === 'true');
+    const el = document.getElementById('asist-opt-emergencia');
+    if(el) el.style.display = activo ? 'flex' : 'none';
+  }catch(e){ console.warn('[FF] feature_panico:', e); }
+}
+_checkFeaturePanico();
 
 function marcarAlertaEnviada(ok){
   var st = document.getElementById('emerg-status');

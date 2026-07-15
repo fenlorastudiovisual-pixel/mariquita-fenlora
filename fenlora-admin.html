@@ -447,6 +447,9 @@ tr:hover td{background:var(--bg3)}
     </div>
     <div class="nav-section">
       <div class="nav-label">Turismo</div>
+      <div class="nav-item" onclick="showModule('riesgo',this)">
+        <span class="ni">🛡️</span> Gestión del Riesgo
+      </div>
       <div class="nav-item" onclick="showModule('eventos',this)">
         <span class="ni">📅</span> Agenda de eventos
       </div>
@@ -1404,6 +1407,26 @@ tr:hover td{background:var(--bg3)}
           </div>
         </div>
       </div>
+    </div>
+
+        <!-- ══════════════ GESTIÓN DEL RIESGO ══════════════ -->
+    <div class="module" id="mod-riesgo">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:14px">
+        <div>
+          <div class="mod-title">🛡️ Gestión del Riesgo</div>
+          <div class="mod-sub">Información oficial de prevención que ven los visitantes en el mapa</div>
+        </div>
+        <button onclick="guardarRiesgo()" class="btn primary">💾 Guardar cambios</button>
+      </div>
+
+      <div style="background:rgba(198,40,40,.08);border:1px solid rgba(198,40,40,.28);border-radius:11px;padding:11px 14px;margin-bottom:16px;font-size:11.5px;color:#FFB4B4;line-height:1.55">
+        ⚠️ <b>Publica solo información oficial</b> (SGC, IDEAM, Alcaldía, Gestión del Riesgo). Nunca inventes zonas, niveles ni indicaciones: esta sección la puede leer alguien en una emergencia real.
+      </div>
+
+      <!-- Pestañas de municipio -->
+      <div id="riesgo-tabs" style="display:flex;gap:7px;flex-wrap:wrap;margin-bottom:16px;border-bottom:1px solid var(--border);padding-bottom:12px"></div>
+
+      <div id="riesgo-form"></div>
     </div>
 
         <!-- ══════════════ REPORTES ══════════════ -->
@@ -2743,10 +2766,11 @@ function showModule(name,el){
       if(n.textContent.trim().toLowerCase().includes(name.toLowerCase().substring(0,5)))n.classList.add('active');
     });
   }
-  const titles={dashboard:['Dashboard','Resumen general · Mayo 2026'],clientes:['Clientes','Directorio de suscriptores'],renovaciones:['Renovaciones','Cobros y vencimientos'],alertas:['Alertas y mensajes','Comunicación con suscriptores'],cotizaciones:['Cotizaciones','Leads de turistas'],menus:['Editor de menús','Actualiza precios e ítems en tiempo real'],descuentos:['Descuentos y promos','Gestión de ofertas activas'],totem:['Control tótem','Pantalla Plaza Central · Mariquita'],eventos:['Agenda de eventos','Calendario turístico 2026'],addons:['Add-ons y servicios','Servicios adicionales Fenlora'],reportes:['Reportes','Finanzas y métricas exportables']};
+  const titles={dashboard:['Dashboard','Resumen general · Mayo 2026'],clientes:['Clientes','Directorio de suscriptores'],renovaciones:['Renovaciones','Cobros y vencimientos'],alertas:['Alertas y mensajes','Comunicación con suscriptores'],cotizaciones:['Cotizaciones','Leads de turistas'],menus:['Editor de menús','Actualiza precios e ítems en tiempo real'],descuentos:['Descuentos y promos','Gestión de ofertas activas'],totem:['Control tótem','Pantalla Plaza Central · Mariquita'],eventos:['Agenda de eventos','Calendario turístico 2026'],addons:['Add-ons y servicios','Servicios adicionales Fenlora'],reportes:['Reportes','Finanzas y métricas exportables'],riesgo:['Gestión del Riesgo','Información oficial de prevención por municipio']};
   if(titles[name]){document.getElementById('topbar-title').textContent=titles[name][0];document.getElementById('topbar-sub').textContent=titles[name][1]}
   if(name==='addons') renderAddonGrid();
   if(name==='updates') initUpdates();
+  if(name==='riesgo') initRiesgo();
 }
 
 // ── ALERT ──
@@ -3132,6 +3156,256 @@ async function guardarMenu(){
 
 // ── TOAST ──
 let toastTimeout;
+
+// ══════════════════════════════════════════════
+// GESTIÓN DEL RIESGO (universal por municipio)
+// Se guarda en Supabase: config.key = 'riesgo_<slug>', value = JSON
+// ══════════════════════════════════════════════
+var RIESGO_MUNS = [
+  {slug:'mariquita', nombre:'Mariquita'},
+  {slug:'chaparral', nombre:'Chaparral'}
+];
+var RIESGO_NIVELES = [
+  {k:'verde',    t:'Verde — normal'},
+  {k:'amarillo', t:'Amarillo — cambios'},
+  {k:'naranja',  t:'Naranja — probable'},
+  {k:'rojo',     t:'Rojo — inminente'}
+];
+var RIESGO_COLORES = {verde:'#1A7A4A', amarillo:'#C8860A', naranja:'#D4580A', rojo:'#C62828'};
+var RIESGO_DATA = {};
+var riesgoActual = 'mariquita';
+var _riesgoCargado = false;
+
+function riesgoDefault(nombre){
+  return { activa:false, titulo:nombre+' Segura',
+    subtitulo:'Información oficial de prevención · Para conocer, no para alarmarse',
+    datos_oficiales:false, fuente_puntos:'',
+    camara:{titulo:'', youtube_id:'', fuente:''},
+    amenazas:[], puntos:[], telefonos:[], pasos:[] };
+}
+function _esc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+async function initRiesgo(){
+  renderRiesgoTabs();
+  if(_riesgoCargado){ renderRiesgoForm(); return; }
+  document.getElementById('riesgo-form').innerHTML = '<div style="padding:30px;text-align:center;color:var(--text3);font-size:13px">Cargando…</div>';
+  try{
+    var keys = RIESGO_MUNS.map(function(m){ return 'riesgo_'+m.slug; });
+    var r = await _sbAdmin.from('config').select('key,value').in('key', keys);
+    var porKey = {};
+    (r.data||[]).forEach(function(row){ porKey[row.key] = row.value; });
+    RIESGO_MUNS.forEach(function(m){
+      var raw = porKey['riesgo_'+m.slug];
+      var obj = null;
+      if(raw){ try{ obj = JSON.parse(raw); }catch(e){ console.warn('[Riesgo] JSON inválido en', m.slug, e); } }
+      RIESGO_DATA[m.slug] = obj || riesgoDefault(m.nombre);
+    });
+    _riesgoCargado = true;
+  }catch(e){
+    console.warn('[Riesgo] Error al cargar:', e);
+    RIESGO_MUNS.forEach(function(m){ if(!RIESGO_DATA[m.slug]) RIESGO_DATA[m.slug] = riesgoDefault(m.nombre); });
+  }
+  renderRiesgoForm();
+}
+
+function renderRiesgoTabs(){
+  var el = document.getElementById('riesgo-tabs'); if(!el) return;
+  el.innerHTML = RIESGO_MUNS.map(function(m){
+    var act = m.slug === riesgoActual;
+    var on = RIESGO_DATA[m.slug] && RIESGO_DATA[m.slug].activa;
+    return '<button onclick="switchRiesgoMun(\'' + m.slug + '\')" style="padding:8px 15px;border-radius:9px;cursor:pointer;font-size:12.5px;font-weight:600;font-family:inherit;'
+      + 'background:'+(act?'var(--gold-dim)':'var(--bg3)')+';color:'+(act?'var(--gold)':'var(--text3)')+';border:1px solid '+(act?'var(--gold)':'var(--border)')+'">'
+      + '<span style="display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:7px;background:'+(on?'#4CAF82':'#6B6B75')+'"></span>'
+      + _esc(m.nombre) + '</button>';
+  }).join('');
+}
+function switchRiesgoMun(slug){
+  leerRiesgoForm();
+  riesgoActual = slug;
+  renderRiesgoTabs(); renderRiesgoForm();
+}
+
+function _campo(label, id, val, ph, tipo){
+  return '<div style="margin-bottom:11px"><label style="display:block;font-size:10.5px;color:var(--text3);margin-bottom:4px;letter-spacing:.04em;text-transform:uppercase">'+label+'</label>'
+    + '<input id="'+id+'" type="'+(tipo||'text')+'" value="'+_esc(val)+'" placeholder="'+_esc(ph||'')+'" style="width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:7px;padding:9px 11px;color:var(--text);font-size:12.5px;font-family:inherit;outline:none"></div>';
+}
+function _switch(label, id, on, desc){
+  return '<div style="display:flex;align-items:center;justify-content:space-between;gap:14px;padding:12px 14px;border:1px solid var(--border);border-radius:10px;background:var(--bg3);margin-bottom:11px">'
+    + '<div><div style="font-size:12.5px;font-weight:600;color:var(--text)">'+label+'</div>'
+    + (desc?'<div style="font-size:10.5px;color:var(--text3);margin-top:2px">'+desc+'</div>':'') + '</div>'
+    + '<button id="'+id+'" data-on="'+(on?'1':'0')+'" onclick="toggleRiesgoSwitch(this)" style="cursor:pointer;border-radius:20px;padding:5px 13px;font-size:11px;font-weight:800;font-family:inherit;border:1px solid '
+    + (on?'rgba(37,211,102,.4);background:rgba(26,122,74,.22);color:#4CAF82':'var(--border);background:var(--bg2);color:var(--text3)') + '">'
+    + (on?'● ACTIVA':'○ INACTIVA') + '</button></div>';
+}
+function toggleRiesgoSwitch(b){
+  var on = b.dataset.on === '1';
+  on = !on; b.dataset.on = on ? '1':'0';
+  b.textContent = on ? '● ACTIVA' : '○ INACTIVA';
+  b.style.border = '1px solid ' + (on?'rgba(37,211,102,.4)':'var(--border)');
+  b.style.background = on ? 'rgba(26,122,74,.22)' : 'var(--bg2)';
+  b.style.color = on ? '#4CAF82' : 'var(--text3)';
+}
+function _bloque(t, s, inner){
+  return '<div style="border:1px solid var(--border2);border-radius:13px;background:var(--bg2);padding:16px;margin-bottom:14px">'
+    + '<div style="font-size:13.5px;font-weight:700;color:var(--text);margin-bottom:2px">'+t+'</div>'
+    + '<div style="font-size:11px;color:var(--text3);margin-bottom:13px">'+s+'</div>' + inner + '</div>';
+}
+function _btnAdd(txt, fn){
+  return '<button onclick="'+fn+'" style="margin-top:9px;padding:8px 14px;border-radius:8px;background:var(--bg3);border:1px dashed var(--gold);color:var(--gold);cursor:pointer;font-size:11.5px;font-weight:600;font-family:inherit">'+txt+'</button>';
+}
+function _btnDel(fn){
+  return '<button onclick="'+fn+'" title="Eliminar" style="flex:none;width:30px;height:30px;border-radius:7px;background:rgba(198,40,40,.14);border:1px solid rgba(198,40,40,.3);color:#FF8A80;cursor:pointer;font-size:13px">✕</button>';
+}
+
+function renderRiesgoForm(){
+  var d = RIESGO_DATA[riesgoActual] || riesgoDefault(riesgoActual);
+  var nom = (RIESGO_MUNS.filter(function(m){return m.slug===riesgoActual;})[0]||{}).nombre || riesgoActual;
+  var H = '';
+
+  H += _bloque('⚙️ General', 'Cómo se ve la sección en el mapa de '+_esc(nom),
+      _switch('Mostrar la sección en el mapa', 'rg-activa', d.activa, 'Actívala solo cuando la información esté validada')
+    + _switch('Datos ya validados', 'rg-oficiales', d.datos_oficiales, 'Quita el aviso amarillo de “datos de ejemplo”')
+    + _campo('Título de la sección', 'rg-titulo', d.titulo, nom+' Segura')
+    + _campo('Subtítulo', 'rg-subtitulo', d.subtitulo, 'Información oficial de prevención'));
+
+  var am = (d.amenazas||[]).map(function(a,i){
+    return '<div style="border:1px solid var(--border);border-radius:10px;padding:12px;margin-bottom:10px;background:var(--bg3)">'
+      + '<div style="display:flex;gap:8px;align-items:center;margin-bottom:10px">'
+        + '<input id="rg-am-ico-'+i+'" value="'+_esc(a.icono)+'" placeholder="🌋" style="width:52px;text-align:center;background:var(--bg2);border:1px solid var(--border);border-radius:7px;padding:8px;color:var(--text);font-size:15px;outline:none">'
+        + '<input id="rg-am-nom-'+i+'" value="'+_esc(a.nombre)+'" placeholder="Nombre de la amenaza (ej. Volcán Nevado del Ruiz)" style="flex:1;background:var(--bg2);border:1px solid var(--border);border-radius:7px;padding:8px 10px;color:var(--text);font-size:12.5px;font-family:inherit;outline:none">'
+        + _btnDel("riesgoDel('amenazas',"+i+")")
+      + '</div>'
+      + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">'
+        + '<select id="rg-am-niv-'+i+'" style="background:var(--bg2);border:1px solid var(--border);border-radius:7px;padding:8px 10px;color:var(--text);font-size:12px;font-family:inherit;outline:none">'
+          + RIESGO_NIVELES.map(function(n){ return '<option value="'+n.k+'"'+(a.nivel===n.k?' selected':'')+'>'+n.t+'</option>'; }).join('')
+        + '</select>'
+        + '<input id="rg-am-est-'+i+'" value="'+_esc(a.estado)+'" placeholder="Estado (ej. Nivel Amarillo III)" style="background:var(--bg2);border:1px solid var(--border);border-radius:7px;padding:8px 10px;color:var(--text);font-size:12px;font-family:inherit;outline:none">'
+      + '</div>'
+      + '<textarea id="rg-am-desc-'+i+'" rows="2" placeholder="Descripción oficial de lo que significa ese nivel" style="width:100%;background:var(--bg2);border:1px solid var(--border);border-radius:7px;padding:8px 10px;color:var(--text);font-size:12px;font-family:inherit;outline:none;resize:vertical;margin-bottom:8px">'+_esc(a.desc)+'</textarea>'
+      + '<div style="display:grid;grid-template-columns:1fr 1.4fr;gap:8px">'
+        + '<input id="rg-am-fue-'+i+'" value="'+_esc(a.fuente)+'" placeholder="Fuente (ej. SGC)" style="background:var(--bg2);border:1px solid var(--border);border-radius:7px;padding:8px 10px;color:var(--text);font-size:12px;font-family:inherit;outline:none">'
+        + '<input id="rg-am-url-'+i+'" value="'+_esc(a.url)+'" placeholder="Link oficial (opcional)" style="background:var(--bg2);border:1px solid var(--border);border-radius:7px;padding:8px 10px;color:var(--text);font-size:12px;font-family:inherit;outline:none">'
+      + '</div></div>';
+  }).join('');
+  H += _bloque('⚠️ Amenazas', 'Agrega las que apliquen: volcán, deslizamiento, creciente, incendio, sismo…',
+      (am || '<div style="font-size:11.5px;color:var(--text3);padding:10px 0">Aún no hay amenazas. Agrega la primera.</div>')
+      + _btnAdd('+ Agregar amenaza', "riesgoAdd('amenazas')"));
+
+  H += _bloque('📹 Cámara en vivo (opcional)', 'Si la fuente oficial transmite en YouTube. Déjalo vacío para ocultar esta tarjeta.',
+      _campo('Título de la tarjeta', 'rg-cam-tit', (d.camara||{}).titulo, 'Cámara en vivo del volcán')
+    + _campo('ID del video de YouTube', 'rg-cam-id', (d.camara||{}).youtube_id, 'de la URL: watch?v=ESTE_ID')
+    + _campo('Fuente', 'rg-cam-fue', (d.camara||{}).fuente, 'SGC'));
+
+  var pt = (d.puntos||[]).map(function(p,i){
+    return '<div style="display:flex;gap:7px;margin-bottom:8px;align-items:center">'
+      + '<input id="rg-pt-n-'+i+'" value="'+_esc(p.n)+'" placeholder="Nombre del punto de encuentro" style="flex:2;background:var(--bg3);border:1px solid var(--border);border-radius:7px;padding:8px 10px;color:var(--text);font-size:12.5px;font-family:inherit;outline:none">'
+      + '<input id="rg-pt-lat-'+i+'" value="'+_esc(p.lat)+'" placeholder="Latitud" style="flex:1;background:var(--bg3);border:1px solid var(--border);border-radius:7px;padding:8px 10px;color:var(--text);font-size:12px;font-family:inherit;outline:none">'
+      + '<input id="rg-pt-lng-'+i+'" value="'+_esc(p.lng)+'" placeholder="Longitud" style="flex:1;background:var(--bg3);border:1px solid var(--border);border-radius:7px;padding:8px 10px;color:var(--text);font-size:12px;font-family:inherit;outline:none">'
+      + _btnDel("riesgoDel('puntos',"+i+")") + '</div>';
+  }).join('');
+  H += _bloque('🗺️ Puntos de encuentro', 'Coordenadas oficiales. Tip: en Google Maps, clic derecho sobre el sitio → copia lat y lng.',
+      (pt || '<div style="font-size:11.5px;color:var(--text3);padding:10px 0">Aún no hay puntos.</div>')
+    + _btnAdd('+ Agregar punto', "riesgoAdd('puntos')")
+    + '<div style="margin-top:12px">' + _campo('Fuente de esta información', 'rg-fuente-puntos', d.fuente_puntos, 'Alcaldía de '+_esc(nom)+' · Gestión del Riesgo') + '</div>');
+
+  var tl = (d.telefonos||[]).map(function(t,i){
+    return '<div style="display:flex;gap:7px;margin-bottom:8px;align-items:center">'
+      + '<input id="rg-tl-i-'+i+'" value="'+_esc(t.i)+'" placeholder="🚨" style="width:52px;text-align:center;background:var(--bg3);border:1px solid var(--border);border-radius:7px;padding:8px;color:var(--text);font-size:15px;outline:none">'
+      + '<input id="rg-tl-n-'+i+'" value="'+_esc(t.n)+'" placeholder="Nombre (ej. 123)" style="flex:1;background:var(--bg3);border:1px solid var(--border);border-radius:7px;padding:8px 10px;color:var(--text);font-size:12.5px;font-family:inherit;outline:none">'
+      + '<input id="rg-tl-d-'+i+'" value="'+_esc(t.d)+'" placeholder="Descripción" style="flex:1.4;background:var(--bg3);border:1px solid var(--border);border-radius:7px;padding:8px 10px;color:var(--text);font-size:12px;font-family:inherit;outline:none">'
+      + '<input id="rg-tl-t-'+i+'" value="'+_esc(t.tel)+'" placeholder="Número a marcar" style="flex:1;background:var(--bg3);border:1px solid var(--border);border-radius:7px;padding:8px 10px;color:var(--text);font-size:12px;font-family:inherit;outline:none">'
+      + _btnDel("riesgoDel('telefonos',"+i+")") + '</div>';
+  }).join('');
+  H += _bloque('📞 Teléfonos de emergencia', 'Los que el visitante puede tocar para llamar.',
+      (tl || '<div style="font-size:11.5px;color:var(--text3);padding:10px 0">Aún no hay teléfonos.</div>')
+    + _btnAdd('+ Agregar teléfono', "riesgoAdd('telefonos')"));
+
+  var ps = (d.pasos||[]).map(function(p,i){
+    return '<div style="display:flex;gap:7px;margin-bottom:8px;align-items:center">'
+      + '<span style="width:24px;height:24px;flex:none;border-radius:50%;background:var(--gold-dim);color:var(--gold);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700">'+(i+1)+'</span>'
+      + '<input id="rg-ps-'+i+'" value="'+_esc(p)+'" placeholder="Indicación oficial" style="flex:1;background:var(--bg3);border:1px solid var(--border);border-radius:7px;padding:8px 10px;color:var(--text);font-size:12.5px;font-family:inherit;outline:none">'
+      + _btnDel("riesgoDel('pasos',"+i+")") + '</div>';
+  }).join('');
+  H += _bloque('✅ Qué hacer en caso de emergencia', 'Texto oficial de Gestión del Riesgo. No lo redactes tú.',
+      (ps || '<div style="font-size:11.5px;color:var(--text3);padding:10px 0">Aún no hay indicaciones.</div>')
+    + _btnAdd('+ Agregar indicación', "riesgoAdd('pasos')"));
+
+  document.getElementById('riesgo-form').innerHTML = H;
+}
+
+function riesgoAdd(tipo){
+  leerRiesgoForm();
+  var d = RIESGO_DATA[riesgoActual];
+  if(!d[tipo]) d[tipo] = [];
+  if(tipo==='amenazas')  d.amenazas.push({icono:'⚠️', nombre:'', nivel:'verde', estado:'', desc:'', fuente:'', url:''});
+  if(tipo==='puntos')    d.puntos.push({n:'', lat:'', lng:''});
+  if(tipo==='telefonos') d.telefonos.push({i:'📞', n:'', d:'', tel:''});
+  if(tipo==='pasos')     d.pasos.push('');
+  renderRiesgoForm();
+}
+function riesgoDel(tipo, i){
+  leerRiesgoForm();
+  var d = RIESGO_DATA[riesgoActual];
+  if(d[tipo]) d[tipo].splice(i,1);
+  renderRiesgoForm();
+}
+function _val(id){ var e = document.getElementById(id); return e ? e.value.trim() : ''; }
+function _sw(id){ var e = document.getElementById(id); return e ? e.dataset.on === '1' : false; }
+
+function leerRiesgoForm(){
+  if(!document.getElementById('rg-activa')) return;
+  var d = RIESGO_DATA[riesgoActual]; if(!d) return;
+  d.activa = _sw('rg-activa');
+  d.datos_oficiales = _sw('rg-oficiales');
+  d.titulo = _val('rg-titulo');
+  d.subtitulo = _val('rg-subtitulo');
+  d.fuente_puntos = _val('rg-fuente-puntos');
+  d.camara = { titulo:_val('rg-cam-tit'), youtube_id:_val('rg-cam-id'), fuente:_val('rg-cam-fue') };
+  d.amenazas = (d.amenazas||[]).map(function(a,i){
+    return { icono:_val('rg-am-ico-'+i), nombre:_val('rg-am-nom-'+i),
+      nivel:(document.getElementById('rg-am-niv-'+i)||{}).value || 'verde',
+      estado:_val('rg-am-est-'+i), desc:_val('rg-am-desc-'+i),
+      fuente:_val('rg-am-fue-'+i), url:_val('rg-am-url-'+i) };
+  });
+  d.puntos = (d.puntos||[]).map(function(p,i){
+    return { n:_val('rg-pt-n-'+i), lat:_val('rg-pt-lat-'+i), lng:_val('rg-pt-lng-'+i) };
+  });
+  d.telefonos = (d.telefonos||[]).map(function(t,i){
+    return { i:_val('rg-tl-i-'+i), n:_val('rg-tl-n-'+i), d:_val('rg-tl-d-'+i), tel:_val('rg-tl-t-'+i) };
+  });
+  d.pasos = (d.pasos||[]).map(function(p,i){ return _val('rg-ps-'+i); });
+}
+
+async function guardarRiesgo(){
+  leerRiesgoForm();
+  var d = RIESGO_DATA[riesgoActual];
+  // Validación honesta antes de publicar
+  if(d.activa){
+    var faltan = [];
+    if(!(d.amenazas||[]).length)  faltan.push('al menos una amenaza');
+    if(!(d.puntos||[]).length)    faltan.push('al menos un punto de encuentro');
+    if(!(d.telefonos||[]).length) faltan.push('al menos un teléfono');
+    var malas = (d.puntos||[]).filter(function(p){ return !p.n || isNaN(parseFloat(p.lat)) || isNaN(parseFloat(p.lng)); });
+    if(malas.length) faltan.push('coordenadas válidas en todos los puntos');
+    if(faltan.length){
+      showNotif('⚠ Para publicar falta: ' + faltan.join(', '));
+      return;
+    }
+    if(!d.datos_oficiales){
+      if(!confirm('Vas a PUBLICAR esta sección, pero los datos NO están marcados como validados.\n\nSe mostrará el aviso de "datos de ejemplo". ¿Continuar?')) return;
+    }
+  }
+  try{
+    var r = await _sbAdmin.from('config').upsert([{ key:'riesgo_'+riesgoActual, value: JSON.stringify(d) }], {onConflict:'key'});
+    if(r.error) throw r.error;
+    showNotif('✅ Guardado · ' + (d.activa ? 'la sección está VISIBLE en el mapa' : 'la sección está oculta'));
+    renderRiesgoTabs();
+  }catch(e){
+    console.warn('[Riesgo] Error al guardar:', e);
+    showNotif('⚠ No se pudo guardar: ' + (e.message||''));
+  }
+}
+
 function showNotif(msg){
   const t=document.getElementById('toast');
   t.textContent=msg;t.style.opacity='1';

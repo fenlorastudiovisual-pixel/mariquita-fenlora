@@ -2688,117 +2688,165 @@ document.addEventListener('DOMContentLoaded',function(){ verificarMantenimiento(
   });
 </script>
 
-<!-- ===== MARIQUITA SEGURA ===== -->
-<button id="seg-fab" onclick="abrirSegura()" title="Mariquita Segura">🛡️<span class="seg-dot" id="seg-fab-dot"></span></button>
+<!-- ===== SECCIÓN DE RIESGO (contenido desde el admin) ===== -->
+<button id="seg-fab" onclick="abrirSegura()" title="Información de prevención">🛡️<span class="seg-dot" id="seg-fab-dot"></span></button>
 <div id="seg-panel">
   <div class="seg-head">
     <div>
-      <div class="seg-title">🛡️ Mariquita Segura</div>
-      <div class="seg-sub">Información oficial de prevención · Para conocer, no para alarmarse</div>
+      <div class="seg-title" id="seg-titulo">🛡️</div>
+      <div class="seg-sub" id="seg-subtitulo"></div>
     </div>
     <button class="seg-x" onclick="cerrarSegura()">✕ Cerrar</button>
   </div>
   <div class="seg-body">
-    <div class="seg-demo" id="seg-demo-aviso">👀 Datos de ejemplo — pendientes de validación con la Alcaldía y el SGC.</div>
+    <div class="seg-demo" id="seg-demo-aviso">👀 Datos en revisión — pendientes de validación oficial.</div>
 
-    <div class="seg-card">
-      <div class="seg-t">🌋 Estado del volcán Nevado del Ruiz</div>
-      <div class="seg-s">Nivel de actividad según el Servicio Geológico Colombiano</div>
-      <div class="seg-semaforo">
-        <div class="seg-luz" id="seg-luz">⚠️</div>
-        <div class="seg-sem-i">
-          <div class="seg-nivel" id="seg-nivel">—</div>
-          <div class="seg-desc" id="seg-desc">—</div>
-          <div class="seg-escala" id="seg-escala"></div>
-        </div>
-      </div>
-      <div class="seg-fuente">📌 Fuente: <b>Servicio Geológico Colombiano (SGC)</b> · Actualizado: <span id="seg-hora">—</span> · <a href="https://www.sgc.gov.co/" target="_blank" rel="noopener">Ver fuente oficial ↗</a></div>
-    </div>
+    <div id="seg-amenazas"></div>
 
-    <div class="seg-card">
-      <div class="seg-t">📹 Cámara en vivo del volcán</div>
-      <div class="seg-s">Transmisión 24/7 del SGC desde el Observatorio de Manizales, a ~30 km del cráter Arenas</div>
+    <div class="seg-card" id="seg-cam-card" style="display:none">
+      <div class="seg-t" id="seg-cam-tit">📹 Cámara en vivo</div>
       <div class="seg-cam" id="seg-cam"></div>
-      <div class="seg-fuente">📌 Transmisión oficial del <b>SGC</b> · La imagen depende del clima y la visibilidad</div>
+      <div class="seg-fuente" id="seg-cam-fue"></div>
     </div>
 
-    <div class="seg-card">
-      <div class="seg-t">📊 Sismos recientes cerca de Mariquita</div>
-      <div class="seg-s">Últimos movimientos registrados en la región</div>
-      <div id="seg-sismos"></div>
-      <div class="seg-fuente">📌 Fuente: <b>SGC</b> · <a href="https://www.sgc.gov.co/sismos" target="_blank" rel="noopener">Ver todos los sismos ↗</a></div>
-    </div>
-
-    <div class="seg-card">
-      <div class="seg-t">🗺️ Zonas y puntos de encuentro</div>
+    <div class="seg-card" id="seg-evac-card" style="display:none">
+      <div class="seg-t">🗺️ Puntos de encuentro</div>
       <div class="seg-s">Dónde ir en caso de una eventualidad. Conócelos antes de necesitarlos.</div>
       <div id="seg-evac-map"></div>
-      <div class="seg-leyenda">
-        <span><i style="background:rgba(198,40,40,.65)"></i>Zona de influencia</span>
-        <span><i style="background:rgba(26,122,74,.75)"></i>Punto de encuentro</span>
-        <span><i style="background:rgba(200,134,10,.8)"></i>Ruta de evacuación</span>
-      </div>
-      <div class="seg-fuente">📌 Fuente: <b>Alcaldía de Mariquita · Gestión del Riesgo</b> — <i>pendiente de validación</i></div>
+      <div class="seg-leyenda"><span><i style="background:rgba(26,122,74,.75)"></i>Punto de encuentro</span></div>
+      <div class="seg-fuente" id="seg-fuente-puntos"></div>
     </div>
 
-    <div class="seg-card">
+    <div class="seg-card" id="seg-pasos-card" style="display:none">
       <div class="seg-t">✅ Qué hacer en caso de emergencia</div>
-      <div class="seg-s">Recomendaciones básicas de preparación</div>
-      <div class="seg-paso"><div class="seg-paso-n">1</div><div class="seg-paso-t">Mantén la calma y aléjate de ríos y quebradas.</div></div>
-      <div class="seg-paso"><div class="seg-paso-n">2</div><div class="seg-paso-t">Dirígete al punto de encuentro más cercano por las rutas señaladas.</div></div>
-      <div class="seg-paso"><div class="seg-paso-n">3</div><div class="seg-paso-t">Ten a la mano tu documento, agua, linterna y medicamentos.</div></div>
-      <div class="seg-paso"><div class="seg-paso-n">4</div><div class="seg-paso-t">Sigue únicamente las indicaciones de las autoridades. No difundas rumores.</div></div>
-      <div class="seg-paso"><div class="seg-paso-n">5</div><div class="seg-paso-t">Si hay caída de ceniza, cúbrete nariz y boca y protege los ojos.</div></div>
-      <div class="seg-fuente">📌 Contenido pendiente de validar con <b>Gestión del Riesgo · Alcaldía de Mariquita</b></div>
+      <div class="seg-s">Indicaciones oficiales</div>
+      <div id="seg-pasos"></div>
     </div>
 
-    <div class="seg-card">
+    <div class="seg-card" id="seg-tel-card" style="display:none">
       <div class="seg-t">📞 Teléfonos de emergencia</div>
       <div class="seg-s">Toca para llamar</div>
-      <div class="seg-tels">
-        <a class="seg-tel" href="tel:123"><span style="font-size:20px">🚨</span><span><span class="seg-tn">123</span><br><span class="seg-td">Línea de emergencias</span></span></a>
-        <a class="seg-tel" href="tel:119"><span style="font-size:20px">🚒</span><span><span class="seg-tn">119</span><br><span class="seg-td">Bomberos</span></span></a>
-        <a class="seg-tel" href="#"><span style="font-size:20px">🏥</span><span><span class="seg-tn">Hospital</span><br><span class="seg-td">[por confirmar]</span></span></a>
-        <a class="seg-tel" href="#"><span style="font-size:20px">🛡️</span><span><span class="seg-tn">Gestión del Riesgo</span><br><span class="seg-td">[por confirmar]</span></span></a>
-      </div>
+      <div class="seg-tels" id="seg-tels"></div>
     </div>
 
     <div class="seg-aviso">
-      ⚠️ <b>Importante:</b> Colombia en Ruta es una plataforma <b>informativa</b>. No es un sistema de alerta temprana y no reemplaza a las autoridades. Toda la información aquí proviene de fuentes oficiales (SGC, Alcaldía de Mariquita, Gestión del Riesgo). En una emergencia, atiende siempre las indicaciones de las autoridades y de la sirena municipal.
+      ⚠️ <b>Importante:</b> Colombia en Ruta es una plataforma <b>informativa</b>. No es un sistema de alerta temprana y no reemplaza a las autoridades. La información proviene de fuentes oficiales. En una emergencia, atiende siempre las indicaciones de las autoridades.
     </div>
   </div>
 </div>
-<!-- ===== FIN MARIQUITA SEGURA ===== -->
+<!-- ===== FIN SECCIÓN DE RIESGO ===== -->
 
 <script>
-/* ═══════ MARIQUITA SEGURA — configuración ═══════ */
-// (1) Ponlo en true SOLO cuando la Alcaldía valide los datos oficiales.
-var SEGURA_ACTIVA = true;
-// (2) Pega el ID del video en vivo del SGC (de la URL: watch?v=ESTE_ID). Vacío = muestra botón al canal.
-var SGC_LIVE_ID = '';
-var SGC_CANAL = 'https://www.youtube.com/@ServicioGeologicoC/live';
-// (3) Nivel del volcán — debe copiarse del SGC. colores: verde | amarillo | naranja | rojo
-var NIVEL_VOLCAN = { color:'amarillo', nombre:'Nivel Amarillo (III)',
-  desc:'Cambios en el comportamiento de la actividad volcánica. El volcán está siendo monitoreado permanentemente.' };
-var SEG_COLORES = { verde:'#1A7A4A', amarillo:'#C8860A', naranja:'#D4580A', rojo:'#C62828' };
-// (4) Sismos — de ejemplo hasta conectar el feed del SGC
-var SEG_SISMOS = [
-  {mag:'2.4', lugar:'Villahermosa, Tolima', dist:'18 km de Mariquita', hace:'hace 3 horas', prof:'Prof. 5 km'},
-  {mag:'1.8', lugar:'Casabianca, Tolima',   dist:'27 km de Mariquita', hace:'hace 9 horas', prof:'Prof. 3 km'},
-  {mag:'3.1', lugar:'Manizales, Caldas',    dist:'42 km de Mariquita', hace:'ayer',         prof:'Prof. 8 km'}
-];
-// (5) Puntos de encuentro — REEMPLAZAR con los oficiales de la Alcaldía
-var SEG_PUNTOS = [
-  {n:'Parque principal',  lat:5.1990, lng:-74.8930},
-  {n:'Estadio municipal', lat:5.2035, lng:-74.8975},
-  {n:'Coliseo cubierto',  lat:5.1955, lng:-74.8880}
-];
-var SEG_DATOS_OFICIALES = false; // true cuando ya no sean de ejemplo (oculta el aviso amarillo)
+/* ═══════ SECCIÓN DE RIESGO (se configura desde el admin) ═══════ */
+var RIESGO_CFG = null;          // config del municipio actual
+var RIESGO_CACHE = {};          // slug -> config
+var SEG_COLORES = {verde:'#1A7A4A', amarillo:'#C8860A', naranja:'#D4580A', rojo:'#C62828'};
 
-/* ═══════ Lógica ═══════ */
+function _segEsc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+async function cargarRiesgo(slug){
+  slug = slug || (typeof municipioActual!=='undefined' ? municipioActual : 'mariquita');
+  if(RIESGO_CACHE[slug] !== undefined){ RIESGO_CFG = RIESGO_CACHE[slug]; _segAplicar(); return; }
+  try{
+    var r = await _sb.from("config").select('value').eq('key','riesgo_'+slug).limit(1);
+    var cfg = null;
+    if(r.data && r.data[0] && r.data[0].value){ try{ cfg = JSON.parse(r.data[0].value); }catch(e){ console.warn('[Riesgo] JSON inválido', e); } }
+    RIESGO_CACHE[slug] = cfg; RIESGO_CFG = cfg;
+  }catch(e){ console.warn('[Riesgo] No se pudo cargar:', e); RIESGO_CACHE[slug] = null; RIESGO_CFG = null; }
+  _segAplicar();
+}
+
+function _segAplicar(){
+  var fab = document.getElementById('seg-fab');
+  var visible = !!(RIESGO_CFG && RIESGO_CFG.activa);
+  if(fab) fab.style.display = visible ? 'flex' : 'none';
+  if(!visible){ cerrarSegura(); return; }
+  var c = RIESGO_CFG;
+  var t = document.getElementById('seg-titulo'); if(t) t.textContent = '🛡️ ' + (c.titulo || 'Información de prevención');
+  var s = document.getElementById('seg-subtitulo'); if(s) s.textContent = c.subtitulo || '';
+  var dm = document.getElementById('seg-demo-aviso'); if(dm) dm.style.display = c.datos_oficiales ? 'none' : '';
+  // color del punto del escudo = amenaza más alta
+  var orden = ['verde','amarillo','naranja','rojo'], max = 0;
+  (c.amenazas||[]).forEach(function(a){ var i = orden.indexOf(a.nivel); if(i > max) max = i; });
+  var dot = document.getElementById('seg-fab-dot'); if(dot) dot.style.background = SEG_COLORES[orden[max]];
+  _segPintarAmenazas(); _segPintarCamara(); _segPintarPuntos(); _segPintarTelefonos(); _segPintarPasos();
+}
+
+function _segPintarAmenazas(){
+  var el = document.getElementById('seg-amenazas'); if(!el) return;
+  var lista = (RIESGO_CFG && RIESGO_CFG.amenazas) || [];
+  if(!lista.length){ el.innerHTML = ''; return; }
+  var orden = ['verde','amarillo','naranja','rojo'];
+  el.innerHTML = lista.map(function(a){
+    var col = SEG_COLORES[a.nivel] || SEG_COLORES.verde;
+    var idx = orden.indexOf(a.nivel);
+    var escala = orden.map(function(k,i){
+      return '<div class="seg-paso-luz" style="background:'+(i<=idx ? SEG_COLORES[k] : 'rgba(255,255,255,.09)')+'"></div>';
+    }).join('');
+    var fuente = a.fuente ? ('📌 Fuente: <b>'+_segEsc(a.fuente)+'</b>' + (a.url ? ' · <a href="'+_segEsc(a.url)+'" target="_blank" rel="noopener">Ver fuente oficial ↗</a>' : '')) : '';
+    return '<div class="seg-card"><div class="seg-t">'+_segEsc(a.icono||'⚠️')+' '+_segEsc(a.nombre||'Amenaza')+'</div>'
+      + '<div class="seg-semaforo" style="margin-top:10px">'
+        + '<div class="seg-luz" style="background:'+col+'">'+_segEsc(a.icono||'⚠️')+'</div>'
+        + '<div class="seg-sem-i">'
+          + '<div class="seg-nivel" style="color:'+col+'">'+_segEsc(a.estado||'—')+'</div>'
+          + '<div class="seg-desc">'+_segEsc(a.desc||'')+'</div>'
+          + '<div class="seg-escala">'+escala+'</div>'
+        + '</div></div>'
+      + (fuente ? '<div class="seg-fuente">'+fuente+'</div>' : '')
+      + '</div>';
+  }).join('');
+}
+
+function _segPintarCamara(){
+  var card = document.getElementById('seg-cam-card'); if(!card) return;
+  var c = (RIESGO_CFG && RIESGO_CFG.camara) || {};
+  if(!c.youtube_id && !c.titulo){ card.style.display = 'none'; return; }
+  card.style.display = '';
+  var tit = document.getElementById('seg-cam-tit'); if(tit) tit.textContent = '📹 ' + (c.titulo || 'Cámara en vivo');
+  var fue = document.getElementById('seg-cam-fue');
+  if(fue) fue.innerHTML = c.fuente ? ('📌 Transmisión oficial de <b>'+_segEsc(c.fuente)+'</b> · La imagen depende del clima y la visibilidad') : '';
+  var box = document.getElementById('seg-cam'); if(!box) return;
+  if(c.youtube_id){
+    box.innerHTML = '<iframe src="https://www.youtube.com/embed/'+_segEsc(c.youtube_id)+'" allowfullscreen title="Camara en vivo"></iframe>';
+  } else {
+    box.innerHTML = '<div style="font-size:12px;color:#A99678">Cámara no disponible por ahora.</div>';
+  }
+}
+
+function _segPintarTelefonos(){
+  var card = document.getElementById('seg-tel-card'); if(!card) return;
+  var lista = (RIESGO_CFG && RIESGO_CFG.telefonos) || [];
+  if(!lista.length){ card.style.display = 'none'; return; }
+  card.style.display = '';
+  document.getElementById('seg-tels').innerHTML = lista.map(function(t){
+    return '<a class="seg-tel" href="tel:'+_segEsc(t.tel||'')+'"><span style="font-size:20px">'+_segEsc(t.i||'📞')+'</span>'
+      + '<span><span class="seg-tn">'+_segEsc(t.n||'')+'</span><br><span class="seg-td">'+_segEsc(t.d||'')+'</span></span></a>';
+  }).join('');
+}
+
+function _segPintarPasos(){
+  var card = document.getElementById('seg-pasos-card'); if(!card) return;
+  var lista = (RIESGO_CFG && RIESGO_CFG.pasos) || [];
+  if(!lista.length){ card.style.display = 'none'; return; }
+  card.style.display = '';
+  document.getElementById('seg-pasos').innerHTML = lista.map(function(p,i){
+    return '<div class="seg-paso"><div class="seg-paso-n">'+(i+1)+'</div><div class="seg-paso-t">'+_segEsc(p)+'</div></div>';
+  }).join('');
+}
+
+function _segPintarPuntos(){
+  var card = document.getElementById('seg-evac-card'); if(!card) return;
+  var lista = (RIESGO_CFG && RIESGO_CFG.puntos) || [];
+  if(!lista.length){ card.style.display = 'none'; return; }
+  card.style.display = '';
+  var f = document.getElementById('seg-fuente-puntos');
+  if(f) f.innerHTML = (RIESGO_CFG.fuente_puntos ? ('📌 Fuente: <b>'+_segEsc(RIESGO_CFG.fuente_puntos)+'</b>') : '');
+  if(_evacMap){ try{ _evacMap.remove(); }catch(e){} _evacMap = null; }
+}
+
+/* ═══════ Panel ═══════ */
 function abrirSegura(){
-  var p = document.getElementById('seg-panel');
-  if(!p) return;
+  var p = document.getElementById('seg-panel'); if(!p) return;
   p.classList.add('seg-open');
   document.body.style.overflow = 'hidden';
   setTimeout(initEvacMap, 130);
@@ -2808,78 +2856,39 @@ function cerrarSegura(){
   if(p) p.classList.remove('seg-open');
   document.body.style.overflow = '';
 }
-function _segPintarCamara(){
-  var box = document.getElementById('seg-cam'); if(!box) return;
-  if(SGC_LIVE_ID){
-    box.innerHTML = '<iframe src="https://www.youtube.com/embed/'+SGC_LIVE_ID+'" allowfullscreen title="Camara en vivo del Nevado del Ruiz"></iframe>';
-  } else {
-    box.innerHTML = '<div><div style="font-size:32px;margin-bottom:8px">📹</div>'
-      +'<div style="font-size:13px;font-weight:600;margin-bottom:5px">Cámara en vivo del Nevado del Ruiz</div>'
-      +'<div style="font-size:11.5px;color:#A99678;margin-bottom:13px;max-width:380px">Transmisión oficial del SGC, 24 horas.</div>'
-      +'<a class="seg-btn" href="'+SGC_CANAL+'" target="_blank" rel="noopener">▶ Ver en el canal del SGC</a></div>';
-  }
-}
-function _segPintarSemaforo(){
-  var c = SEG_COLORES[NIVEL_VOLCAN.color] || SEG_COLORES.verde;
-  var luz = document.getElementById('seg-luz'); if(luz) luz.style.background = c;
-  var niv = document.getElementById('seg-nivel'); if(niv){ niv.style.color = c; niv.textContent = NIVEL_VOLCAN.nombre; }
-  var des = document.getElementById('seg-desc'); if(des) des.textContent = NIVEL_VOLCAN.desc;
-  var orden = ['verde','amarillo','naranja','rojo'];
-  var idx = orden.indexOf(NIVEL_VOLCAN.color);
-  var esc = document.getElementById('seg-escala');
-  if(esc) esc.innerHTML = orden.map(function(k,i){
-    return '<div class="seg-paso-luz" style="background:'+(i<=idx ? SEG_COLORES[k] : 'rgba(255,255,255,.09)')+'"></div>';
-  }).join('');
-  var f = new Date();
-  var h = document.getElementById('seg-hora');
-  if(h) h.textContent = f.toLocaleDateString('es-CO',{day:'2-digit',month:'short'})+' · '+f.toLocaleTimeString('es-CO',{hour:'2-digit',minute:'2-digit'});
-  var dot = document.getElementById('seg-fab-dot'); if(dot) dot.style.background = c;
-}
-function _segPintarSismos(){
-  var el = document.getElementById('seg-sismos'); if(!el) return;
-  el.innerHTML = SEG_SISMOS.map(function(s){
-    return '<div class="seg-sismo"><div class="seg-mag">'+s.mag+'</div>'
-      +'<div class="seg-si"><div class="seg-sl">'+s.lugar+'</div><div class="seg-sd">'+s.dist+' · '+s.prof+'</div></div>'
-      +'<div class="seg-sd" style="text-align:right;white-space:nowrap">'+s.hace+'</div></div>';
-  }).join('');
-}
+
 var _evacMap = null;
 function initEvacMap(){
+  var lista = (RIESGO_CFG && RIESGO_CFG.puntos) || [];
+  if(!lista.length || typeof L === 'undefined') return;
   if(_evacMap){ try{ _evacMap.invalidateSize(); }catch(e){} return; }
-  if(typeof L === 'undefined') return;
   try{
-    _evacMap = L.map('seg-evac-map',{scrollWheelZoom:false}).setView([5.1990,-74.8930], 14);
+    var pts = lista.map(function(p){ return [parseFloat(p.lat), parseFloat(p.lng)]; })
+                   .filter(function(p){ return !isNaN(p[0]) && !isNaN(p[1]); });
+    if(!pts.length) return;
+    _evacMap = L.map('seg-evac-map',{scrollWheelZoom:false});
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'© OpenStreetMap'}).addTo(_evacMap);
-    L.circle([5.1990,-74.8930], {radius:900, color:'#C62828', fillColor:'#C62828', fillOpacity:.10, weight:1.5, dashArray:'6,6'})
-      .addTo(_evacMap).bindPopup('<b>Zona de ejemplo</b><br>Pendiente de datos oficiales');
-    L.polyline([[5.1955,-74.8880],[5.1990,-74.8930],[5.2035,-74.8975]], {color:'#C8860A', weight:4, dashArray:'8,7', opacity:.85})
-      .addTo(_evacMap).bindPopup('Ruta de ejemplo');
     var ico = L.divIcon({className:'', html:'<div style="background:#1A7A4A;width:28px;height:28px;border-radius:50%;border:2.5px solid #FDF6EC;display:flex;align-items:center;justify-content:center;font-size:14px;box-shadow:0 2px 8px rgba(0,0,0,.5)">🏳️</div>', iconSize:[28,28], iconAnchor:[14,14]});
-    SEG_PUNTOS.forEach(function(p){
-      L.marker([p.lat,p.lng],{icon:ico}).addTo(_evacMap)
-        .bindPopup('<b>🏳️ '+p.n+'</b><br><span style="font-size:11px;color:#666">Punto de encuentro</span>');
+    lista.forEach(function(p){
+      var la = parseFloat(p.lat), ln = parseFloat(p.lng);
+      if(isNaN(la)||isNaN(ln)) return;
+      L.marker([la,ln],{icon:ico}).addTo(_evacMap)
+        .bindPopup('<b>🏳️ '+_segEsc(p.n)+'</b><br><span style="font-size:11px;color:#666">Punto de encuentro</span>');
     });
+    if(pts.length === 1) _evacMap.setView(pts[0], 15);
+    else _evacMap.fitBounds(L.latLngBounds(pts).pad(0.25));
     setTimeout(function(){ try{ _evacMap.invalidateSize(); }catch(e){} }, 150);
-  }catch(e){ console.warn('[Segura] mapa evacuación:', e); }
+  }catch(e){ console.warn('[Riesgo] mapa:', e); }
 }
-// El escudo solo aparece en Mariquita y solo si la sección está activada
-function _segActualizarFab(){
-  var f = document.getElementById('seg-fab'); if(!f) return;
-  var esMariquita = (typeof municipioActual !== 'undefined') && municipioActual === 'mariquita';
-  f.style.display = (SEGURA_ACTIVA && esMariquita) ? 'flex' : 'none';
-}
-// Engancharse a los cambios de municipio sin modificar las funciones originales
+
+// Recargar al cambiar de municipio (sin tocar las funciones originales)
 ['seleccionarMunicipio','elegirDesdePortada'].forEach(function(fn){
   if(typeof window[fn] === 'function'){
     var _orig = window[fn];
-    window[fn] = function(){ var r = _orig.apply(this, arguments); setTimeout(_segActualizarFab, 20); return r; };
+    window[fn] = function(){ var r = _orig.apply(this, arguments); setTimeout(function(){ cargarRiesgo(); }, 30); return r; };
   }
 });
-(function initSegura(){
-  var d = document.getElementById('seg-demo-aviso');
-  if(d && SEG_DATOS_OFICIALES) d.style.display = 'none';
-  _segPintarCamara(); _segPintarSemaforo(); _segPintarSismos(); _segActualizarFab();
-})();
+setTimeout(function(){ cargarRiesgo(); }, 800);
 </script>
 
 </body>

@@ -3225,6 +3225,55 @@ function switchRiesgoMun(slug){
   renderRiesgoTabs(); renderRiesgoForm();
 }
 
+// ── Plantillas sugeridas (solo lo verificable públicamente) ──
+var RIESGO_PLANTILLAS = {
+  mariquita: {
+    amenazas:[
+      {icono:'🌋', nombre:'Volcán Nevado del Ruiz', nivel:'verde', estado:'(copiar el nivel actual del SGC)',
+       desc:'Mariquita está en zona de influencia del volcán. El SGC lo monitorea permanentemente.',
+       fuente:'Servicio Geológico Colombiano (SGC)', url:'https://www.sgc.gov.co/'},
+      {icono:'🏔️', nombre:'Deslizamientos', nivel:'verde', estado:'(copiar el nivel actual del IDEAM)',
+       desc:'En temporada de lluvias el IDEAM emite alertas por remoción en masa.',
+       fuente:'IDEAM', url:'http://www.ideam.gov.co/'}
+    ],
+    camara:{titulo:'Cámara en vivo del volcán', youtube_id:'', fuente:'SGC'},
+    telefonos:[
+      {i:'🚨', n:'123', d:'Línea única de emergencias', tel:'123'},
+      {i:'🚒', n:'119', d:'Bomberos', tel:'119'}
+    ]
+  },
+  chaparral: {
+    amenazas:[
+      {icono:'🏔️', nombre:'Deslizamientos', nivel:'verde', estado:'(copiar el nivel actual del IDEAM)',
+       desc:'El IDEAM emite alertas por remoción en masa en temporada de lluvias.',
+       fuente:'IDEAM', url:'http://www.ideam.gov.co/'},
+      {icono:'🌊', nombre:'Crecientes súbitas — río Amoyá', nivel:'verde', estado:'(copiar el nivel actual del IDEAM)',
+       desc:'El IDEAM emite alertas por crecientes súbitas en la cuenca del río Amoyá.',
+       fuente:'IDEAM', url:'http://www.ideam.gov.co/'},
+      {icono:'🔥', nombre:'Incendios forestales', nivel:'verde', estado:'(confirmar con Cortolima)',
+       desc:'Chaparral cuenta con plan de contingencia de incendios forestales.',
+       fuente:'Cortolima', url:'https://cortolima.gov.co/'}
+    ],
+    camara:{titulo:'', youtube_id:'', fuente:''},
+    telefonos:[
+      {i:'🚨', n:'123', d:'Línea única de emergencias', tel:'123'},
+      {i:'🚒', n:'119', d:'Bomberos', tel:'119'}
+    ]
+  }
+};
+function cargarPlantillaRiesgo(){
+  var p = RIESGO_PLANTILLAS[riesgoActual];
+  if(!p){ showNotif('No hay plantilla para este municipio'); return; }
+  if(!confirm('Se van a reemplazar las amenazas, la cámara y los teléfonos con la plantilla sugerida.\n\nLos puntos de encuentro NO se tocan (esos son oficiales de la Alcaldía).\n\n¿Continuar?')) return;
+  leerRiesgoForm();
+  var d = RIESGO_DATA[riesgoActual];
+  d.amenazas = JSON.parse(JSON.stringify(p.amenazas));
+  d.camara   = JSON.parse(JSON.stringify(p.camara));
+  d.telefonos= JSON.parse(JSON.stringify(p.telefonos));
+  renderRiesgoForm();
+  showNotif('📋 Plantilla cargada · revisa los niveles y completa los puntos de encuentro');
+}
+
 function _campo(label, id, val, ph, tipo){
   return '<div style="margin-bottom:11px"><label style="display:block;font-size:10.5px;color:var(--text3);margin-bottom:4px;letter-spacing:.04em;text-transform:uppercase">'+label+'</label>'
     + '<input id="'+id+'" type="'+(tipo||'text')+'" value="'+_esc(val)+'" placeholder="'+_esc(ph||'')+'" style="width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:7px;padding:9px 11px;color:var(--text);font-size:12.5px;font-family:inherit;outline:none"></div>';
@@ -3261,6 +3310,8 @@ function renderRiesgoForm(){
   var d = RIESGO_DATA[riesgoActual] || riesgoDefault(riesgoActual);
   var nom = (RIESGO_MUNS.filter(function(m){return m.slug===riesgoActual;})[0]||{}).nombre || riesgoActual;
   var H = '';
+  H += '<div style="display:flex;justify-content:flex-end;margin-bottom:12px">'
+    + '<button onclick="cargarPlantillaRiesgo()" style="padding:8px 15px;border-radius:8px;background:var(--bg3);border:1px dashed var(--gold);color:var(--gold);cursor:pointer;font-size:11.5px;font-weight:600;font-family:inherit">📋 Cargar plantilla sugerida</button></div>';
 
   H += _bloque('⚙️ General', 'Cómo se ve la sección en el mapa de '+_esc(nom),
       _switch('Mostrar la sección en el mapa', 'rg-activa', d.activa, 'Actívala solo cuando la información esté validada')
@@ -3963,6 +4014,8 @@ showModule = function(name, el){
     clima:['Clima y alertas','Control del widget de clima del mapa v4'],
     intros:['Intros por temporada','Navidad, Halloween, Feria del Mangostino y más'],
     vendedores:['Red de vendedores','Comisiones, liquidaciones y bonos'],
+    updates:['Updates y mantenimiento','Actualizaciones y modo mantenimiento'],
+    riesgo:['Gestión del Riesgo','Información oficial de prevención por municipio'],
   };
   if(allTitles[name]){
     document.getElementById('topbar-title').textContent=allTitles[name][0];
@@ -3976,6 +4029,10 @@ showModule = function(name, el){
   if(name==='clima')        { try{ refreshClima(); }catch(e){} }
   if(name==='intros')       { try{ renderIntrosList(); }catch(e){} }
   if(name==='clientes')     { try{ renderClients(filteredClients); }catch(e){} }
+  // Estos faltaban en el override y por eso nunca se inicializaban:
+  if(name==='addons')       { try{ renderAddonGrid(); }catch(e){ console.warn('addons:',e); } }
+  if(name==='updates')      { try{ initUpdates(); }catch(e){ console.warn('updates:',e); } }
+  if(name==='riesgo')       { try{ initRiesgo(); }catch(e){ console.warn('riesgo:',e); } }
 };
 
 // ── (Sistema viejo de "chips" de categorías ELIMINADO: era código muerto,

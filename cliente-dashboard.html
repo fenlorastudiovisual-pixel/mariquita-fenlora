@@ -1583,21 +1583,28 @@ function renderToggleAbierto(){
 async function verificarMantenimiento(){
   try{
     var r = await fetch('https://ikcutinvnkktfasgnanv.supabase.co/rest/v1/config?clave=eq.mantenimiento_activo&select=valor',{
+      cache:'no-store',
       headers:{'apikey':'sb_publishable_G_MCq1M-a_CM77AKPocYvA_KOgmiw7h','Authorization':'Bearer sb_publishable_G_MCq1M-a_CM77AKPocYvA_KOgmiw7h'}
     });
+    if(!r.ok){ console.warn('[Mant] HTTP', r.status, '— se conserva el estado actual'); return; }
     var data = await r.json();
-    if(data && data[0] && (data[0].valor === true || data[0].valor === 'true')){
+    if(!Array.isArray(data)){ console.warn('[Mant] respuesta inesperada:', data); return; }
+    if(data[0] && (data[0].valor === true || data[0].valor === 'true')){
       var r2 = await fetch('https://ikcutinvnkktfasgnanv.supabase.co/rest/v1/config?clave=in.(mantenimiento_titulo,mantenimiento_hora)&select=clave,valor',{
+        cache:'no-store',
         headers:{'apikey':'sb_publishable_G_MCq1M-a_CM77AKPocYvA_KOgmiw7h','Authorization':'Bearer sb_publishable_G_MCq1M-a_CM77AKPocYvA_KOgmiw7h'}
       });
       var d2 = await r2.json();
       var cfg = {}; if(Array.isArray(d2)) d2.forEach(function(x){cfg[x.clave]=x.valor;});
       mostrarBannerMantenimiento(cfg['mantenimiento_titulo']||'Actualización en curso', cfg['mantenimiento_hora']||'');
     } else {
-      var b = document.getElementById('mant-banner');
-      if(b){ b.remove(); document.body.style.marginTop=''; }
+      ocultarBannerMantenimiento();
     }
-  }catch(e){}
+  }catch(e){ console.warn('[Mant] error de red — se conserva el banner:', e); }
+}
+function ocultarBannerMantenimiento(){
+  var b = document.getElementById('mant-banner');
+  if(b){ b.remove(); document.body.style.paddingTop=''; }
 }
 function mostrarBannerMantenimiento(titulo,hora){
   if(document.getElementById('mant-banner')) return;
@@ -1609,7 +1616,19 @@ function mostrarBannerMantenimiento(titulo,hora){
   document.body.style.paddingTop = '44px';
 }
 // Verificar al cargar y cada 30s
-document.addEventListener('DOMContentLoaded',function(){ verificarMantenimiento(); setInterval(verificarMantenimiento,30000); });
+document.addEventListener('DOMContentLoaded',function(){
+  verificarMantenimiento();
+  setInterval(verificarMantenimiento, 15000);   // respaldo
+  // Tiempo real: reacciona al instante cuando cambias la config en el admin
+  try{
+    var _sbCfg = window.supabase ? window.supabase.createClient(SUPA_URL_CD, SUPA_KEY_CD) : null;
+    if(_sbCfg){
+      _sbCfg.channel('cfg-mant-cliente')
+        .on('postgres_changes', {event:'*', schema:'public', table:'config'}, function(){ verificarMantenimiento(); _checkFeaturePanico(); })
+        .subscribe(function(st){ console.log('[Mant] realtime config:', st); });
+    }
+  }catch(e){ console.warn('[Mant] realtime no disponible:', e); }
+});
 
 </script>
 <script src="fenlora-pwa.js"></script>

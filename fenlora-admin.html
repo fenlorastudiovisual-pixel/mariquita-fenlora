@@ -3195,13 +3195,13 @@ async function initRiesgo(){
   document.getElementById('riesgo-form').innerHTML = '<div style="padding:30px;text-align:center;color:var(--text3);font-size:13px">Cargando…</div>';
   try{
     var keys = RIESGO_MUNS.map(function(m){ return 'riesgo_'+m.slug; });
-    var r = await _sbAdmin.from('config').select('key,value').in('key', keys);
+    var r = await _sbAdmin.from('config').select('clave,valor').in('clave', keys);
+    if(r.error) throw r.error;
     var porKey = {};
-    (r.data||[]).forEach(function(row){ porKey[row.key] = row.value; });
+    (r.data||[]).forEach(function(row){ porKey[row.clave] = row.valor; });
     RIESGO_MUNS.forEach(function(m){
-      var raw = porKey['riesgo_'+m.slug];
-      var obj = null;
-      if(raw){ try{ obj = JSON.parse(raw); }catch(e){ console.warn('[Riesgo] JSON inválido en', m.slug, e); } }
+      var obj = porKey['riesgo_'+m.slug];
+      if(typeof obj === 'string'){ try{ obj = JSON.parse(obj); }catch(e){ obj = null; } }
       RIESGO_DATA[m.slug] = obj || riesgoDefault(m.nombre);
     });
     _riesgoCargado = true;
@@ -3471,8 +3471,8 @@ async function guardarRiesgo(){
 
   try{
     var filas = RIESGO_MUNS.filter(function(m){ return RIESGO_DATA[m.slug]; })
-      .map(function(m){ return { key:'riesgo_'+m.slug, value: JSON.stringify(RIESGO_DATA[m.slug]) }; });
-    var r = await _sbAdmin.from('config').upsert(filas, {onConflict:'key'});
+      .map(function(m){ return { clave:'riesgo_'+m.slug, valor: RIESGO_DATA[m.slug] }; });
+    var r = await _sbAdmin.from('config').upsert(filas, {onConflict:'clave'});
     if(r.error) throw r.error;
     var publicados = RIESGO_MUNS.filter(function(m){ return RIESGO_DATA[m.slug] && RIESGO_DATA[m.slug].activa; })
                                 .map(function(m){ return m.nombre; });
@@ -5578,16 +5578,17 @@ var _mantActivo = false;
 async function initUpdates(){
   // Leer estado actual de Supabase
   try{
-    var r = await _sbAdmin.from('config').select('key,value').in('key',['mantenimiento_activo','mantenimiento_titulo','mantenimiento_desc','mantenimiento_hora']);
+    var r = await _sbAdmin.from('config').select('clave,valor').in('clave',['mantenimiento_activo','mantenimiento_titulo','mantenimiento_desc','mantenimiento_hora']);
+    if(r.error) console.warn('[Config] Error al leer:', r.error.message);
     if(r.data){
       var cfg = {};
-      r.data.forEach(function(row){ cfg[row.key] = row.value; });
-      _mantActivo = cfg['mantenimiento_activo'] === 'true';
+      r.data.forEach(function(row){ cfg[row.clave] = row.valor; });
+      _mantActivo = cfg['mantenimiento_activo'] === true || cfg['mantenimiento_activo'] === 'true';
       if(cfg['mantenimiento_titulo']) document.getElementById('upd-titulo').value = cfg['mantenimiento_titulo'];
       if(cfg['mantenimiento_desc'])   document.getElementById('upd-desc').value   = cfg['mantenimiento_desc'];
       if(cfg['mantenimiento_hora'])   document.getElementById('upd-hora').value   = cfg['mantenimiento_hora'];
     }
-  }catch(e){}
+  }catch(e){ console.warn('[Config] initUpdates:', e); }
   actualizarEstadoUI();
   actualizarPreviewUpdate();
   renderHistorialUpdates();
@@ -5598,8 +5599,9 @@ async function initUpdates(){
 var _ffPanico = false;
 async function cargarFeaturePanico(){
   try{
-    var r = await _sbAdmin.from('config').select('key,value').eq('key','feature_panico').limit(1);
-    _ffPanico = !!(r.data && r.data[0] && r.data[0].value === 'true');
+    var r = await _sbAdmin.from('config').select('clave,valor').eq('clave','feature_panico').limit(1);
+    if(r.error) console.warn('[Config] feature_panico:', r.error.message);
+    _ffPanico = !!(r.data && r.data[0] && (r.data[0].valor === true || r.data[0].valor === 'true'));
   }catch(e){ console.warn('[FF] No se pudo leer feature_panico:', e); }
   pintarFeaturePanico();
 }
@@ -5637,7 +5639,7 @@ async function toggleFeaturePanico(){
   var btn = document.getElementById('ff-panico-btn');
   if(btn){ btn.disabled = true; btn.textContent = 'Guardando…'; }
   try{
-    var r = await _sbAdmin.from('config').upsert([{key:'feature_panico', value: nuevo ? 'true':'false'}], {onConflict:'key'});
+    var r = await _sbAdmin.from('config').upsert([{clave:'feature_panico', valor: nuevo}], {onConflict:'clave'});
     if(r.error) throw r.error;
     _ffPanico = nuevo;
     showNotif(nuevo ? '🚨 Botón de pánico ACTIVADO en todos los paneles' : '○ Botón de pánico desactivado');
@@ -5696,11 +5698,12 @@ async function guardarUpdate(){
   var hora   = document.getElementById('upd-hora').value.trim();
   if(!titulo){ showNotif('⚠️ Escribe un título'); return; }
   try{
-    await _sbAdmin.from('config').upsert([
-      {key:'mantenimiento_titulo', value:titulo},
-      {key:'mantenimiento_desc',   value:desc},
-      {key:'mantenimiento_hora',   value:hora}
-    ]);
+    var _ru = await _sbAdmin.from('config').upsert([
+      {clave:'mantenimiento_titulo', valor:titulo},
+      {clave:'mantenimiento_desc',   valor:desc},
+      {clave:'mantenimiento_hora',   valor:hora}
+    ], {onConflict:'clave'});
+    if(_ru.error) throw _ru.error;
     // Guardar en historial local
     _updHistorial.unshift({titulo:titulo, desc:desc, hora:hora, fecha:new Date().toLocaleDateString('es-CO')});
     if(_updHistorial.length > 10) _updHistorial.pop();
@@ -5708,26 +5711,28 @@ async function guardarUpdate(){
     renderHistorialUpdates();
     actualizarPreviewUpdate();
     showNotif('✅ Update guardado correctamente');
-  }catch(e){ showNotif('⚠️ Error guardando update'); }
+  }catch(e){ console.warn('[Config] guardarUpdate:', e); showNotif('⚠️ Error guardando update: ' + (e.message||'')); }
 }
 
 async function activarMantenimiento(){
   if(!confirm('¿Activar modo mantenimiento? El mapa y los paneles mostrarán un aviso a los usuarios.')) return;
   try{
-    await _sbAdmin.from('config').upsert([{key:'mantenimiento_activo', value:'true'}]);
+    var _ra = await _sbAdmin.from('config').upsert([{clave:'mantenimiento_activo', valor:true}], {onConflict:'clave'});
+    if(_ra.error) throw _ra.error;
     _mantActivo = true;
     actualizarEstadoUI();
     showNotif('🔧 Modo mantenimiento activado');
-  }catch(e){ showNotif('⚠️ Error activando mantenimiento'); }
+  }catch(e){ console.warn('[Config] activar:', e); showNotif('⚠️ Error activando mantenimiento: ' + (e.message||'')); }
 }
 
 async function desactivarMantenimiento(){
   try{
-    await _sbAdmin.from('config').upsert([{key:'mantenimiento_activo', value:'false'}]);
+    var _rd = await _sbAdmin.from('config').upsert([{clave:'mantenimiento_activo', valor:false}], {onConflict:'clave'});
+    if(_rd.error) throw _rd.error;
     _mantActivo = false;
     actualizarEstadoUI();
     showNotif('✅ Plataforma restaurada — mantenimiento desactivado');
-  }catch(e){ showNotif('⚠️ Error desactivando mantenimiento'); }
+  }catch(e){ console.warn('[Config] desactivar:', e); showNotif('⚠️ Error desactivando mantenimiento: ' + (e.message||'')); }
 }
 
 async function notificarClientesUpdate(){

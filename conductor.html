@@ -764,8 +764,8 @@ Tengo una sugerencia para mejorar el servicio:`
 // ── La opción de Emergencia solo aparece si Fenlora activó la función (admin > Updates) ──
 async function _checkFeaturePanico(){
   try{
-    const r = await _sb.from('config').select('value').eq('key','feature_panico').limit(1);
-    const activo = !!(r.data && r.data[0] && r.data[0].value === 'true');
+    const r = await _sb.from('config').select('valor').eq('clave','feature_panico').limit(1);
+    const activo = !!(r.data && r.data[0] && (r.data[0].valor === true || r.data[0].valor === 'true'));
     const el = document.getElementById('asist-opt-emergencia');
     if(el) el.style.display = activo ? 'flex' : 'none';
   }catch(e){ console.warn('[FF] feature_panico:', e); }

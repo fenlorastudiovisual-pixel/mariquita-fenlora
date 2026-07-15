@@ -1500,11 +1500,11 @@ function llamarEmergencia(){
 // ── El botón de pánico solo aparece si Fenlora activó la función (admin > Updates) ──
 async function _checkFeaturePanico(){
   try{
-    const res = await fetch(SUPA_URL_CD + '/rest/v1/config?key=eq.feature_panico&select=value', {
+    const res = await fetch(SUPA_URL_CD + '/rest/v1/config?clave=eq.feature_panico&select=valor', {
       headers: { 'apikey': SUPA_KEY_CD, 'Authorization': 'Bearer ' + SUPA_KEY_CD }
     });
     const rows = await res.json();
-    const activo = Array.isArray(rows) && rows[0] && rows[0].value === 'true';
+    const activo = Array.isArray(rows) && rows[0] && (rows[0].valor === true || rows[0].valor === 'true');
     const btn = document.getElementById('panic-btn');
     if(btn) btn.style.display = activo ? '' : 'none';
   }catch(e){ console.warn('[FF] feature_panico:', e); }
@@ -1582,16 +1582,16 @@ function renderToggleAbierto(){
 // ── VERIFICAR MODO MANTENIMIENTO ──
 async function verificarMantenimiento(){
   try{
-    var r = await fetch('https://ikcutinvnkktfasgnanv.supabase.co/rest/v1/config?key=eq.mantenimiento_activo&select=value',{
+    var r = await fetch('https://ikcutinvnkktfasgnanv.supabase.co/rest/v1/config?clave=eq.mantenimiento_activo&select=valor',{
       headers:{'apikey':'sb_publishable_G_MCq1M-a_CM77AKPocYvA_KOgmiw7h','Authorization':'Bearer sb_publishable_G_MCq1M-a_CM77AKPocYvA_KOgmiw7h'}
     });
     var data = await r.json();
-    if(data && data[0] && data[0].value === 'true'){
-      var r2 = await fetch('https://ikcutinvnkktfasgnanv.supabase.co/rest/v1/config?key=in.(mantenimiento_titulo,mantenimiento_hora)&select=key,value',{
+    if(data && data[0] && (data[0].valor === true || data[0].valor === 'true')){
+      var r2 = await fetch('https://ikcutinvnkktfasgnanv.supabase.co/rest/v1/config?clave=in.(mantenimiento_titulo,mantenimiento_hora)&select=clave,valor',{
         headers:{'apikey':'sb_publishable_G_MCq1M-a_CM77AKPocYvA_KOgmiw7h','Authorization':'Bearer sb_publishable_G_MCq1M-a_CM77AKPocYvA_KOgmiw7h'}
       });
       var d2 = await r2.json();
-      var cfg = {}; if(Array.isArray(d2)) d2.forEach(function(x){cfg[x.key]=x.value;});
+      var cfg = {}; if(Array.isArray(d2)) d2.forEach(function(x){cfg[x.clave]=x.valor;});
       mostrarBannerMantenimiento(cfg['mantenimiento_titulo']||'Actualización en curso', cfg['mantenimiento_hora']||'');
     } else {
       var b = document.getElementById('mant-banner');

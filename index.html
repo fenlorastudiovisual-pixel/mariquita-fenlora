@@ -2644,16 +2644,16 @@ if(qrSeal && PASSPORT_POINTS.find(x=>x.id===qrSeal)){
 // ── VERIFICAR MODO MANTENIMIENTO ──
 async function verificarMantenimiento(){
   try{
-    var r = await fetch('https://ikcutinvnkktfasgnanv.supabase.co/rest/v1/config?key=eq.mantenimiento_activo&select=value',{
+    var r = await fetch('https://ikcutinvnkktfasgnanv.supabase.co/rest/v1/config?clave=eq.mantenimiento_activo&select=valor',{
       headers:{'apikey':'sb_publishable_G_MCq1M-a_CM77AKPocYvA_KOgmiw7h','Authorization':'Bearer sb_publishable_G_MCq1M-a_CM77AKPocYvA_KOgmiw7h'}
     });
     var data = await r.json();
-    if(data && data[0] && data[0].value === 'true'){
-      var r2 = await fetch('https://ikcutinvnkktfasgnanv.supabase.co/rest/v1/config?key=in.(mantenimiento_titulo,mantenimiento_hora)&select=key,value',{
+    if(data && data[0] && (data[0].valor === true || data[0].valor === 'true')){
+      var r2 = await fetch('https://ikcutinvnkktfasgnanv.supabase.co/rest/v1/config?clave=in.(mantenimiento_titulo,mantenimiento_hora)&select=clave,valor',{
         headers:{'apikey':'sb_publishable_G_MCq1M-a_CM77AKPocYvA_KOgmiw7h','Authorization':'Bearer sb_publishable_G_MCq1M-a_CM77AKPocYvA_KOgmiw7h'}
       });
       var d2 = await r2.json();
-      var cfg = {}; if(Array.isArray(d2)) d2.forEach(function(x){cfg[x.key]=x.value;});
+      var cfg = {}; if(Array.isArray(d2)) d2.forEach(function(x){cfg[x.clave]=x.valor;});
       mostrarBannerMantenimiento(cfg['mantenimiento_titulo']||'Actualización en curso', cfg['mantenimiento_hora']||'');
     } else {
       var b = document.getElementById('mant-banner');
@@ -2748,9 +2748,10 @@ async function cargarRiesgo(slug){
   slug = slug || (typeof municipioActual!=='undefined' ? municipioActual : 'mariquita');
   if(RIESGO_CACHE[slug] !== undefined){ RIESGO_CFG = RIESGO_CACHE[slug]; _segAplicar(); return; }
   try{
-    var r = await _sb.from("config").select('value').eq('key','riesgo_'+slug).limit(1);
-    var cfg = null;
-    if(r.data && r.data[0] && r.data[0].value){ try{ cfg = JSON.parse(r.data[0].value); }catch(e){ console.warn('[Riesgo] JSON inválido', e); } }
+    var r = await _sb.from("config").select('valor').eq('clave','riesgo_'+slug).limit(1);
+    if(r.error) console.warn('[Riesgo] Error al leer:', r.error.message);
+    var cfg = (r.data && r.data[0]) ? r.data[0].valor : null;
+    if(typeof cfg === 'string'){ try{ cfg = JSON.parse(cfg); }catch(e){ cfg = null; } }
     RIESGO_CACHE[slug] = cfg; RIESGO_CFG = cfg;
   }catch(e){ console.warn('[Riesgo] No se pudo cargar:', e); RIESGO_CACHE[slug] = null; RIESGO_CFG = null; }
   _segAplicar();
